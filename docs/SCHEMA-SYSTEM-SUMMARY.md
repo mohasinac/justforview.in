@@ -87,30 +87,35 @@ Complete implementation for Product resource as a reference:
 ### Schema Types
 
 #### 1. Backend Schema (`schemas/resources/`)
+
 - **Purpose**: Define Firestore document structure
 - **Features**: Zod validation, type inference
 - **Used in**: API routes, database operations
 - **Example**: `ProductSchema` with all raw fields
 
 #### 2. UI Schema (`schemas/ui/`)
+
 - **Purpose**: Define frontend display model
 - **Features**: Formatted values, computed fields, display helpers
 - **Used in**: Components, pages, hooks
 - **Example**: `ProductUI` with formatted prices, badges, etc.
 
 #### 3. Mapper (`schemas/mappers/`)
+
 - **Purpose**: Transform backend → frontend
 - **Features**: Format dates, prices, generate computed fields
 - **Used in**: API routes (before sending response)
 - **Example**: `mapProductToUI()` transforms Product → ProductUI
 
 ### Endpoints Constants (`constants/endpoints/`)
+
 - **Purpose**: Centralized API endpoint definitions
 - **Features**: Type-safe route functions, query builders
 - **Used in**: Services, API routes
 - **Example**: `PRODUCT_ENDPOINTS.BY_ID(id)` → `/products/${id}`
 
 ### Fields Constants (`constants/fields/`)
+
 - **Purpose**: Field configurations for forms, tables, filters
 - **Features**: Labels, validation rules, options, helper text
 - **Used in**: Forms, tables, filters
@@ -121,26 +126,31 @@ Complete implementation for Product resource as a reference:
 ## Key Benefits
 
 ### 1. Eliminates Data Inconsistencies
+
 - ✅ Single source of truth for each resource
 - ✅ Backend and frontend schemas explicitly defined
 - ✅ Mappers ensure consistent transformation
 
 ### 2. Type Safety
+
 - ✅ Full TypeScript support
 - ✅ Compile-time type checking
 - ✅ IntelliSense/autocomplete everywhere
 
 ### 3. Maintainability
+
 - ✅ Changes in one place propagate correctly
 - ✅ Easy to find and fix issues
 - ✅ Clear separation of concerns
 
 ### 4. Developer Experience
+
 - ✅ Clear patterns to follow
 - ✅ Example implementations available
 - ✅ Comprehensive documentation
 
 ### 5. Consistency
+
 - ✅ All resources follow same structure
 - ✅ Predictable file locations
 - ✅ Standard naming conventions
@@ -153,12 +163,15 @@ Complete implementation for Product resource as a reference:
 
 ```typescript
 // src/app/api/products/[id]/route.ts
-import { ProductSchema } from '@/schemas/resources/product.schema';
-import { mapProductToUI } from '@/schemas/mappers/product.mapper';
+import { ProductSchema } from "@/schemas/resources/product.schema";
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   // Fetch from Firestore
-  const doc = await db.collection('products').doc(params.id).get();
+  const doc = await db.collection("products").doc(params.id).get();
   const product = doc.data();
 
   // Validate (optional but recommended)
@@ -176,7 +189,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 ```typescript
 // src/components/product/ProductCard.tsx
-import type { ProductCardUI } from '@/schemas/ui/product.ui';
+import type { ProductCardUI } from "@/schemas/ui/product.ui";
 
 interface Props {
   product: ProductCardUI; // Always use UI schema
@@ -191,9 +204,7 @@ export function ProductCard({ product }: Props) {
       {product.discount && (
         <span className="text-red-600">{product.discount.label}</span>
       )}
-      <span className={product.stock.className}>
-        {product.stock.label}
-      </span>
+      <span className={product.stock.className}>{product.stock.label}</span>
       {product.badges.map((badge) => (
         <span key={badge.text} className={badge.className}>
           {badge.text}
@@ -208,15 +219,15 @@ export function ProductCard({ product }: Props) {
 
 ```typescript
 // src/services/products.service.ts
-import type { ProductUI } from '@/schemas/ui/product.ui';
-import { PRODUCT_ENDPOINTS } from '@/constants/endpoints/product.endpoints';
-import { apiService } from './api.service';
+import type { ProductUI } from "@/schemas/ui/product.ui";
+import { PRODUCT_ENDPOINTS } from "@/constants/endpoints/product.endpoints";
+import { apiService } from "./api.service";
 
 class ProductService {
   async getProduct(id: string): Promise<ProductUI> {
     // Use endpoint constant
     const url = PRODUCT_ENDPOINTS.BY_ID(id);
-    
+
     // API returns already-mapped UI schema
     const response = await apiService.get<{ product: ProductUI }>(url);
     return response.product;
@@ -244,6 +255,7 @@ class ProductService {
 ### Short Term (Next 2 Weeks)
 
 1. Complete core resources:
+
    - ✅ Product (done)
    - Auction
    - Category
@@ -271,19 +283,22 @@ class ProductService {
 ### ✅ DO
 
 1. **Always use UI schemas in frontend**
+
    ```typescript
-   import type { ProductUI } from '@/schemas/ui/product.ui';
+   import type { ProductUI } from "@/schemas/ui/product.ui";
    ```
 
 2. **Always map in API routes**
+
    ```typescript
    const uiProduct = mapProductToUI(product);
    return NextResponse.json({ product: uiProduct });
    ```
 
 3. **Always use endpoint constants**
+
    ```typescript
-   import { PRODUCT_ENDPOINTS } from '@/constants/endpoints/product.endpoints';
+   import { PRODUCT_ENDPOINTS } from "@/constants/endpoints/product.endpoints";
    const url = PRODUCT_ENDPOINTS.BY_ID(id);
    ```
 
@@ -295,43 +310,51 @@ class ProductService {
 ### ❌ DON'T
 
 1. **Don't use backend types in components**
+
    ```typescript
    // ❌ Wrong
-   import type { Product } from '@/schemas/resources/product.schema';
-   interface Props { product: Product }
-   
+   import type { Product } from "@/schemas/resources/product.schema";
+   interface Props {
+     product: Product;
+   }
+
    // ✅ Correct
-   import type { ProductUI } from '@/schemas/ui/product.ui';
-   interface Props { product: ProductUI }
+   import type { ProductUI } from "@/schemas/ui/product.ui";
+   interface Props {
+     product: ProductUI;
+   }
    ```
 
 2. **Don't skip mapping in API routes**
+
    ```typescript
    // ❌ Wrong - returning raw Firestore data
    return NextResponse.json({ product: doc.data() });
-   
+
    // ✅ Correct - returning mapped UI data
    const uiProduct = mapProductToUI(doc.data());
    return NextResponse.json({ product: uiProduct });
    ```
 
 3. **Don't hardcode endpoint strings**
+
    ```typescript
    // ❌ Wrong
-   await apiService.get('/products/' + id);
-   
+   await apiService.get("/products/" + id);
+
    // ✅ Correct
    await apiService.get(PRODUCT_ENDPOINTS.BY_ID(id));
    ```
 
 4. **Don't create re-exports**
+
    ```typescript
    // ❌ Wrong - barrel exports not allowed
-   export * from './product.ui';
-   export * from './auction.ui';
-   
+   export * from "./product.ui";
+   export * from "./auction.ui";
+
    // ✅ Correct - explicit imports
-   import type { ProductUI } from '@/schemas/ui/product.ui';
+   import type { ProductUI } from "@/schemas/ui/product.ui";
    ```
 
 ---
@@ -339,12 +362,14 @@ class ProductService {
 ## Resources
 
 ### Documentation
+
 - [Migration Checklist](../SCHEMA-MIGRATION-CHECKLIST.md) - 200+ task checklist
 - [Schema System Guide](../src/schemas/README.md) - How to use schemas
 - [Type Organization](../src/types/README.md) - Type system guide
 - [Resource Docs Template](../docs/resources/README.md) - AI agent docs
 
 ### Example Files
+
 - `src/schemas/resources/product.schema.ts` - Backend schema example
 - `src/schemas/ui/product.ui.ts` - UI schema example
 - `src/schemas/mappers/product.mapper.ts` - Mapper example
@@ -356,6 +381,7 @@ class ProductService {
 ## Questions?
 
 Refer to:
+
 1. The example Product implementation
 2. Documentation in `src/schemas/README.md`
 3. Migration checklist for step-by-step guide

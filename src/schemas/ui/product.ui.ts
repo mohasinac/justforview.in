@@ -1,11 +1,14 @@
 /**
  * Product UI Schema (Frontend)
- * 
+ *
  * Defines the structure of Product data as displayed in the UI.
  * Includes formatted values, computed fields, and display helpers.
  */
 
-import type { ProductStatus, ProductCondition } from '@/schemas/resources/product.schema';
+import type {
+  ProductStatus,
+  ProductCondition,
+} from "@/schemas/resources/product.schema";
 
 /**
  * Price Display Information
@@ -52,7 +55,7 @@ export interface StockStatus {
   /** CSS class for styling */
   className: string;
   /** Badge variant */
-  badgeVariant: 'success' | 'warning' | 'danger' | 'default';
+  badgeVariant: "success" | "warning" | "danger" | "default";
 }
 
 /**
@@ -343,14 +346,19 @@ export interface ProductFormData {
   images: string[];
   videos?: string[];
   specifications?: Array<{ name: string; value: string }>;
-  variants?: Array<{ name: string; value: string; priceAdjustment?: number; stockCount?: number }>;
+  variants?: Array<{
+    name: string;
+    value: string;
+    priceAdjustment?: number;
+    stockCount?: number;
+  }>;
   dimensions?: {
     length: number;
     width: number;
     height: number;
-    unit: 'cm' | 'inch';
+    unit: "cm" | "inch";
     weight: number;
-    weightUnit: 'kg' | 'g' | 'lb';
+    weightUnit: "kg" | "g" | "lb";
   };
   shippingClass?: string;
   tags?: string[];

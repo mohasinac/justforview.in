@@ -41,7 +41,7 @@ export interface Product {
   updatedAt: Date;
 }
 
-export type ProductStatus = 'draft' | 'published' | 'archived';
+export type ProductStatus = "draft" | "published" | "archived";
 ```
 
 **When to use**: In API routes, Firestore operations, backend services
@@ -189,7 +189,7 @@ export interface FilterOption {
 export interface SortOption {
   label: string;
   value: string;
-  order: 'asc' | 'desc';
+  order: "asc" | "desc";
 }
 
 // types/shared/responses.types.ts
@@ -215,37 +215,42 @@ export interface ApiError {
 
 ```typescript
 // ✅ Import specific types
-import type { ProductUI } from '@/types/ui/product.ui.types';
-import type { CreateProductRequest } from '@/types/api/product.api.types';
-import type { PaginatedResponse } from '@/types/shared/pagination.types';
+import type { ProductUI } from "@/types/ui/product.ui.types";
+import type { CreateProductRequest } from "@/types/api/product.api.types";
+import type { PaginatedResponse } from "@/types/shared/pagination.types";
 ```
 
 ### ❌ DON'T - Use Index Re-exports
 
 ```typescript
 // ❌ Don't use barrel exports
-import { ProductUI } from '@/types'; // No re-exports allowed
+import { ProductUI } from "@/types"; // No re-exports allowed
 ```
 
 ## File Naming Convention
 
 ### Entity Types
+
 - `{resource}.types.ts` - Main entity type
 - Example: `product.types.ts`, `auction.types.ts`, `shop.types.ts`
 
 ### UI Types
+
 - `{resource}.ui.types.ts` - UI display types
 - Example: `product.ui.types.ts`, `auction.ui.types.ts`
 
 ### API Types
+
 - `{resource}.api.types.ts` - API request/response types
 - Example: `product.api.types.ts`, `auction.api.types.ts`
 
 ### Component Types
+
 - `{component-category}.types.ts` - Component prop types
 - Example: `cards.types.ts`, `forms.types.ts`, `modals.types.ts`
 
 ### Shared Types
+
 - `{concept}.types.ts` - Generic utility types
 - Example: `pagination.types.ts`, `filters.types.ts`, `responses.types.ts`
 
@@ -255,18 +260,18 @@ Types can be derived from Zod schemas:
 
 ```typescript
 // schemas/resources/product.schema.ts
-import { z } from 'zod';
+import { z } from "zod";
 
 export const ProductSchema = z.object({
   id: z.string(),
   name: z.string(),
   price: z.number(),
-  status: z.enum(['draft', 'published', 'archived']),
+  status: z.enum(["draft", "published", "archived"]),
 });
 
 // types/entities/product.types.ts
-import { z } from 'zod';
-import { ProductSchema } from '@/schemas/resources/product.schema';
+import { z } from "zod";
+import { ProductSchema } from "@/schemas/resources/product.schema";
 
 export type Product = z.infer<typeof ProductSchema>;
 ```
@@ -296,12 +301,12 @@ The old `src/types/index.ts` is deprecated. Types should be moved to appropriate
 
 ```typescript
 // Old (deprecated)
-import { Product, ProductUI, CreateProductRequest } from '@/types';
+import { Product, ProductUI, CreateProductRequest } from "@/types";
 
 // New (correct)
-import type { Product } from '@/types/entities/product.types';
-import type { ProductUI } from '@/types/ui/product.ui.types';
-import type { CreateProductRequest } from '@/types/api/product.api.types';
+import type { Product } from "@/types/entities/product.types";
+import type { ProductUI } from "@/types/ui/product.ui.types";
+import type { CreateProductRequest } from "@/types/api/product.api.types";
 ```
 
 ## Examples
@@ -310,9 +315,9 @@ import type { CreateProductRequest } from '@/types/api/product.api.types';
 
 ```typescript
 // Component using types from multiple sources
-import type { ProductUI } from '@/types/ui/product.ui.types';
-import type { ProductCardProps } from '@/types/components/cards.types';
-import type { FilterOption } from '@/types/shared/filters.types';
+import type { ProductUI } from "@/types/ui/product.ui.types";
+import type { ProductCardProps } from "@/types/components/cards.types";
+import type { FilterOption } from "@/types/shared/filters.types";
 
 interface Props extends ProductCardProps {
   filters: FilterOption[];
@@ -327,12 +332,12 @@ export function FilterableProductCard({ product, filters, ...props }: Props) {
 
 ```typescript
 // Service using API types
-import type { ProductUI } from '@/types/ui/product.ui.types';
-import type { 
-  CreateProductRequest, 
+import type { ProductUI } from "@/types/ui/product.ui.types";
+import type {
+  CreateProductRequest,
   GetProductsResponse,
-  ProductFilters 
-} from '@/types/api/product.api.types';
+  ProductFilters,
+} from "@/types/api/product.api.types";
 
 class ProductService {
   async getProducts(filters?: ProductFilters): Promise<GetProductsResponse> {
@@ -349,14 +354,14 @@ class ProductService {
 
 ```typescript
 // API route using entity types and mapper
-import type { Product } from '@/types/entities/product.types';
-import { ProductSchema } from '@/schemas/resources/product.schema';
-import { mapProductToUI } from '@/schemas/mappers/product.mapper';
+import type { Product } from "@/types/entities/product.types";
+import { ProductSchema } from "@/schemas/resources/product.schema";
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
 
 export async function GET(req: Request) {
-  const doc = await db.collection('products').doc(id).get();
+  const doc = await db.collection("products").doc(id).get();
   const product = doc.data() as Product;
-  
+
   const uiProduct = mapProductToUI(product);
   return NextResponse.json({ product: uiProduct });
 }

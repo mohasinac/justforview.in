@@ -67,12 +67,15 @@ Brief description of the resource and its purpose.
 ## Schema Definitions
 
 ### Backend Schema (Firestore)
+
 Complete Zod schema with all fields
 
 ### UI Schema (Frontend)
+
 Display-focused schema with computed fields
 
 ### Type Definitions
+
 TypeScript interfaces
 
 ## Relationships
@@ -82,12 +85,15 @@ How this resource relates to others
 ## API Endpoints
 
 ### List Endpoints
+
 GET /api/{resources}
 
-### CRUD Endpoints  
+### CRUD Endpoints
+
 GET, POST, PATCH, DELETE
 
 ### Action Endpoints
+
 Special actions for this resource
 
 ## Service Methods
@@ -101,6 +107,7 @@ Common UI patterns and components
 ## Fields Reference
 
 Complete field list with:
+
 - Field name
 - Type
 - Required/Optional
@@ -145,6 +152,7 @@ When working with a specific resource:
 ### Finding Documentation
 
 **By Feature**:
+
 - User registration → `user.md`
 - Product listing → `product.md`
 - Auction bidding → `auction.md`
@@ -152,12 +160,14 @@ When working with a specific resource:
 - Shop management → `shop.md`
 
 **By Operation**:
+
 - CRUD operations → Check resource's "API Endpoints" section
 - Filtering → Check resource's "Filters & Sorting" section
 - Bulk actions → Check resource's "Bulk Actions" section
 - Validation → Check resource's "Fields Reference" section
 
 **By Component Type**:
+
 - Cards → Check resource's "Components" section
 - Forms → Check resource's "Components" section
 - Lists → Check resource's "Components" section

@@ -27,15 +27,15 @@ The schema system eliminates data inconsistencies by:
 
 ```typescript
 // Import resource schema for validation
-import { ProductSchema } from '@/schemas/resources/product.schema';
+import { ProductSchema } from "@/schemas/resources/product.schema";
 // Import mapper to transform to UI format
-import { mapProductToUI } from '@/schemas/mappers/product.mapper';
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
 
 // Validate input
 const validatedData = ProductSchema.parse(input);
 
 // Store in Firestore
-await db.collection('products').add(validatedData);
+await db.collection("products").add(validatedData);
 
 // Transform for response
 const uiProduct = mapProductToUI(validatedData);
@@ -46,7 +46,7 @@ return NextResponse.json({ product: uiProduct });
 
 ```typescript
 // Import UI schema type
-import type { ProductUI } from '@/schemas/ui/product.ui';
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 // Use in component
 interface Props {
@@ -70,7 +70,7 @@ export function ProductCard({ product }: Props) {
 
 ```typescript
 // Services always return UI schema types
-import type { ProductUI } from '@/schemas/ui/product.ui';
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 class ProductService {
   async getProduct(id: string): Promise<ProductUI> {
@@ -87,14 +87,14 @@ class ProductService {
 
 ```typescript
 // ❌ WRONG - Using backend schema in component
-import { Product } from '@/schemas/resources/product.schema';
+import { Product } from "@/schemas/resources/product.schema";
 
 interface Props {
   product: Product; // Backend type
 }
 
 // ✅ CORRECT - Using UI schema in component
-import type { ProductUI } from '@/schemas/ui/product.ui';
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 interface Props {
   product: ProductUI; // UI type
@@ -106,15 +106,15 @@ interface Props {
 ```typescript
 // ❌ WRONG - Returning raw Firestore data
 export async function GET(req: Request) {
-  const doc = await db.collection('products').doc(id).get();
+  const doc = await db.collection("products").doc(id).get();
   return NextResponse.json({ product: doc.data() }); // Raw backend data
 }
 
 // ✅ CORRECT - Using mapper
-import { mapProductToUI } from '@/schemas/mappers/product.mapper';
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
 
 export async function GET(req: Request) {
-  const doc = await db.collection('products').doc(id).get();
+  const doc = await db.collection("products").doc(id).get();
   const product = mapProductToUI(doc.data());
   return NextResponse.json({ product }); // Mapped UI data
 }
@@ -124,16 +124,16 @@ export async function GET(req: Request) {
 
 ```typescript
 // ✅ Always validate API inputs with schema
-import { CreateProductSchema } from '@/schemas/resources/product.schema';
+import { CreateProductSchema } from "@/schemas/resources/product.schema";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  
+
   // Validate - throws if invalid
   const validData = CreateProductSchema.parse(body);
-  
+
   // Now safe to use
-  await db.collection('products').add(validData);
+  await db.collection("products").add(validData);
 }
 ```
 
@@ -177,6 +177,7 @@ UI schemas should include computed/formatted values for display:
 ## File Naming Convention
 
 ### Resource Schemas (Backend)
+
 - `{resource}.schema.ts` - Full schema with all fields
 - Export main schema as `{Resource}Schema`
 - Export create schema as `Create{Resource}Schema`
@@ -185,6 +186,7 @@ UI schemas should include computed/formatted values for display:
 Example: `product.schema.ts` exports `ProductSchema`, `CreateProductSchema`, `UpdateProductSchema`
 
 ### UI Schemas (Frontend)
+
 - `{resource}.ui.ts` - UI display models
 - Export main type as `{Resource}UI`
 - Export related types as needed
@@ -192,6 +194,7 @@ Example: `product.schema.ts` exports `ProductSchema`, `CreateProductSchema`, `Up
 Example: `product.ui.ts` exports `ProductUI`, `ProductCardUI`, `ProductListItemUI`
 
 ### Mappers
+
 - `{resource}.mapper.ts` - Transformation functions
 - Export mapper as `map{Resource}ToUI`
 - Export reverse mapper as `map{Resource}FromUI` (if needed)
@@ -203,34 +206,41 @@ Example: `product.mapper.ts` exports `mapProductToUI`, `mapProductFromUI`
 Follow this checklist when adding a new resource:
 
 1. **Create Resource Schema** (`schemas/resources/{resource}.schema.ts`)
+
    - Define Zod schema matching Firestore structure
    - Export create/update variants
    - Add validation rules
 
 2. **Create Entity Types** (`types/entities/{resource}.types.ts`)
+
    - Define TypeScript interfaces from schemas
    - Export all related types
 
 3. **Create UI Schema** (`schemas/ui/{resource}.ui.ts`)
+
    - Define display-focused data model
    - Include computed/formatted fields
    - Add helper types (CardUI, ListItemUI, etc.)
 
 4. **Create UI Types** (`types/ui/{resource}.ui.types.ts`)
+
    - Define TypeScript interfaces for UI schemas
    - Export all UI-related types
 
 5. **Create Mapper** (`schemas/mappers/{resource}.mapper.ts`)
+
    - Implement BE→UI transformation
    - Format dates, prices, etc.
    - Add computed fields
    - Handle missing/null values
 
 6. **Create Endpoints Constants** (`constants/endpoints/{resource}.endpoints.ts`)
+
    - Define all API endpoints
    - Use template functions for dynamic routes
 
 7. **Create Fields Constants** (`constants/fields/{resource}.fields.ts`)
+
    - Define field names, labels, validation rules
    - Form field configurations
    - Filter field definitions
@@ -266,8 +276,9 @@ Follow this checklist when adding a new resource:
 ## Examples
 
 See the first implementations:
+
 - `resources/product.schema.ts` - Resource schema example
-- `ui/product.ui.ts` - UI schema example  
+- `ui/product.ui.ts` - UI schema example
 - `mappers/product.mapper.ts` - Mapper example
 
 ## Related Documentation

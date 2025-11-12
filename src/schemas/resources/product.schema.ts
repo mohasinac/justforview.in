@@ -1,36 +1,46 @@
 /**
  * Product Resource Schema (Backend/Firestore)
- * 
+ *
  * Defines the structure of Product documents as stored in Firestore.
  * Used for validation, type inference, and database operations.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Product Condition Enum
  */
-export const ProductConditionEnum = z.enum(['new', 'used', 'refurbished']);
+export const ProductConditionEnum = z.enum(["new", "used", "refurbished"]);
 export type ProductCondition = z.infer<typeof ProductConditionEnum>;
 
 /**
  * Product Status Enum
  */
-export const ProductStatusEnum = z.enum(['draft', 'published', 'archived', 'out-of-stock']);
+export const ProductStatusEnum = z.enum([
+  "draft",
+  "published",
+  "archived",
+  "out-of-stock",
+]);
 export type ProductStatus = z.infer<typeof ProductStatusEnum>;
 
 /**
  * Shipping Class Enum
  */
-export const ShippingClassEnum = z.enum(['standard', 'express', 'heavy', 'fragile']);
+export const ShippingClassEnum = z.enum([
+  "standard",
+  "express",
+  "heavy",
+  "fragile",
+]);
 export type ShippingClass = z.infer<typeof ShippingClassEnum>;
 
 /**
  * Product Specification Schema
  */
 export const ProductSpecificationSchema = z.object({
-  name: z.string().min(1, 'Specification name is required'),
-  value: z.string().min(1, 'Specification value is required'),
+  name: z.string().min(1, "Specification name is required"),
+  value: z.string().min(1, "Specification value is required"),
 });
 export type ProductSpecification = z.infer<typeof ProductSpecificationSchema>;
 
@@ -38,8 +48,8 @@ export type ProductSpecification = z.infer<typeof ProductSpecificationSchema>;
  * Product Variant Schema
  */
 export const ProductVariantSchema = z.object({
-  name: z.string().min(1, 'Variant name is required'),
-  value: z.string().min(1, 'Variant value is required'),
+  name: z.string().min(1, "Variant name is required"),
+  value: z.string().min(1, "Variant value is required"),
   priceAdjustment: z.number().optional(),
   stockCount: z.number().int().min(0).optional(),
   sku: z.string().optional(),
@@ -50,12 +60,12 @@ export type ProductVariant = z.infer<typeof ProductVariantSchema>;
  * Product Dimensions Schema
  */
 export const ProductDimensionsSchema = z.object({
-  length: z.number().positive('Length must be positive'),
-  width: z.number().positive('Width must be positive'),
-  height: z.number().positive('Height must be positive'),
-  unit: z.enum(['cm', 'inch']),
-  weight: z.number().positive('Weight must be positive'),
-  weightUnit: z.enum(['kg', 'g', 'lb']),
+  length: z.number().positive("Length must be positive"),
+  width: z.number().positive("Width must be positive"),
+  height: z.number().positive("Height must be positive"),
+  unit: z.enum(["cm", "inch"]),
+  weight: z.number().positive("Weight must be positive"),
+  weightUnit: z.enum(["kg", "g", "lb"]),
 });
 export type ProductDimensions = z.infer<typeof ProductDimensionsSchema>;
 
@@ -69,18 +79,27 @@ export const ProductSchema = z.object({
   categoryId: z.string(),
 
   // Basic Info
-  name: z.string().min(3, 'Product name must be at least 3 characters').max(200, 'Product name is too long'),
-  slug: z.string().min(3).regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
-  description: z.string().min(20, 'Description must be at least 20 characters'),
+  name: z
+    .string()
+    .min(3, "Product name must be at least 3 characters")
+    .max(200, "Product name is too long"),
+  slug: z
+    .string()
+    .min(3)
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug must contain only lowercase letters, numbers, and hyphens"
+    ),
+  description: z.string().min(20, "Description must be at least 20 characters"),
   shortDescription: z.string().max(200).optional(),
 
   // Pricing
-  price: z.number().positive('Price must be positive'),
+  price: z.number().positive("Price must be positive"),
   originalPrice: z.number().positive().optional(),
   costPrice: z.number().positive().optional(),
 
   // Inventory
-  stockCount: z.number().int().min(0, 'Stock count cannot be negative'),
+  stockCount: z.number().int().min(0, "Stock count cannot be negative"),
   lowStockThreshold: z.number().int().min(0).default(10),
   sku: z.string().optional(),
 
@@ -88,10 +107,10 @@ export const ProductSchema = z.object({
   condition: ProductConditionEnum,
   brand: z.string().optional(),
   manufacturer: z.string().optional(),
-  countryOfOrigin: z.string().default('India'),
+  countryOfOrigin: z.string().default("India"),
 
   // Media
-  images: z.array(z.string().url()).min(1, 'At least one image is required'),
+  images: z.array(z.string().url()).min(1, "At least one image is required"),
   videos: z.array(z.string().url()).optional(),
 
   // Specifications
@@ -152,7 +171,7 @@ export const CreateProductSchema = ProductSchema.omit({
 }).extend({
   // Make some fields optional for creation
   slug: z.string().optional(), // Can be auto-generated
-  status: ProductStatusEnum.default('draft'),
+  status: ProductStatusEnum.default("draft"),
 });
 
 export type CreateProduct = z.infer<typeof CreateProductSchema>;
@@ -161,7 +180,9 @@ export type CreateProduct = z.infer<typeof CreateProductSchema>;
  * Update Product Schema (for updates)
  * All fields optional except ID
  */
-export const UpdateProductSchema = ProductSchema.partial().required({ id: true });
+export const UpdateProductSchema = ProductSchema.partial().required({
+  id: true,
+});
 
 export type UpdateProduct = z.infer<typeof UpdateProductSchema>;
 
@@ -184,7 +205,9 @@ export const ProductFilterSchema = z.object({
   search: z.string().optional(),
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().max(100).default(20),
-  sort: z.enum(['newest', 'oldest', 'price-asc', 'price-desc', 'popular', 'rating']).default('newest'),
+  sort: z
+    .enum(["newest", "oldest", "price-asc", "price-desc", "popular", "rating"])
+    .default("newest"),
 });
 
 export type ProductFilter = z.infer<typeof ProductFilterSchema>;

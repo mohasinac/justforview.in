@@ -157,101 +157,121 @@ docs/
 #### 2.1 Product Resource 🚧
 
 **Backend**:
+
 - [ ] `src/schemas/resources/product.schema.ts` - Database schema with Zod validation
 - [ ] `src/types/entities/product.types.ts` - Product entity types
 - [ ] `src/constants/endpoints/product.endpoints.ts` - Product API endpoints
 - [ ] `src/constants/fields/product.fields.ts` - Product field definitions
 
 **Frontend**:
+
 - [ ] `src/schemas/ui/product.ui.ts` - Product UI schema
 - [ ] `src/types/ui/product.ui.types.ts` - Product UI types
 - [ ] `src/schemas/mappers/product.mapper.ts` - Product BE→UI mapper
 
 **API Integration**:
+
 - [ ] Update `src/app/api/products/route.ts` to use mapper
 - [ ] Update `src/services/products.service.ts` to use UI schema
 
 **Documentation**:
+
 - [ ] `docs/resources/product.md` - Complete product resource guide
 
 #### 2.2 Auction Resource 🚧
 
 **Backend**:
+
 - [ ] `src/schemas/resources/auction.schema.ts`
 - [ ] `src/types/entities/auction.types.ts`
 - [ ] `src/constants/endpoints/auction.endpoints.ts`
 - [ ] `src/constants/fields/auction.fields.ts`
 
 **Frontend**:
+
 - [ ] `src/schemas/ui/auction.ui.ts`
 - [ ] `src/types/ui/auction.ui.types.ts`
 - [ ] `src/schemas/mappers/auction.mapper.ts`
 
 **API Integration**:
+
 - [ ] Update `src/app/api/auctions/route.ts`
 - [ ] Update `src/services/auctions.service.ts`
 
 **Documentation**:
+
 - [ ] `docs/resources/auction.md`
 
 #### 2.3 Category Resource 🚧
 
 **Backend**:
+
 - [ ] `src/schemas/resources/category.schema.ts`
 - [ ] `src/types/entities/category.types.ts`
 - [ ] `src/constants/endpoints/category.endpoints.ts`
 - [ ] `src/constants/fields/category.fields.ts`
 
 **Frontend**:
+
 - [ ] `src/schemas/ui/category.ui.ts`
 - [ ] `src/types/ui/category.ui.types.ts`
 - [ ] `src/schemas/mappers/category.mapper.ts`
 
 **API Integration**:
+
 - [ ] Update `src/app/api/categories/route.ts`
 - [ ] Update `src/services/categories.service.ts`
 
 **Documentation**:
+
 - [ ] `docs/resources/category.md`
 
 #### 2.4 Shop Resource 🚧
 
 **Backend**:
+
 - [ ] `src/schemas/resources/shop.schema.ts`
 - [ ] `src/types/entities/shop.types.ts`
 - [ ] `src/constants/endpoints/shop.endpoints.ts`
 - [ ] `src/constants/fields/shop.fields.ts`
 
 **Frontend**:
+
 - [ ] `src/schemas/ui/shop.ui.ts`
 - [ ] `src/types/ui/shop.ui.types.ts`
 - [ ] `src/schemas/mappers/shop.mapper.ts`
 
 **API Integration**:
+
 - [ ] Update `src/app/api/shops/route.ts`
 - [ ] Update `src/services/shops.service.ts`
 
 **Documentation**:
+
 - [ ] `docs/resources/shop.md`
 
 #### 2.5 Order Resource 🚧
 
 **Backend**:
+
 - [ ] `src/schemas/resources/order.schema.ts`
 - [ ] `src/types/entities/order.types.ts`
 - [ ] `src/constants/endpoints/order.endpoints.ts`
 - [ ] `src/constants/fields/order.fields.ts`
 
 **Frontend**:
+
 - [ ] `src/schemas/ui/order.ui.ts`
 - [ ] `src/types/ui/order.ui.types.ts`
 - [ ] `src/schemas/mappers/order.mapper.ts`
 
 **API Integration**:
+
 - [ ] Update `src/app/api/orders/route.ts`
 - [ ] Update `src/services/orders.service.ts`
 
 **Documentation**:
+
 - [ ] `docs/resources/order.md`
 
 ---
@@ -261,12 +281,14 @@ docs/
 ### User & Auth Resources
 
 #### 3.1 User Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
 - [ ] Documentation
 
 #### 3.2 Address Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
@@ -275,6 +297,7 @@ docs/
 ### Review & Rating Resources
 
 #### 3.3 Review Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
@@ -283,12 +306,14 @@ docs/
 ### Marketing Resources
 
 #### 3.4 Coupon Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
 - [ ] Documentation
 
 #### 3.5 Hero Slide Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
@@ -297,12 +322,14 @@ docs/
 ### Support Resources
 
 #### 3.6 Support Ticket Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
 - [ ] Documentation
 
 #### 3.7 Return Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
@@ -311,12 +338,14 @@ docs/
 ### Financial Resources
 
 #### 3.8 Payment Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
 - [ ] Documentation
 
 #### 3.9 Payout Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
@@ -325,6 +354,7 @@ docs/
 ### Content Resources
 
 #### 3.10 Blog Post Resource
+
 - [ ] Backend schema, types, constants
 - [ ] Frontend UI schema, types, mapper
 - [ ] API integration
@@ -337,6 +367,7 @@ docs/
 ### 4.1 Update Components to Use UI Schemas
 
 **Product Components**:
+
 - [ ] `src/components/product/ProductCard.tsx`
 - [ ] `src/components/product/ProductGrid.tsx`
 - [ ] `src/components/product/ProductDetails.tsx`
@@ -344,6 +375,7 @@ docs/
 - [ ] All other product components
 
 **Auction Components**:
+
 - [ ] `src/components/auction/AuctionCard.tsx`
 - [ ] `src/components/auction/AuctionGrid.tsx`
 - [ ] `src/components/auction/AuctionDetails.tsx`
@@ -351,24 +383,28 @@ docs/
 - [ ] All other auction components
 
 **Category Components**:
+
 - [ ] `src/components/category/CategoryCard.tsx`
 - [ ] `src/components/category/CategoryTree.tsx`
 - [ ] `src/components/category/CategoryForm.tsx`
 - [ ] All other category components
 
 **Shop Components**:
+
 - [ ] `src/components/shop/ShopCard.tsx`
 - [ ] `src/components/shop/ShopProfile.tsx`
 - [ ] `src/components/shop/ShopForm.tsx`
 - [ ] All other shop components
 
 **Order Components**:
+
 - [ ] `src/components/order/OrderCard.tsx`
 - [ ] `src/components/order/OrderList.tsx`
 - [ ] `src/components/order/OrderDetails.tsx`
 - [ ] All other order components
 
 **Cart & Checkout Components**:
+
 - [ ] `src/components/cart/CartItem.tsx`
 - [ ] `src/components/cart/CartSummary.tsx`
 - [ ] `src/components/checkout/CheckoutForm.tsx`
@@ -389,6 +425,7 @@ docs/
 ### 5.1 Update Pages to Use UI Schemas
 
 **Product Pages**:
+
 - [ ] `src/app/products/page.tsx`
 - [ ] `src/app/products/[slug]/page.tsx`
 - [ ] `src/app/seller/products/page.tsx`
@@ -396,29 +433,34 @@ docs/
 - [ ] `src/app/admin/products/page.tsx`
 
 **Auction Pages**:
+
 - [ ] `src/app/auctions/page.tsx`
 - [ ] `src/app/auctions/[slug]/page.tsx`
 - [ ] `src/app/seller/auctions/page.tsx`
 - [ ] `src/app/admin/auctions/page.tsx`
 
 **Category Pages**:
+
 - [ ] `src/app/categories/page.tsx`
 - [ ] `src/app/categories/[slug]/page.tsx`
 - [ ] `src/app/admin/categories/page.tsx`
 
 **Shop Pages**:
+
 - [ ] `src/app/shops/page.tsx`
 - [ ] `src/app/shops/[slug]/page.tsx`
 - [ ] `src/app/seller/shop/page.tsx`
 - [ ] `src/app/admin/shops/page.tsx`
 
 **Order Pages**:
+
 - [ ] `src/app/user/orders/page.tsx`
 - [ ] `src/app/user/orders/[id]/page.tsx`
 - [ ] `src/app/seller/orders/page.tsx`
 - [ ] `src/app/admin/orders/page.tsx`
 
 **Checkout Pages**:
+
 - [ ] `src/app/cart/page.tsx`
 - [ ] `src/app/checkout/page.tsx`
 
@@ -453,29 +495,34 @@ docs/
 ### 7.1 Update API Routes to Use Mappers
 
 **Product APIs**:
+
 - [ ] `src/app/api/products/route.ts`
 - [ ] `src/app/api/products/[id]/route.ts`
 - [ ] `src/app/api/admin/products/route.ts`
 - [ ] `src/app/api/seller/products/route.ts`
 
 **Auction APIs**:
+
 - [ ] `src/app/api/auctions/route.ts`
 - [ ] `src/app/api/auctions/[id]/route.ts`
 - [ ] `src/app/api/admin/auctions/route.ts`
 - [ ] `src/app/api/seller/auctions/route.ts`
 
 **Category APIs**:
+
 - [ ] `src/app/api/categories/route.ts`
 - [ ] `src/app/api/categories/[id]/route.ts`
 - [ ] `src/app/api/admin/categories/route.ts`
 
 **Shop APIs**:
+
 - [ ] `src/app/api/shops/route.ts`
 - [ ] `src/app/api/shops/[id]/route.ts`
 - [ ] `src/app/api/admin/shops/route.ts`
 - [ ] `src/app/api/seller/shop/route.ts`
 
 **Order APIs**:
+
 - [ ] `src/app/api/orders/route.ts`
 - [ ] `src/app/api/orders/[id]/route.ts`
 - [ ] `src/app/api/admin/orders/route.ts`
@@ -595,6 +642,7 @@ docs/
 ### ✅ Phase Complete When:
 
 1. **All Resources Implemented**:
+
    - Backend schemas with Zod validation
    - UI schemas with proper types
    - Mappers for BE→UI transformation
@@ -604,6 +652,7 @@ docs/
    - AI-agent documentation
 
 2. **All Code Updated**:
+
    - All components use UI schemas
    - All pages use UI schemas
    - All services use endpoint constants and return UI schemas
@@ -612,11 +661,13 @@ docs/
    - All contexts use UI schemas
 
 3. **Zero TypeScript Errors**:
+
    - `npm run type-check` passes
    - No `any` types except for external libraries
    - All imports resolved correctly
 
 4. **All Tests Pass**:
+
    - `npm run test:workflows:all` succeeds
    - All integration tests pass
    - Manual testing complete
@@ -633,7 +684,7 @@ docs/
 **Total Tasks**: ~200+  
 **Completed**: 12 (6%)  
 **In Progress**: 0  
-**Remaining**: ~188  
+**Remaining**: ~188
 
 **Estimated Time**: 3-4 weeks (working incrementally)
 

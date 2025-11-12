@@ -1,11 +1,11 @@
 /**
  * Product Mapper
- * 
+ *
  * Transforms Product data between backend (Firestore) and frontend (UI) formats.
  * Handles formatting, computed fields, and data enrichment.
  */
 
-import type { Product } from '@/schemas/resources/product.schema';
+import type { Product } from "@/schemas/resources/product.schema";
 import type {
   ProductUI,
   ProductCardUI,
@@ -21,14 +21,17 @@ import type {
   ReturnPolicyDisplay,
   ProductSpecificationUI,
   ProductVariantUI,
-} from '@/schemas/ui/product.ui';
+} from "@/schemas/ui/product.ui";
 
 /**
  * Format price with currency
  */
-function formatPrice(amount: number, currencyCode: string = 'INR'): PriceDisplay {
-  const currency = currencyCode === 'INR' ? '₹' : '$';
-  const formatted = `${currency}${amount.toLocaleString('en-IN', {
+function formatPrice(
+  amount: number,
+  currencyCode: string = "INR"
+): PriceDisplay {
+  const currency = currencyCode === "INR" ? "₹" : "$";
+  const formatted = `${currency}${amount.toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -44,7 +47,10 @@ function formatPrice(amount: number, currencyCode: string = 'INR'): PriceDisplay
 /**
  * Calculate discount information
  */
-function calculateDiscount(price: number, originalPrice?: number): DiscountInfo | undefined {
+function calculateDiscount(
+  price: number,
+  originalPrice?: number
+): DiscountInfo | undefined {
   if (!originalPrice || originalPrice <= price) return undefined;
 
   const amount = originalPrice - price;
@@ -61,27 +67,30 @@ function calculateDiscount(price: number, originalPrice?: number): DiscountInfo 
 /**
  * Generate stock status information
  */
-function getStockStatus(stockCount: number, lowStockThreshold: number): StockStatus {
+function getStockStatus(
+  stockCount: number,
+  lowStockThreshold: number
+): StockStatus {
   const inStock = stockCount > 0;
   const isLow = inStock && stockCount <= lowStockThreshold;
   const outOfStock = stockCount === 0;
 
   let label: string;
   let className: string;
-  let badgeVariant: 'success' | 'warning' | 'danger' | 'default';
+  let badgeVariant: "success" | "warning" | "danger" | "default";
 
   if (outOfStock) {
-    label = 'Out of Stock';
-    className = 'text-red-600 bg-red-50';
-    badgeVariant = 'danger';
+    label = "Out of Stock";
+    className = "text-red-600 bg-red-50";
+    badgeVariant = "danger";
   } else if (isLow) {
     label = `Only ${stockCount} left`;
-    className = 'text-orange-600 bg-orange-50';
-    badgeVariant = 'warning';
+    className = "text-orange-600 bg-orange-50";
+    badgeVariant = "warning";
   } else {
-    label = 'In Stock';
-    className = 'text-green-600 bg-green-50';
-    badgeVariant = 'success';
+    label = "In Stock";
+    className = "text-green-600 bg-green-50";
+    badgeVariant = "success";
   }
 
   return {
@@ -99,30 +108,33 @@ function getStockStatus(stockCount: number, lowStockThreshold: number): StockSta
  * Get status display information
  */
 function getStatusDisplay(status: string): StatusDisplay {
-  const statusMap: Record<string, { label: string; color: string; className: string; icon?: string }> = {
+  const statusMap: Record<
+    string,
+    { label: string; color: string; className: string; icon?: string }
+  > = {
     draft: {
-      label: 'Draft',
-      color: 'gray',
-      className: 'text-gray-600 bg-gray-50',
-      icon: 'pencil',
+      label: "Draft",
+      color: "gray",
+      className: "text-gray-600 bg-gray-50",
+      icon: "pencil",
     },
     published: {
-      label: 'Published',
-      color: 'green',
-      className: 'text-green-600 bg-green-50',
-      icon: 'check-circle',
+      label: "Published",
+      color: "green",
+      className: "text-green-600 bg-green-50",
+      icon: "check-circle",
     },
     archived: {
-      label: 'Archived',
-      color: 'orange',
-      className: 'text-orange-600 bg-orange-50',
-      icon: 'archive',
+      label: "Archived",
+      color: "orange",
+      className: "text-orange-600 bg-orange-50",
+      icon: "archive",
     },
-    'out-of-stock': {
-      label: 'Out of Stock',
-      color: 'red',
-      className: 'text-red-600 bg-red-50',
-      icon: 'x-circle',
+    "out-of-stock": {
+      label: "Out of Stock",
+      color: "red",
+      className: "text-red-600 bg-red-50",
+      icon: "x-circle",
     },
   };
 
@@ -138,7 +150,9 @@ function getStatusDisplay(status: string): StatusDisplay {
 function getRatingDisplay(rating: number, reviewCount: number): RatingDisplay {
   const formatted = rating.toFixed(1);
   const reviewCountFormatted =
-    reviewCount >= 1000 ? `${(reviewCount / 1000).toFixed(1)}k reviews` : `${reviewCount} review${reviewCount !== 1 ? 's' : ''}`;
+    reviewCount >= 1000
+      ? `${(reviewCount / 1000).toFixed(1)}k reviews`
+      : `${reviewCount} review${reviewCount !== 1 ? "s" : ""}`;
 
   // Generate star array for display (e.g., [1, 1, 1, 0.5, 0])
   const stars: number[] = [];
@@ -171,41 +185,46 @@ function generateBadges(product: Product): ProductBadge[] {
   // Featured badge
   if (product.isFeatured) {
     badges.push({
-      text: 'Featured',
-      color: 'blue',
-      className: 'text-blue-600 bg-blue-50',
-      icon: 'star',
+      text: "Featured",
+      color: "blue",
+      className: "text-blue-600 bg-blue-50",
+      icon: "star",
     });
   }
 
   // New badge (within last 7 days)
-  const daysSinceCreation = Math.floor((Date.now() - product.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+  const daysSinceCreation = Math.floor(
+    (Date.now() - product.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+  );
   if (daysSinceCreation <= 7) {
     badges.push({
-      text: 'New',
-      color: 'green',
-      className: 'text-green-600 bg-green-50',
-      icon: 'sparkles',
+      text: "New",
+      color: "green",
+      className: "text-green-600 bg-green-50",
+      icon: "sparkles",
     });
   }
 
   // Best seller badge (high sales count)
   if (product.salesCount >= 100) {
     badges.push({
-      text: 'Best Seller',
-      color: 'purple',
-      className: 'text-purple-600 bg-purple-50',
-      icon: 'fire',
+      text: "Best Seller",
+      color: "purple",
+      className: "text-purple-600 bg-purple-50",
+      icon: "fire",
     });
   }
 
   // Low stock badge
-  if (product.stockCount > 0 && product.stockCount <= product.lowStockThreshold) {
+  if (
+    product.stockCount > 0 &&
+    product.stockCount <= product.lowStockThreshold
+  ) {
     badges.push({
       text: `Only ${product.stockCount} left`,
-      color: 'orange',
-      className: 'text-orange-600 bg-orange-50',
-      icon: 'alert-circle',
+      color: "orange",
+      className: "text-orange-600 bg-orange-50",
+      icon: "alert-circle",
     });
   }
 
@@ -228,14 +247,33 @@ function formatImages(images: string[], name: string): ProductImage[] {
  * Get shipping information
  */
 function getShippingInfo(shippingClass?: string): ShippingInfo {
-  const shippingMap: Record<string, { label: string; estimatedDays: number; isFree: boolean }> = {
-    standard: { label: 'Standard Shipping (5-7 days)', estimatedDays: 7, isFree: false },
-    express: { label: 'Express Shipping (2-3 days)', estimatedDays: 3, isFree: false },
-    heavy: { label: 'Heavy Item Shipping (7-10 days)', estimatedDays: 10, isFree: false },
-    fragile: { label: 'Fragile Item Shipping (5-7 days)', estimatedDays: 7, isFree: false },
+  const shippingMap: Record<
+    string,
+    { label: string; estimatedDays: number; isFree: boolean }
+  > = {
+    standard: {
+      label: "Standard Shipping (5-7 days)",
+      estimatedDays: 7,
+      isFree: false,
+    },
+    express: {
+      label: "Express Shipping (2-3 days)",
+      estimatedDays: 3,
+      isFree: false,
+    },
+    heavy: {
+      label: "Heavy Item Shipping (7-10 days)",
+      estimatedDays: 10,
+      isFree: false,
+    },
+    fragile: {
+      label: "Fragile Item Shipping (5-7 days)",
+      estimatedDays: 7,
+      isFree: false,
+    },
   };
 
-  const info = shippingMap[shippingClass || 'standard'] || shippingMap.standard;
+  const info = shippingMap[shippingClass || "standard"] || shippingMap.standard;
 
   return {
     class: shippingClass,
@@ -246,12 +284,15 @@ function getShippingInfo(shippingClass?: string): ShippingInfo {
 /**
  * Get return policy display
  */
-function getReturnPolicyDisplay(isReturnable: boolean, windowDays: number): ReturnPolicyDisplay {
+function getReturnPolicyDisplay(
+  isReturnable: boolean,
+  windowDays: number
+): ReturnPolicyDisplay {
   return {
     isReturnable,
     windowDays,
-    label: isReturnable ? `${windowDays}-day return policy` : 'No returns',
-    icon: isReturnable ? 'rotate-ccw' : 'x-circle',
+    label: isReturnable ? `${windowDays}-day return policy` : "No returns",
+    icon: isReturnable ? "rotate-ccw" : "x-circle",
   };
 }
 
@@ -260,11 +301,11 @@ function getReturnPolicyDisplay(isReturnable: boolean, windowDays: number): Retu
  */
 function getConditionLabel(condition: string): string {
   const conditionMap: Record<string, string> = {
-    new: 'Brand New',
-    used: 'Used',
-    refurbished: 'Refurbished',
+    new: "Brand New",
+    used: "Used",
+    refurbished: "Refurbished",
   };
-  return conditionMap[condition] || 'New';
+  return conditionMap[condition] || "New";
 }
 
 /**
@@ -284,10 +325,10 @@ function formatCount(count: number): string {
  * Format date
  */
 function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-IN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return new Intl.DateTimeFormat("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   }).format(date);
 }
 
@@ -302,7 +343,10 @@ function generateProductUrl(slug: string): string {
  * Generate share URL
  */
 function generateShareUrl(slug: string): string {
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || 'https://justforview.in';
+  const baseUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_SITE_URL || "https://justforview.in";
   return `${baseUrl}/products/${slug}`;
 }
 
@@ -312,7 +356,9 @@ function generateShareUrl(slug: string): string {
 export function mapProductToUI(product: Product): ProductUI {
   const images = formatImages(product.images, product.name);
   const price = formatPrice(product.price);
-  const originalPrice = product.originalPrice ? formatPrice(product.originalPrice) : undefined;
+  const originalPrice = product.originalPrice
+    ? formatPrice(product.originalPrice)
+    : undefined;
   const discount = calculateDiscount(product.price, product.originalPrice);
 
   return {
@@ -367,7 +413,10 @@ export function mapProductToUI(product: Product): ProductUI {
     tags: product.tags,
 
     // Policies
-    returnPolicy: getReturnPolicyDisplay(product.isReturnable, product.returnWindowDays),
+    returnPolicy: getReturnPolicyDisplay(
+      product.isReturnable,
+      product.returnWindowDays
+    ),
     warranty: product.warranty,
 
     // SEO
@@ -401,7 +450,9 @@ export function mapProductToUI(product: Product): ProductUI {
     createdAtFormatted: formatDate(product.createdAt),
     updatedAtFormatted: formatDate(product.updatedAt),
     publishDate: product.publishDate,
-    publishDateFormatted: product.publishDate ? formatDate(product.publishDate) : undefined,
+    publishDateFormatted: product.publishDate
+      ? formatDate(product.publishDate)
+      : undefined,
   };
 }
 
@@ -411,7 +462,9 @@ export function mapProductToUI(product: Product): ProductUI {
 export function mapProductToCard(product: Product): ProductCardUI {
   const images = formatImages(product.images, product.name);
   const price = formatPrice(product.price);
-  const originalPrice = product.originalPrice ? formatPrice(product.originalPrice) : undefined;
+  const originalPrice = product.originalPrice
+    ? formatPrice(product.originalPrice)
+    : undefined;
   const discount = calculateDiscount(product.price, product.originalPrice);
 
   return {
@@ -433,7 +486,10 @@ export function mapProductToCard(product: Product): ProductCardUI {
 /**
  * Map backend Product to simplified ProductListItemUI
  */
-export function mapProductToListItem(product: Product, shopName: string): ProductListItemUI {
+export function mapProductToListItem(
+  product: Product,
+  shopName: string
+): ProductListItemUI {
   const images = formatImages(product.images, product.name);
   const price = formatPrice(product.price);
 
