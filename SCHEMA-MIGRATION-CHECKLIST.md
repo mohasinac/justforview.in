@@ -24,7 +24,12 @@ Migration to a comprehensive resource schema system to eliminate data inconsiste
 ```
 src/
 ├── schemas/
-│   ├── resources/          # Backend database schemas
+│   ├── resources/          # Ba**Total Tasks**: ~200+
+**Completed**: 58 (29%)**Total Tasks**: ~200+
+**Completed**: 103 (52%)
+**In Progress**: 0
+**Remaining**: ~97n Progress**: 0
+**Remaining**: ~142d database schemas
 │   │   ├── product.schema.ts
 │   │   ├── auction.schema.ts
 │   │   ├── category.schema.ts
@@ -292,12 +297,27 @@ docs/
 
 - [ ] `docs/resources/user.md`
 
-#### 3.2 Address Resource
+#### 3.2 Address Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
+
+- [x] `src/schemas/resources/address.schema.ts`
+- [x] `src/constants/endpoints/address.endpoints.ts`
+- [x] `src/constants/fields/address.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/address.ui.ts`
+- [x] `src/schemas/mappers/address.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/user/addresses/route.ts`
+- [ ] Update `src/services/addresses.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/address.md`
 
 ### Review & Rating Resources
 
@@ -347,44 +367,119 @@ docs/
 
 - [ ] `docs/resources/coupon.md`
 
-#### 3.5 Hero Slide Resource
+#### 3.5 Hero Slide Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
+
+- [x] `src/schemas/resources/hero-slide.schema.ts`
+- [x] `src/constants/endpoints/hero-slide.endpoints.ts`
+- [x] `src/constants/fields/hero-slide.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/hero-slide.ui.ts`
+- [x] `src/schemas/mappers/hero-slide.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/hero-slides/route.ts`
+- [ ] Update `src/services/hero-slides.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/hero-slide.md`
 
 ### Support Resources
 
-#### 3.6 Support Ticket Resource
+#### 3.6 Support Ticket Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
 
-#### 3.7 Return Resource
+- [x] `src/schemas/resources/support.schema.ts`
+- [x] `src/constants/endpoints/support.endpoints.ts`
+- [x] `src/constants/fields/support.fields.ts`
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Frontend**:
+
+- [x] `src/schemas/ui/support.ui.ts`
+- [x] `src/schemas/mappers/support.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/support/route.ts`
+- [ ] Update `src/services/support.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/support.md`
+
+#### 3.7 Return Resource ✅
+
+**Backend**:
+
+- [x] `src/schemas/resources/return.schema.ts`
+- [x] `src/constants/endpoints/return.endpoints.ts`
+- [x] `src/constants/fields/return.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/return.ui.ts`
+- [x] `src/schemas/mappers/return.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/returns/route.ts`
+- [ ] Update `src/services/returns.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/return.md`
 
 ### Financial Resources
 
-#### 3.8 Payment Resource
+#### 3.8 Payment Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
 
-#### 3.9 Payout Resource
+- [x] `src/schemas/resources/payment.schema.ts`
+- [x] `src/constants/endpoints/payment.endpoints.ts`
+- [x] `src/constants/fields/payment.fields.ts`
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Frontend**:
+
+- [x] `src/schemas/ui/payment.ui.ts`
+- [x] `src/schemas/mappers/payment.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/payments/route.ts`
+- [ ] Update `src/services/payments.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/payment.md`
+
+#### 3.9 Payout Resource ✅
+
+**Backend**:
+
+- [x] `src/schemas/resources/payout.schema.ts`
+- [x] `src/constants/endpoints/payout.endpoints.ts`
+- [x] `src/constants/fields/payout.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/payout.ui.ts`
+- [x] `src/schemas/mappers/payout.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/seller/payouts/route.ts`
+- [ ] Update `src/services/payouts.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/payout.md`
 
 ### Content Resources
 
@@ -717,11 +812,11 @@ docs/
 ## Progress Tracking
 
 **Total Tasks**: ~200+  
-**Completed**: 52 (26%)  
+**Completed**: 103 (52%)  
 **In Progress**: 0  
-**Remaining**: ~148
+**Remaining**: ~97
 
-**Estimated Time**: 3-4 weeks (working incrementally)
+**Estimated Time**: 2-3 weeks (working incrementally)
 
 ---
 
@@ -747,9 +842,15 @@ docs/
 7. ✅ Implement Review resource
 8. ✅ Implement User resource
 9. ✅ Implement Coupon resource
-10. 🚧 Implement Address resource
-11. 🚧 Implement Support Ticket resource
-12. Continue with remaining Phase 3 resources
+10. ✅ Implement Address resource
+11. ✅ Implement Support Ticket resource
+12. ✅ Implement Hero Slide resource
+13. ✅ Implement Return resource
+14. ✅ Implement Payment resource
+15. ✅ Implement Payout resource
+16. 🚧 Implement Blog Post resource
+17. 🚧 Create services for new resources (address, support, return, payment, payout)
+18. 🚧 Update API routes to use mappers
 
 ---
 

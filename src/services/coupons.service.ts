@@ -1,10 +1,15 @@
 import { apiService } from "./api.service";
+import type { PaginatedResponse } from "@/types";
+import type { CouponUI } from "@/schemas/ui/coupon.ui";
+import {
+  COUPON_ENDPOINTS,
+  SELLER_COUPON_ENDPOINTS,
+  ADMIN_COUPON_ENDPOINTS,
+} from "@/constants/endpoints/coupon.endpoints";
 import type {
-  Coupon,
   CouponType,
   CouponStatus,
-  PaginatedResponse,
-} from "@/types";
+} from "@/schemas/resources/coupon.schema";
 
 interface CouponFilters {
   shopId?: string;
@@ -75,7 +80,7 @@ interface ValidateCouponResponse {
 
 class CouponsService {
   // List coupons (public active/owner all)
-  async list(filters?: CouponFilters): Promise<PaginatedResponse<Coupon>> {
+  async list(filters?: CouponFilters): Promise<PaginatedResponse<CouponUI>> {
     const params = new URLSearchParams();
 
     if (filters) {
@@ -91,66 +96,147 @@ class CouponsService {
     }
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/coupons?${queryString}` : "/coupons";
+    const endpoint = queryString
+      ? `${COUPON_ENDPOINTS.list}?${queryString}`
+      : COUPON_ENDPOINTS.list;
 
-    return apiService.get<PaginatedResponse<Coupon>>(endpoint);
+    return apiService.get<PaginatedResponse<CouponUI>>(endpoint);
   }
 
   // Get coupon by ID
-  async getById(id: string): Promise<Coupon> {
-    return apiService.get<Coupon>(`/coupons/${id}`);
+  async getById(id: string): Promise<CouponUI> {
+    return apiService.get<CouponUI>(COUPON_ENDPOINTS.byId(id));
   }
 
   // Get coupon by code
-  async getByCode(code: string): Promise<Coupon> {
-    return apiService.get<Coupon>(`/coupons/${code}`);
-  }
-
-  // Create coupon (seller/admin)
-  async create(data: CreateCouponData): Promise<Coupon> {
-    return apiService.post<Coupon>("/coupons", data);
-  }
-
-  // Update coupon (owner/admin)
-  async update(code: string, data: UpdateCouponData): Promise<Coupon> {
-    return apiService.patch<Coupon>(`/coupons/${code}`, data);
-  }
-
-  // Delete coupon (owner/admin)
-  async delete(code: string): Promise<{ message: string }> {
-    return apiService.delete<{ message: string }>(`/coupons/${code}`);
+  async getByCode(code: string): Promise<CouponUI> {
+    return apiService.get<CouponUI>(COUPON_ENDPOINTS.byCode(code));
   }
 
   // Validate coupon
   async validate(data: ValidateCouponData): Promise<ValidateCouponResponse> {
-    return apiService.post<ValidateCouponResponse>("/coupons/validate", data);
-  }
-
-  // Check if coupon code is available (for form validation)
-  async validateCode(
-    code: string,
-    shopId?: string
-  ): Promise<{ available: boolean; message?: string }> {
-    const params = new URLSearchParams();
-    params.append("code", code);
-    if (shopId) params.append("shop_id", shopId);
-
-    return apiService.get<{ available: boolean; message?: string }>(
-      `/coupons/validate-code?${params.toString()}`
+    return apiService.post<ValidateCouponResponse>(
+      COUPON_ENDPOINTS.validate,
+      data
     );
   }
 
-  // Get public coupons (featured/active)
-  async getPublic(shopId?: string): Promise<Coupon[]> {
+  // Get featured coupons
+  async getFeatured(): Promise<CouponUI[]> {
+    return apiService.get<CouponUI[]>(COUPON_ENDPOINTS.featured);
+  }
+
+  // Get shop coupons
+  async getByShop(shopId: string): Promise<CouponUI[]> {
+    return apiService.get<CouponUI[]>(COUPON_ENDPOINTS.byShop(shopId));
+  }
+
+  // Seller: List own coupons
+  async sellerList(
+    filters?: CouponFilters
+  ): Promise<PaginatedResponse<CouponUI>> {
     const params = new URLSearchParams();
-    if (shopId) params.append("shopId", shopId);
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
 
     const queryString = params.toString();
     const endpoint = queryString
-      ? `/coupons/public?${queryString}`
-      : "/coupons/public";
+      ? `${SELLER_COUPON_ENDPOINTS.list}?${queryString}`
+      : SELLER_COUPON_ENDPOINTS.list;
 
-    return apiService.get<Coupon[]>(endpoint);
+    return apiService.get<PaginatedResponse<CouponUI>>(endpoint);
+  }
+
+  // Seller: Create coupon
+  async create(data: CreateCouponData): Promise<CouponUI> {
+    return apiService.post<CouponUI>(SELLER_COUPON_ENDPOINTS.create, data);
+  }
+
+  // Seller: Update coupon
+  async update(id: string, data: UpdateCouponData): Promise<CouponUI> {
+    return apiService.patch<CouponUI>(SELLER_COUPON_ENDPOINTS.update(id), data);
+  }
+
+  // Seller: Delete coupon
+  async delete(id: string): Promise<{ message: string }> {
+    return apiService.delete<{ message: string }>(
+      SELLER_COUPON_ENDPOINTS.delete(id)
+    );
+  }
+
+  // Seller: Activate coupon
+  async activate(id: string): Promise<CouponUI> {
+    return apiService.post<CouponUI>(SELLER_COUPON_ENDPOINTS.activate(id), {});
+  }
+
+  // Seller: Deactivate coupon
+  async deactivate(id: string): Promise<CouponUI> {
+    return apiService.post<CouponUI>(
+      SELLER_COUPON_ENDPOINTS.deactivate(id),
+      {}
+    );
+  }
+
+  // Admin: All coupons
+  async adminList(
+    filters?: CouponFilters
+  ): Promise<PaginatedResponse<CouponUI>> {
+    const params = new URLSearchParams();
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
+
+    const queryString = params.toString();
+    const endpoint = queryString
+      ? `${ADMIN_COUPON_ENDPOINTS.list}?${queryString}`
+      : ADMIN_COUPON_ENDPOINTS.list;
+
+    return apiService.get<PaginatedResponse<CouponUI>>(endpoint);
+  }
+
+  // Admin: Bulk operations
+  async bulkActivate(couponIds: string[]): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>(
+      ADMIN_COUPON_ENDPOINTS.bulkActivate,
+      { couponIds }
+    );
+  }
+
+  async bulkDeactivate(couponIds: string[]): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>(
+      ADMIN_COUPON_ENDPOINTS.bulkDeactivate,
+      { couponIds }
+    );
+  }
+
+  async bulkDelete(couponIds: string[]): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>(
+      ADMIN_COUPON_ENDPOINTS.bulkDelete,
+      { couponIds }
+    );
+  }
+
+  async bulkFeature(couponIds: string[]): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>(
+      ADMIN_COUPON_ENDPOINTS.bulkFeature,
+      { couponIds }
+    );
+  }
+
+  // Admin: Stats
+  async getStats(): Promise<any> {
+    return apiService.get<any>(ADMIN_COUPON_ENDPOINTS.stats);
   }
 }
 

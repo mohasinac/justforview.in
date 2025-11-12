@@ -1,5 +1,11 @@
 import { apiService } from "./api.service";
-import type { User, UserRole, PaginatedResponse } from "@/types";
+import type { PaginatedResponse } from "@/types";
+import type { UserUI } from "@/schemas/ui/user.ui";
+import {
+  USER_ENDPOINTS,
+  ADMIN_USER_ENDPOINTS,
+} from "@/constants/endpoints/user.endpoints";
+import type { UserRole } from "@/schemas/resources/user.schema";
 
 interface UserFilters {
   role?: UserRole;
@@ -43,7 +49,7 @@ interface ChangeRoleData {
 
 class UsersService {
   // List users (admin only)
-  async list(filters?: UserFilters): Promise<PaginatedResponse<User>> {
+  async list(filters?: UserFilters): Promise<PaginatedResponse<UserUI>> {
     const params = new URLSearchParams();
 
     if (filters) {
@@ -55,73 +61,37 @@ class UsersService {
     }
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/users?${queryString}` : "/users";
+    const endpoint = queryString
+      ? `${ADMIN_USER_ENDPOINTS.list}?${queryString}`
+      : ADMIN_USER_ENDPOINTS.list;
 
-    return apiService.get<PaginatedResponse<User>>(endpoint);
+    return apiService.get<PaginatedResponse<UserUI>>(endpoint);
   }
 
-  // Get user by ID (self/admin)
-  async getById(id: string): Promise<User> {
-    return apiService.get<User>(`/users/${id}`);
-  }
-
-  // Update user (self/admin)
-  async update(id: string, data: UpdateUserData): Promise<User> {
-    return apiService.patch<User>(`/users/${id}`, data);
-  }
-
-  // Ban user (admin only)
-  async ban(id: string, data: BanUserData): Promise<User> {
-    return apiService.patch<User>(`/users/${id}/ban`, data);
-  }
-
-  // Change user role (admin only)
-  async changeRole(id: string, data: ChangeRoleData): Promise<User> {
-    return apiService.patch<User>(`/users/${id}/role`, data);
+  // Get user by ID (public profile)
+  async getById(id: string): Promise<UserUI> {
+    return apiService.get<UserUI>(USER_ENDPOINTS.profile(id));
   }
 
   // Get current user profile
-  async getMe(): Promise<User> {
-    const response = await apiService.get<{ user: User }>("/user/profile");
-    return response.user;
+  async getMe(): Promise<UserUI> {
+    return apiService.get<UserUI>(USER_ENDPOINTS.me);
   }
 
   // Update current user profile
-  async updateMe(data: UpdateUserData): Promise<User> {
-    const response = await apiService.patch<{ user: User; message: string }>(
-      "/user/profile",
-      data
-    );
-    return response.user;
+  async updateMe(data: UpdateUserData): Promise<UserUI> {
+    return apiService.patch<UserUI>(USER_ENDPOINTS.updateProfile, data);
   }
 
-  // Change password - Note: This endpoint needs to be created
+  // Update preferences
+  async updatePreferences(data: any): Promise<UserUI> {
+    return apiService.patch<UserUI>(USER_ENDPOINTS.updatePreferences, data);
+  }
+
+  // Change password
   async changePassword(data: ChangePasswordData): Promise<{ message: string }> {
-    return apiService.post<{ message: string }>("/user/password", data);
-  }
-
-  // Send email verification OTP - Note: This endpoint needs to be created
-  async sendEmailVerification(): Promise<{ message: string }> {
-    return apiService.post<{ message: string }>("/user/verify-email", {});
-  }
-
-  // Verify email with OTP
-  async verifyEmail(data: VerifyEmailData): Promise<{ message: string }> {
     return apiService.post<{ message: string }>(
-      "/user/verify-email/confirm",
-      data
-    );
-  }
-
-  // Send mobile verification OTP
-  async sendMobileVerification(): Promise<{ message: string }> {
-    return apiService.post<{ message: string }>("/user/verify-mobile", {});
-  }
-
-  // Verify mobile with OTP
-  async verifyMobile(data: VerifyMobileData): Promise<{ message: string }> {
-    return apiService.post<{ message: string }>(
-      "/user/verify-mobile/confirm",
+      USER_ENDPOINTS.changePassword,
       data
     );
   }
@@ -131,7 +101,7 @@ class UsersService {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("/api/users/me/avatar", {
+    const response = await fetch(USER_ENDPOINTS.updateAvatar, {
       method: "POST",
       body: formData,
     });
@@ -144,21 +114,50 @@ class UsersService {
     return response.json();
   }
 
-  // Delete avatar
-  async deleteAvatar(): Promise<{ message: string }> {
-    return apiService.delete<{ message: string }>("/users/me/avatar");
+  // Admin: Update user
+  async adminUpdate(id: string, data: UpdateUserData): Promise<UserUI> {
+    return apiService.patch<UserUI>(ADMIN_USER_ENDPOINTS.update(id), data);
   }
 
-  // Delete account
-  async deleteAccount(password: string): Promise<{ message: string }> {
-    return apiService.post<{ message: string }>("/users/me/delete", {
-      password,
+  // Admin: Ban user
+  async ban(id: string, data: BanUserData): Promise<UserUI> {
+    return apiService.post<UserUI>(ADMIN_USER_ENDPOINTS.ban(id), data);
+  }
+
+  // Admin: Unban user
+  async unban(id: string): Promise<UserUI> {
+    return apiService.post<UserUI>(ADMIN_USER_ENDPOINTS.unban(id), {});
+  }
+
+  // Admin: Change user role
+  async changeRole(id: string, data: ChangeRoleData): Promise<UserUI> {
+    return apiService.patch<UserUI>(ADMIN_USER_ENDPOINTS.updateRole(id), data);
+  }
+
+  // Admin: Get user statistics
+  async getStats(): Promise<any> {
+    return apiService.get<any>(ADMIN_USER_ENDPOINTS.stats);
+  }
+
+  // Admin: Bulk operations
+  async bulkBan(userIds: string[]): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>(ADMIN_USER_ENDPOINTS.bulkBan, {
+      userIds,
     });
   }
 
-  // Get user statistics (admin only)
-  async getStats(): Promise<any> {
-    return apiService.get<any>("/users/stats");
+  async bulkActivate(userIds: string[]): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>(
+      ADMIN_USER_ENDPOINTS.bulkActivate,
+      { userIds }
+    );
+  }
+
+  async bulkDelete(userIds: string[]): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>(
+      ADMIN_USER_ENDPOINTS.bulkDelete,
+      { userIds }
+    );
   }
 }
 
