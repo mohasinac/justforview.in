@@ -1,6 +1,7 @@
 import { apiService } from "./api.service";
 import type { PaginatedResponse } from "@/types";
 import type { UserUI } from "@/schemas/ui/user.ui";
+import type { User } from "@/schemas/resources/user.schema";
 import {
   USER_ENDPOINTS,
   ADMIN_USER_ENDPOINTS,
@@ -157,6 +158,12 @@ class UsersService {
     return apiService.post<{ message: string }>(
       ADMIN_USER_ENDPOINTS.bulkDelete,
       { userIds }
+    );
+  }
+
+  async getForEdit(userId: string): Promise<{ ui: UserUI; raw: User }> {
+    return apiService.get<{ ui: UserUI; raw: User }>(
+      USER_ENDPOINTS.forEdit(userId)
     );
   }
 }

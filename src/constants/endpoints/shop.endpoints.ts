@@ -17,6 +17,7 @@ export const SHOP_ENDPOINTS = {
   // Single Shop
   BY_ID: (id: string) => `/api/shops/${id}`,
   BY_SLUG: (slug: string) => `/api/shops/slug/${slug}`,
+  FOR_EDIT: (id: string) => `/api/shops/${id}/edit`,
 
   // Shop Content
   PRODUCTS: (shopId: string) => `/api/shops/${shopId}/products`,

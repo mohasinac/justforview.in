@@ -1,6 +1,7 @@
 import { apiService } from "./api.service";
 import { SHOP_ENDPOINTS } from "@/constants/endpoints/shop.endpoints";
 import type { ShopUI } from "@/schemas/ui/shop.ui";
+import type { Shop } from "@/schemas/resources/shop.schema";
 import type {
   ShopFilter,
   CreateShop,
@@ -68,6 +69,12 @@ class ShopsService {
     return apiService.get<ShopUI[]>(SHOP_ENDPOINTS.VERIFIED);
   }
 
+  async getForEdit(id: string): Promise<{ ui: ShopUI; raw: Shop }> {
+    return apiService.get<{ ui: ShopUI; raw: Shop }>(
+      SHOP_ENDPOINTS.FOR_EDIT(id)
+    );
+  }
+
   async search(query: string): Promise<ShopUI[]> {
     return apiService.get<ShopUI[]>(
       `${SHOP_ENDPOINTS.LIST}?search=${encodeURIComponent(query)}`
@@ -87,6 +94,18 @@ class ShopsService {
 
   async getStats(shopId: string): Promise<any> {
     return apiService.get<any>(`${SHOP_ENDPOINTS.BY_ID(shopId)}/stats`);
+  }
+
+  async bulkAction(
+    action: string,
+    ids: string[],
+    data?: any
+  ): Promise<{ success: boolean }> {
+    return apiService.post("/api/shops/bulk", {
+      action,
+      ids,
+      data,
+    });
   }
 }
 

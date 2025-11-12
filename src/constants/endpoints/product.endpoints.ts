@@ -21,6 +21,7 @@ export const PRODUCT_ENDPOINTS = {
   // Single Product
   BY_ID: (id: string) => `/products/${id}`,
   BY_SLUG: (slug: string) => `/products/slug/${slug}`,
+  FOR_EDIT: (id: string) => `/products/${id}/edit`,
 
   // Product Relationships
   RELATED: (id: string) => `/products/${id}/related`,

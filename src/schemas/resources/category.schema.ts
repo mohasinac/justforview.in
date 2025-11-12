@@ -14,12 +14,21 @@ export const CategorySchema = z.object({
   slug: z.string().min(1).max(150),
   description: z.string().max(1000).optional(),
 
-  // Hierarchy
-  parentId: z.string().nullable().optional(),
+  // Hierarchy - Multiple Parents Support
+  parentIds: z.array(z.string()).default([]),
   path: z.string().min(1).max(500),
   level: z.number().int().min(0).max(5),
   hasChildren: z.boolean(),
   childCount: z.number().int().nonnegative(),
+
+  // Legacy single parent (for backward compatibility)
+  parentId: z.string().nullable().optional(),
+
+  // Creator tracking for seller-created categories
+  createdBy: z.enum(["admin", "seller"]).default("admin"),
+  needsReview: z.boolean().default(false),
+  reviewedAt: z.date().optional(),
+  reviewedBy: z.string().optional(),
 
   // Display
   icon: z.string().max(50).optional(),
@@ -62,6 +71,8 @@ export const CreateCategorySchema = CategorySchema.omit({
   productCount: true,
   createdAt: true,
   updatedAt: true,
+  reviewedAt: true,
+  reviewedBy: true,
 }).extend({
   hasChildren: z.boolean().default(false),
   childCount: z.number().int().nonnegative().default(0),
@@ -113,3 +124,32 @@ export const validateUpdateCategory = (data: unknown) => {
 export const validateCategoryFilter = (data: unknown) => {
   return CategoryFilterSchema.parse(data);
 };
+
+/**
+ * Circular Reference Validation
+ */
+export const validateNonCircular = (
+  categoryId: string,
+  parentIds: string[]
+): boolean => {
+  // Category cannot be its own parent
+  if (parentIds.includes(categoryId)) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Quick Create Schema (Seller Inline Creation)
+ */
+export const QuickCreateCategorySchema = z.object({
+  name: z.string().min(1).max(100),
+  slug: z.string().min(1).max(150),
+  description: z.string().max(1000).optional(),
+  parentIds: z.array(z.string()).default([]),
+  createdBy: z.literal("seller"),
+  needsReview: z.literal(true),
+  isActive: z.literal(false),
+});
+
+export type QuickCreateCategory = z.infer<typeof QuickCreateCategorySchema>;

@@ -18,6 +18,7 @@ export const AUCTION_ENDPOINTS = {
   // Single Auction
   BY_ID: (id: string) => `/api/auctions/${id}`,
   BY_SLUG: (slug: string) => `/api/auctions/slug/${slug}`,
+  FOR_EDIT: (id: string) => `/api/auctions/${id}/edit`,
 
   // Bidding
   BIDS: (auctionId: string) => `/api/auctions/${auctionId}/bids`,

@@ -6,7 +6,12 @@ import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import SlugInput from "@/components/common/SlugInput";
 import { productsService } from "@/services/products.service";
-import type { Product, ProductStatus, ProductCondition } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
+import type {
+  Product,
+  ProductStatus,
+  ProductCondition,
+} from "@/schemas/resources/product.schema";
 
 const STEPS = [
   { id: 1, name: "Basic Info", description: "Name, price, and category" },
@@ -23,18 +28,8 @@ export default function EditProductPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    price: 0,
-    categoryId: "",
-    description: "",
-    stockCount: 0,
-    sku: "",
-    condition: "new" as ProductCondition,
-    status: "draft" as ProductStatus,
-  });
+  const [productUI, setProductUI] = useState<ProductUI | null>(null);
+  const [formData, setFormData] = useState<Partial<Product>>({});
 
   useEffect(() => {
     loadProduct();
@@ -43,19 +38,14 @@ export default function EditProductPage() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const data = await productsService.getBySlug(slug);
-      setProduct(data);
-      setFormData({
-        name: data.name,
-        slug: data.slug,
-        price: data.price,
-        categoryId: data.categoryId,
-        description: data.description || "",
-        stockCount: data.stockCount,
-        sku: data.sku || "",
-        condition: data.condition || "new",
-        status: data.status,
-      });
+      // Get product by slug first to get the ID
+      const productBySlug = await productsService.getBySlug(slug);
+
+      // Then use getForEdit to get both UI and raw formats
+      const { ui, raw } = await productsService.getForEdit(productBySlug.id);
+
+      setProductUI(ui); // For display (shop name, category name, etc.)
+      setFormData(raw); // For form inputs (editable fields)
     } catch (error) {
       console.error("Failed to load product:", error);
       alert("Failed to load product");
@@ -77,9 +67,11 @@ export default function EditProductPage() {
   };
 
   const handleSubmit = async () => {
+    if (!formData.id) return;
+
     try {
       setSaving(true);
-      await productsService.update(slug, formData);
+      await productsService.update(formData.id, formData);
       router.push("/seller/products");
     } catch (error) {
       console.error("Failed to update product:", error);
@@ -139,8 +131,8 @@ export default function EditProductPage() {
                     currentStep > step.id
                       ? "border-blue-600 bg-blue-600 text-white"
                       : currentStep === step.id
-                        ? "border-blue-600 bg-white text-blue-600"
-                        : "border-gray-300 bg-white text-gray-400"
+                      ? "border-blue-600 bg-white text-blue-600"
+                      : "border-gray-300 bg-white text-gray-400"
                   }`}
                 >
                   {currentStep > step.id ? (

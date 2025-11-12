@@ -6,6 +6,7 @@
 import { apiService } from "./api.service";
 import { CATEGORY_ENDPOINTS } from "@/constants/endpoints/category.endpoints";
 import type { CategoryUI } from "@/schemas/ui/category.ui";
+import type { Category } from "@/schemas/resources/category.schema";
 import type { CategoryFilter } from "@/schemas/resources/category.schema";
 
 /**
@@ -76,6 +77,15 @@ class CategoriesService {
   }
 
   /**
+   * Get category for edit
+   */
+  async getForEdit(id: string): Promise<{ ui: CategoryUI; raw: Category }> {
+    return apiService.get<{ ui: CategoryUI; raw: Category }>(
+      CATEGORY_ENDPOINTS.FOR_EDIT(id)
+    );
+  }
+
+  /**
    * Create category (admin)
    */
   async create(data: any): Promise<CategoryUI> {
@@ -94,6 +104,21 @@ class CategoriesService {
    */
   async delete(slug: string): Promise<void> {
     return apiService.delete(`/api/admin/categories/${slug}`);
+  }
+
+  /**
+   * Bulk action
+   */
+  async bulkAction(
+    action: string,
+    ids: string[],
+    data?: any
+  ): Promise<{ success: boolean }> {
+    return apiService.post("/api/categories/bulk", {
+      action,
+      ids,
+      data,
+    });
   }
 }
 

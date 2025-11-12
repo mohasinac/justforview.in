@@ -1,6 +1,7 @@
 import { apiService } from "./api.service";
 import { ORDER_ENDPOINTS } from "@/constants/endpoints/order.endpoints";
 import type { OrderUI } from "@/schemas/ui/order.ui";
+import type { Order } from "@/schemas/resources/order.schema";
 import type {
   OrderFilter,
   CreateOrder,
@@ -105,6 +106,24 @@ class OrdersService {
 
   async downloadInvoice(id: string): Promise<Blob> {
     return apiService.get<Blob>(`${ORDER_ENDPOINTS.byId(id)}/invoice`);
+  }
+
+  async getForEdit(id: string): Promise<{ ui: OrderUI; raw: Order }> {
+    return apiService.get<{ ui: OrderUI; raw: Order }>(
+      ORDER_ENDPOINTS.forEdit(id)
+    );
+  }
+
+  async bulkAction(
+    action: string,
+    ids: string[],
+    data?: any
+  ): Promise<{ success: boolean }> {
+    return apiService.post("/api/orders/bulk", {
+      action,
+      ids,
+      data,
+    });
   }
 }
 

@@ -113,9 +113,12 @@ export default function AdminEditShopPage() {
       setLoading(true);
       setError(null);
 
-      // Load shop by slug (shopId is actually slug in route)
-      const shopData = await shopsService.getBySlug(shopId);
-      setShop(shopData);
+      // Get shop by slug first to get ID
+      const shopUI = await shopsService.getBySlug(shopId);
+      
+      // Load shop with edit format
+      const { ui, raw } = await shopsService.getForEdit(shopUI.id);
+      setShop(ui);
 
       // Load shop products
       const productsData = await shopsService.getShopProducts(shopId, {
@@ -132,21 +135,21 @@ export default function AdminEditShopPage() {
         console.log("Stats not available");
       }
 
-      // Populate form
+      // Populate form with backend format
       setFormData({
-        name: shopData.name,
-        slug: shopData.slug,
-        description: shopData.description || "",
-        email: shopData.email || "",
-        phone: shopData.phone || "",
-        location: shopData.location || "",
+        name: raw.name,
+        slug: raw.slug,
+        description: raw.description || "",
+        email: raw.email || "",
+        phone: raw.phone || "",
+        location: raw.location || "",
         address: {
-          line1: shopData.address?.line1 || "",
-          line2: shopData.address?.line2 || "",
-          city: shopData.address?.city || "",
-          state: shopData.address?.state || "",
-          pincode: shopData.address?.pincode || "",
-          country: shopData.address?.country || "India",
+          line1: raw.address?.line1 || "",
+          line2: raw.address?.line2 || "",
+          city: raw.address?.city || "",
+          state: raw.address?.state || "",
+          pincode: raw.address?.pincode || "",
+          country: raw.address?.country || "India",
         },
         website: shopData.website || "",
         facebook: shopData.facebook || "",

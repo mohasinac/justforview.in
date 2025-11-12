@@ -4,6 +4,7 @@ import {
   SELLER_AUCTION_ENDPOINTS,
 } from "@/constants/endpoints/auction.endpoints";
 import type { AuctionUI } from "@/schemas/ui/auction.ui";
+import type { Auction } from "@/schemas/resources/auction.schema";
 import type {
   CreateAuction,
   UpdateAuction,
@@ -85,6 +86,12 @@ class AuctionsService {
 
   async getBids(id: string): Promise<any[]> {
     return apiService.get<any[]>(AUCTION_ENDPOINTS.BIDS(id));
+  }
+
+  async getForEdit(id: string): Promise<{ ui: AuctionUI; raw: Auction }> {
+    return apiService.get<{ ui: AuctionUI; raw: Auction }>(
+      AUCTION_ENDPOINTS.FOR_EDIT(id)
+    );
   }
 
   async bulkAction(

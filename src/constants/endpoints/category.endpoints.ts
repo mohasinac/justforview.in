@@ -17,6 +17,7 @@ export const CATEGORY_ENDPOINTS = {
   // Single Category
   BY_ID: (id: string) => `/api/categories/${id}`,
   BY_SLUG: (slug: string) => `/api/categories/slug/${slug}`,
+  FOR_EDIT: (id: string) => `/api/categories/${id}/edit`,
 
   // Hierarchy
   CHILDREN: (id: string) => `/api/categories/${id}/children`,

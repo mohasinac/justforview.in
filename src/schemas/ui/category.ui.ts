@@ -17,7 +17,9 @@ export interface CategoryBadge {
  * Category Hierarchy Info
  */
 export interface CategoryHierarchy {
-  parentId?: string | null;
+  parentId?: string | null; // Legacy single parent
+  parentIds: string[]; // Multiple parents support
+  parentBreadcrumbs: CategoryBreadcrumbItem[][]; // Array of breadcrumb paths (one per parent)
   path: string;
   pathSegments: string[];
   level: number;
@@ -77,6 +79,9 @@ export interface CategoryUI {
 
   // Hierarchy
   hierarchy: CategoryHierarchy;
+
+  // Review Status
+  reviewStatus: CategoryReviewStatus;
 
   // Media
   media: CategoryMedia;
@@ -183,6 +188,19 @@ export interface CategoryBreadcrumbItem {
   name: string;
   slug: string;
   url: string;
+}
+
+/**
+ * Category Review Status (for seller-created categories)
+ */
+export interface CategoryReviewStatus {
+  needsReview: boolean;
+  createdBy: "admin" | "seller";
+  reviewedAt?: Date;
+  reviewedBy?: string;
+  statusLabel: string;
+  statusColor: string;
+  statusClassName: string;
 }
 
 /**

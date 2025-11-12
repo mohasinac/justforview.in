@@ -7,6 +7,7 @@ export const ORDER_ENDPOINTS = {
   // Customer endpoints
   list: "/api/orders",
   byId: (id: string) => `/api/orders/${id}`,
+  forEdit: (id: string) => `/api/orders/${id}/edit`,
   create: "/api/orders",
   cancel: (id: string) => `/api/orders/${id}/cancel`,
   track: (id: string) => `/api/orders/${id}/track`,

@@ -7,6 +7,7 @@ export const REVIEW_ENDPOINTS = {
   // Public review endpoints
   list: "/api/reviews",
   byId: (id: string) => `/api/reviews/${id}`,
+  forEdit: (id: string) => `/api/reviews/${id}/edit`,
   byProduct: (productId: string) => `/api/products/${productId}/reviews`,
   byShop: (shopId: string) => `/api/shops/${shopId}/reviews`,
   byAuction: (auctionId: string) => `/api/auctions/${auctionId}/reviews`,

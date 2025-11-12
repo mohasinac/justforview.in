@@ -1,6 +1,7 @@
 import { apiService } from "./api.service";
 import { PRODUCT_ENDPOINTS } from "@/constants/endpoints/product.endpoints";
 import type { ProductUI } from "@/schemas/ui/product.ui";
+import type { Product } from "@/schemas/resources/product.schema";
 import type {
   ProductFilter,
   CreateProduct,
@@ -74,10 +75,28 @@ class ProductsService {
     return apiService.get<ProductUI[]>(PRODUCT_ENDPOINTS.SIMILAR(id));
   }
 
+  async getForEdit(id: string): Promise<{ ui: ProductUI; raw: Product }> {
+    return apiService.get<{ ui: ProductUI; raw: Product }>(
+      PRODUCT_ENDPOINTS.FOR_EDIT(id)
+    );
+  }
+
   async search(query: string): Promise<ProductUI[]> {
     return apiService.get<ProductUI[]>(
       `${PRODUCT_ENDPOINTS.LIST}?search=${encodeURIComponent(query)}`
     );
+  }
+
+  async bulkAction(
+    action: string,
+    ids: string[],
+    data?: any
+  ): Promise<{ success: boolean }> {
+    return apiService.post("/api/products/bulk", {
+      action,
+      ids,
+      data,
+    });
   }
 }
 

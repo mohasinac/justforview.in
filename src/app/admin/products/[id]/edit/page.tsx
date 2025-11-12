@@ -30,6 +30,9 @@ import type {
   Category,
   Shop,
 } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
+import type { CategoryUI } from "@/schemas/ui/category.ui";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
 
 export default function AdminEditProductPage() {
   const router = useRouter();
@@ -41,9 +44,9 @@ export default function AdminEditProductPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [shops, setShops] = useState<Shop[]>([]);
+  const [product, setProduct] = useState<ProductUI | null>(null);
+  const [categories, setCategories] = useState<CategoryUI[]>([]);
+  const [shops, setShops] = useState<ShopUI[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -109,47 +112,47 @@ export default function AdminEditProductPage() {
       setLoading(true);
       setError(null);
 
-      const [productData, categoriesData, shopsData] = await Promise.all([
-        productsService.getById(productId),
+      const [{ ui, raw }, categoriesData, shopsData] = await Promise.all([
+        productsService.getForEdit(productId),
         categoriesService.list({}),
         shopsService.list({}),
       ]);
 
-      setProduct(productData);
+      setProduct(ui);
       setCategories(categoriesData || []);
       setShops(shopsData.data || []);
 
-      // Populate form
+      // Populate form with backend format
       setFormData({
-        shopId: productData.shopId,
-        categoryId: productData.categoryId,
-        name: productData.name,
-        slug: productData.slug,
-        description: productData.description || "",
-        shortDescription: productData.shortDescription || "",
-        price: productData.price,
-        originalPrice: productData.originalPrice || 0,
-        costPrice: productData.costPrice || 0,
-        stockCount: productData.stockCount,
-        lowStockThreshold: productData.lowStockThreshold || 10,
-        sku: productData.sku || "",
-        condition: productData.condition,
-        brand: productData.brand || "",
-        manufacturer: productData.manufacturer || "",
-        countryOfOrigin: productData.countryOfOrigin || "India",
-        tags: productData.tags || [],
-        isReturnable: productData.isReturnable ?? true,
-        returnWindowDays: productData.returnWindowDays || 7,
-        warranty: productData.warranty || "",
-        metaTitle: productData.metaTitle || "",
-        metaDescription: productData.metaDescription || "",
-        status: productData.status,
-        isFeatured: productData.isFeatured || false,
-        showOnHomepage: productData.showOnHomepage || false,
-        shippingClass: productData.shippingClass || "standard",
+        shopId: raw.shopId,
+        categoryId: raw.categoryId,
+        name: raw.name,
+        slug: raw.slug,
+        description: raw.description || "",
+        shortDescription: raw.shortDescription || "",
+        price: raw.price,
+        originalPrice: raw.originalPrice || 0,
+        costPrice: raw.costPrice || 0,
+        stockCount: raw.stockCount,
+        lowStockThreshold: raw.lowStockThreshold || 10,
+        sku: raw.sku || "",
+        condition: raw.condition,
+        brand: raw.brand || "",
+        manufacturer: raw.manufacturer || "",
+        countryOfOrigin: raw.countryOfOrigin || "India",
+        tags: raw.tags || [],
+        isReturnable: raw.isReturnable ?? true,
+        returnWindowDays: raw.returnWindowDays || 7,
+        warranty: raw.warranty || "",
+        metaTitle: raw.metaTitle || "",
+        metaDescription: raw.metaDescription || "",
+        status: raw.status,
+        isFeatured: raw.isFeatured || false,
+        showOnHomepage: raw.showOnHomepage || false,
+        shippingClass: raw.shippingClass || "standard",
       });
 
-      setSpecifications(productData.specifications || []);
+      setSpecifications(raw.specifications || []);
     } catch (error) {
       console.error("Failed to load product:", error);
       setError(

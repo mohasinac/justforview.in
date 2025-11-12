@@ -1,6 +1,7 @@
 import { apiService } from "./api.service";
 import { REVIEW_ENDPOINTS } from "@/constants/endpoints/review.endpoints";
 import type { ReviewUI } from "@/schemas/ui/review.ui";
+import type { Review } from "@/schemas/resources/review.schema";
 import type {
   ReviewFilter,
   CreateReview,
@@ -58,6 +59,12 @@ class ReviewsService {
     return apiService.get<ReviewUI[]>(REVIEW_ENDPOINTS.byProduct(productId));
   }
 
+  async getForEdit(id: string): Promise<{ ui: ReviewUI; raw: Review }> {
+    return apiService.get<{ ui: ReviewUI; raw: Review }>(
+      REVIEW_ENDPOINTS.forEdit(id)
+    );
+  }
+
   async getShopReviews(shopId: string): Promise<ReviewUI[]> {
     return apiService.get<ReviewUI[]>(REVIEW_ENDPOINTS.byShop(shopId));
   }
@@ -93,6 +100,18 @@ class ReviewsService {
     return apiService.get<{ canReview: boolean; reason?: string }>(
       `/api/reviews/can-review/${productId}`
     );
+  }
+
+  async bulkAction(
+    action: string,
+    ids: string[],
+    data?: any
+  ): Promise<{ success: boolean }> {
+    return apiService.post("/api/reviews/bulk", {
+      action,
+      ids,
+      data,
+    });
   }
 }
 

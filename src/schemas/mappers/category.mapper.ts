@@ -15,10 +15,11 @@ import type {
   CategoryStatusDisplay,
   CategoryMedia,
   CategoryBadge,
+  CategoryReviewStatus,
 } from "@/schemas/ui/category.ui";
 
 /**
- * Get category hierarchy info
+ * Get category hierarchy info (supports multiple parents)
  */
 export const getCategoryHierarchy = (category: Category): CategoryHierarchy => {
   const pathSegments = category.path.split("/").filter((s) => s.length > 0);
@@ -38,13 +39,49 @@ export const getCategoryHierarchy = (category: Category): CategoryHierarchy => {
   );
 
   return {
-    parentId: category.parentId,
+    parentId: category.parentId, // Legacy single parent
+    parentIds: category.parentIds || [], // Multiple parents
+    parentBreadcrumbs: [], // Populated separately when needed
     path: category.path,
     pathSegments,
     level: category.level,
     hasChildren: category.hasChildren,
     childCount: category.childCount,
     breadcrumbs,
+  };
+};
+
+/**
+ * Get category review status
+ */
+export const getCategoryReviewStatus = (
+  category: Category
+): CategoryReviewStatus => {
+  const needsReview = category.needsReview || false;
+  const createdBy = category.createdBy || "admin";
+
+  let statusLabel = "Approved";
+  let statusColor = "green";
+  let statusClassName = "bg-green-100 text-green-800";
+
+  if (needsReview) {
+    statusLabel = "Needs Review";
+    statusColor = "yellow";
+    statusClassName = "bg-yellow-100 text-yellow-800";
+  } else if (createdBy === "seller" && category.reviewedAt) {
+    statusLabel = "Reviewed";
+    statusColor = "blue";
+    statusClassName = "bg-blue-100 text-blue-800";
+  }
+
+  return {
+    needsReview,
+    createdBy,
+    reviewedAt: category.reviewedAt,
+    reviewedBy: category.reviewedBy,
+    statusLabel,
+    statusColor,
+    statusClassName,
   };
 };
 
@@ -150,6 +187,24 @@ export const generateCategoryBadges = (category: Category): CategoryBadge[] => {
     });
   }
 
+  if (category.needsReview) {
+    badges.push({
+      text: "Needs Review",
+      color: "yellow",
+      className: "bg-yellow-100 text-yellow-800",
+      icon: "👀",
+    });
+  }
+
+  if (category.createdBy === "seller") {
+    badges.push({
+      text: "Seller Created",
+      color: "indigo",
+      className: "bg-indigo-100 text-indigo-800",
+      icon: "🏪",
+    });
+  }
+
   return badges;
 };
 
@@ -165,6 +220,9 @@ export const mapCategoryToUI = (category: Category): CategoryUI => {
 
     // Hierarchy
     hierarchy: getCategoryHierarchy(category),
+
+    // Review Status
+    reviewStatus: getCategoryReviewStatus(category),
 
     // Media
     media: getCategoryMedia(category),

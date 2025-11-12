@@ -6,6 +6,7 @@
 export const USER_ENDPOINTS = {
   // Public user endpoints
   profile: (userId: string) => `/api/users/${userId}`,
+  forEdit: (userId: string) => `/api/users/${userId}/edit`,
 
   // Current user endpoints
   me: "/api/user/me",
