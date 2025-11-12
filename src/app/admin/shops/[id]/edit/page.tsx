@@ -27,6 +27,8 @@ import SlugInput from "@/components/common/SlugInput";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import type { Shop, Product } from "@/types";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 export default function AdminEditShopPage() {
   const router = useRouter();
@@ -38,8 +40,8 @@ export default function AdminEditShopPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [shop, setShop] = useState<Shop | null>(null);
-  const [shopProducts, setShopProducts] = useState<Product[]>([]);
+  const [shop, setShop] = useState<ShopUI | null>(null);
+  const [shopProducts, setShopProducts] = useState<ProductUI[]>([]);
   const [shopStats, setShopStats] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showBanDialog, setShowBanDialog] = useState(false);
@@ -151,22 +153,22 @@ export default function AdminEditShopPage() {
           pincode: raw.address?.pincode || "",
           country: raw.address?.country || "India",
         },
-        website: shopData.website || "",
-        facebook: shopData.facebook || "",
-        instagram: shopData.instagram || "",
-        twitter: shopData.twitter || "",
-        gst: shopData.gst || "",
-        pan: shopData.pan || "",
-        returnPolicy: shopData.returnPolicy || "",
-        shippingPolicy: shopData.shippingPolicy || "",
+        website: raw.website || "",
+        facebook: raw.facebook || "",
+        instagram: raw.instagram || "",
+        twitter: raw.twitter || "",
+        gst: raw.gst || "",
+        pan: raw.pan || "",
+        returnPolicy: raw.returnPolicy || "",
+        shippingPolicy: raw.shippingPolicy || "",
         bankDetails: {
-          accountHolderName: shopData.bankDetails?.accountHolderName || "",
-          accountNumber: shopData.bankDetails?.accountNumber || "",
-          ifscCode: shopData.bankDetails?.ifscCode || "",
-          bankName: shopData.bankDetails?.bankName || "",
-          branchName: shopData.bankDetails?.branchName || "",
+          accountHolderName: raw.bankDetails?.accountHolderName || "",
+          accountNumber: raw.bankDetails?.accountNumber || "",
+          ifscCode: raw.bankDetails?.ifscCode || "",
+          bankName: raw.bankDetails?.bankName || "",
+          branchName: raw.bankDetails?.branchName || "",
         },
-        upiId: shopData.upiId || "",
+        upiId: raw.upiId || "",
       });
     } catch (error) {
       console.error("Failed to load shop:", error);
