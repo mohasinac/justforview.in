@@ -27,7 +27,10 @@ import {
   TableCheckbox,
   UnifiedFilterSidebar,
 } from "@/components/common/inline-edit";
-import { blogService, type BlogPost } from "@/services/blog.service";
+import {
+  combinedBlogService as blogService,
+  type BlogPost,
+} from "@/services/blog.service";
 import type { BlogPostUI } from "@/schemas/ui/blog-post.ui";
 import { BLOG_FILTERS } from "@/constants/filters";
 import { getBlogBulkActions } from "@/constants/bulk-actions";
@@ -83,28 +86,31 @@ export default function AdminBlogPage() {
         ...filterValues,
       });
 
-      // Type guard to check if response is paginated
-      const isPaginated = !Array.isArray(response) && "data" in response;
-      const data: BlogPostUI[] = isPaginated
-        ? response.data || []
-        : (response as BlogPostUI[]);
+      // Handle both array and paginated responses
+      let data: BlogPostUI[];
+      let totalPages = 1;
+      let totalCount = 0;
+
+      if (Array.isArray(response)) {
+        data = response;
+        totalPages = 1;
+        totalCount = response.length;
+      } else {
+        data = (response as any).data || [];
+        totalPages = (response as any).pagination?.totalPages || 1;
+        totalCount = (response as any).pagination?.total || 0;
+      }
 
       setPosts(data);
-      setTotalPages(isPaginated ? response.pagination?.totalPages || 1 : 1);
-      setTotalPosts(
-        isPaginated ? response.pagination?.total || 0 : data.length
-      );
+      setTotalPages(totalPages);
+      setTotalPosts(totalCount);
 
       // Calculate stats
       setStats({
-        total: totalPosts,
-        published: data.filter(
-          (p: BlogPostUI) => p.status.value === "published"
-        ).length,
-        draft: data.filter((p: BlogPostUI) => p.status.value === "draft")
-          .length,
-        archived: data.filter((p: BlogPostUI) => p.status.value === "archived")
-          .length,
+        total: totalCount,
+        published: data.filter((p) => p.status.value === "published").length,
+        draft: data.filter((p) => p.status.value === "draft").length,
+        archived: data.filter((p) => p.status.value === "archived").length,
       });
     } catch (error) {
       console.error("Failed to load blog posts:", error);
@@ -366,7 +372,7 @@ export default function AdminBlogPage() {
                   )}
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <StatusBadge status={post.status} />
+                      <StatusBadge status={post.status.value} />
                       <div className="flex gap-1">
                         {post.isFeatured && (
                           <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
@@ -535,11 +541,11 @@ export default function AdminBlogPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-                            {post.category}
+                            {post.category.label}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <StatusBadge status={post.status} />
+                          <StatusBadge status={post.status.value} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           <div className="flex flex-col gap-1">

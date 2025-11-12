@@ -17,12 +17,27 @@ Migration to a comprehensive resource schema system to eliminate data inconsiste
 5. **Centralized Types** - All TypeScript types in one location
 6. **Resource Documentation** - AI-agent readable feature guides
 
-**Total Tasks**: 299
-**Completed**: 264 (88%)
-**In Progress**: 0
-**Remaining**: 35
+**Total Tasks**: 337 (updated - includes create forms + bulk routes)
+**Completed**: 291 (86% - includes edit/create forms + bulk actions guides)
+**In Progress**: 7 (getForEdit service methods)
+**Remaining**: 39
 
-**Estimated Time**: 2-3 weeks (working incrementally)
+**Critical Work**:
+
+1. Edit/create forms need backend format, not UI schemas for form state
+2. Bulk action routes should be at resource level with permission checks
+
+**New Phase 10**: Service layer + forms + bulk routes (39 tasks)
+
+- 7 `getForEdit()` methods in services
+- 8 edit form pages to fix
+- 3 create form pages to fix (seller-facing)
+- 6 bulk action route moves
+- 1 inline edit component
+- 5 documentation updates (2 done)
+- Testing and validation
+
+**Estimated Time**: 2 days (service updates + form fixes + route restructuring)
 
 ---
 
@@ -34,8 +49,9 @@ src/
 │ ├── resources/ # Backend Firestore schemas
 │ │ ├── product.schema.ts
 │ │ ├── auction.schema.ts
-│ │ ├── category.schema.ts
-│ │ ├── shop.schema.ts
+│ │ ├── category.schema.ts**Last Updated**: November 13, 2025
+**Maintainer**: Development Team
+**Status**: Phase 3 Complete ✅ | Phase 4-8 In Progress 🚧 | 90% Complete │ ├── shop.schema.ts
 │ │ ├── order.schema.ts
 │ │ ├── user.schema.ts
 │ │ ├── review.schema.ts
@@ -547,6 +563,8 @@ docs/
 - [x] `src/components/product/ProductInfo.tsx`
 - [x] `src/components/product/ProductGallery.tsx`
 - [x] `src/components/product/SimilarProducts.tsx`
+- [x] `src/components/product/ProductReviews.tsx`
+- [x] `src/components/product/ProductDescription.tsx`
 - [ ] `src/components/product/ProductForm.tsx`
 - [ ] All other product components
 
@@ -568,10 +586,8 @@ docs/
 **Shop Components**:
 
 - [x] `src/components/cards/ShopCard.tsx`
+- [x] `src/components/shop/ShopHeader.tsx`
 - [ ] `src/components/shop/ShopProfile.tsx`
-- [ ] `src/components/shop/ShopHeader.tsx` (in progress - needs service methods)
-- [ ] `src/components/shop/ShopForm.tsx`
-- [ ] All other shop components
 - [ ] `src/components/shop/ShopForm.tsx`
 - [ ] All other shop components
 
@@ -594,11 +610,11 @@ docs/
 ### 4.2 Create Component Type Files
 
 - [x] `src/schemas/ui/cart.ui.ts` - Cart UI schema
-- [ ] `src/types/components/cards.types.ts` - Card component props
-- [ ] `src/types/components/forms.types.ts` - Form component props
-- [ ] `src/types/components/modals.types.ts` - Modal component props
-- [ ] `src/types/components/tables.types.ts` - Table component props
-- [ ] `src/types/components/layouts.types.ts` - Layout component props
+- [x] `src/types/components/cards.types.ts` - Card component props
+- [x] `src/types/components/forms.types.ts` - Form component props
+- [x] `src/types/components/modals.types.ts` - Modal component props
+- [x] `src/types/components/tables.types.ts` - Table component props
+- [x] `src/types/components/layouts.types.ts` - Layout component props
 
 ---
 
@@ -611,40 +627,41 @@ docs/
 - [x] `src/app/products/page.tsx`
 - [x] `src/app/products/[slug]/page.tsx`
 - [x] `src/app/seller/products/page.tsx`
-- [ ] `src/app/seller/products/[id]/page.tsx`
-- [ ] `src/app/admin/products/page.tsx`
+- [x] `src/app/seller/products/create/page.tsx`
+- [x] `src/app/seller/products/[id]/page.tsx` (edit page) - Fixed nested field access
+- [x] `src/app/admin/products/page.tsx` - Fixed nested field access
 
 **Auction Pages**:
 
 - [x] `src/app/auctions/page.tsx`
-- [ ] `src/app/auctions/[slug]/page.tsx`
-- [ ] `src/app/seller/auctions/page.tsx`
-- [ ] `src/app/admin/auctions/page.tsx`
+- [x] `src/app/auctions/[slug]/page.tsx`
+- [ ] `src/app/seller/auctions/page.tsx` (needs nested UI field access)
+- [x] `src/app/admin/auctions/page.tsx` (already uses AuctionUI)
 
 **Category Pages**:
 
 - [x] `src/app/categories/page.tsx`
 - [x] `src/app/categories/[slug]/page.tsx`
-- [ ] `src/app/admin/categories/page.tsx`
+- [ ] `src/app/admin/categories/page.tsx` (needs nested UI field access)
 
 **Shop Pages**:
 
 - [x] `src/app/shops/page.tsx`
 - [x] `src/app/shops/[slug]/page.tsx`
-- [ ] `src/app/seller/shop/page.tsx`
-- [ ] `src/app/admin/shops/page.tsx`
+- [ ] `src/app/seller/shop/page.tsx` (needs nested UI field access)
+- [ ] `src/app/admin/shops/page.tsx` (needs nested UI field access)
 
 **Order Pages**:
 
 - [x] `src/app/user/orders/page.tsx`
-- [ ] `src/app/user/orders/[id]/page.tsx`
-- [ ] `src/app/seller/orders/page.tsx`
-- [ ] `src/app/admin/orders/page.tsx`
+- [x] `src/app/user/orders/[id]/page.tsx` (uses OrderUI)
+- [x] `src/app/seller/orders/page.tsx` - Fixed nested field access + service method
+- [x] `src/app/admin/orders/page.tsx` - Fixed nested field access
 
 **Checkout Pages**:
 
 - [x] `src/app/cart/page.tsx`
-- [ ] `src/app/checkout/page.tsx`
+- [ ] `src/app/checkout/page.tsx` (needs nested UI field access)
 
 ---
 
@@ -723,16 +740,12 @@ docs/
 - [x] `src/app/api/support/route.ts`
 - [x] `src/app/api/returns/route.ts`
 - [x] `src/app/api/user/profile/route.ts`
-- [x] `src/app/api/user/addresses/route.ts`
-- [x] `src/app/api/admin/users/route.ts`
-- [x] `src/app/api/admin/hero-slides/route.ts`
-- [x] `src/app/api/admin/payouts/route.ts`
-- [x] `src/app/api/blog/route.ts`
-- [ ] `src/app/api/cart/route.ts` (doesn't need mapper - simple joins)
+- [x] `src/app/api/user/addresses/route.ts` - [x] `src/app/api/admin/users/route.ts` - [x] `src/app/api/admin/hero-slides/route.ts` - [x] `src/app/api/admin/payouts/route.ts` - [x] `src/app/api/blog/route.ts` - [ ] `src/app/api/cart/route.ts` (doesn't need mapper - simple joins)
 
-### 7.2 Update API Routes to Use Resource Schemas for Validation
+                                                      ### 7.2 Update API Routes to Use Resource Schemas for Validation
 
-- [x] All POST/PATCH endpoints validate with resource schemas
+                                                      - [x] All POST/PATCH endpoints validate with resource schemas
+
 - [x] Added validation to cart routes (POST, PATCH)
 - [x] Added validation to blog routes (PATCH)
 - [x] Checkout route already has comprehensive validation
@@ -768,9 +781,178 @@ docs/
 
 ---
 
-## Phase 10: Deprecation & Cleanup
+## Phase 10: Edit/Create Form Pattern Implementation (UI + Raw Data)
 
-### 10.1 Remove Old Type Files
+### 10.1 Add `getForEdit` Methods to Services
+
+Services need to return BOTH formats for edit scenarios:
+
+- **UI format** for display (shop.name, category.name, formatted prices)
+- **Raw backend format** for form state (editable fields with plain values)
+
+- [ ] `src/services/products.service.ts` - Add `getForEdit(id): Promise<{ ui: ProductUI; raw: Product }>`
+- [ ] `src/services/auctions.service.ts` - Add `getForEdit(id): Promise<{ ui: AuctionUI; raw: Auction }>`
+- [ ] `src/services/shops.service.ts` - Add `getForEdit(id): Promise<{ ui: ShopUI; raw: Shop }>`
+- [ ] `src/services/categories.service.ts` - Add `getForEdit(id): Promise<{ ui: CategoryUI; raw: Category }>`
+- [ ] `src/services/orders.service.ts` - Add `getForEdit(id): Promise<{ ui: OrderUI; raw: Order }>`
+- [ ] `src/services/reviews.service.ts` - Add `getForEdit(id): Promise<{ ui: ReviewUI; raw: Review }>`
+- [ ] `src/services/users.service.ts` - Add `getForEdit(id): Promise<{ ui: UserUI; raw: User }>`
+
+**Pattern**:
+
+```typescript
+async getForEdit(id: string): Promise<{ ui: ProductUI; raw: Product }> {
+  const doc = await getDoc(doc(this.collection, id));
+  if (!doc.exists()) throw new Error("Not found");
+
+  const raw = { id: doc.id, ...doc.data() } as Product;
+  const ui = mapProductToUI(raw);
+
+  return { ui, raw };
+}
+```
+
+### 10.2 Fix Admin/Seller Edit & Create Forms
+
+Edit/Create forms use **backend types for form state**, **UI types for display**:
+
+**Product Edit Forms**:
+
+- [ ] `src/app/admin/products/[id]/edit/page.tsx`
+  - Change state from `ProductUI` to `Partial<Product>` for form
+  - Keep separate `ProductUI` state for display fields
+  - Use `getForEdit()` method
+- [ ] `src/app/seller/products/[id]/edit/page.tsx` - Same pattern
+
+**Auction Edit Forms**:
+
+- [ ] `src/app/admin/auctions/[id]/edit/page.tsx` - Use `Partial<Auction>` for form state
+- [ ] `src/app/seller/auctions/[id]/edit/page.tsx` - Same pattern
+
+**Shop Edit Forms**:
+
+- [ ] `src/app/admin/shops/[id]/edit/page.tsx` - Use `Partial<Shop>` for form state
+- [ ] `src/app/seller/shop/edit/page.tsx` - Same pattern
+
+**Category Edit/Create Forms**:
+
+- [ ] `src/app/admin/categories/[id]/edit/page.tsx` - Use `Partial<Category>` for form state
+- [ ] `src/app/admin/categories/create/page.tsx` - Use `Partial<Category>` for form state
+
+**User-Facing Create Forms** (also need backend format):
+
+- [ ] `src/app/seller/products/create/page.tsx` - Use `Partial<Product>` for form state
+- [ ] `src/app/seller/auctions/create/page.tsx` - Use `Partial<Auction>` for form state
+- [ ] `src/app/seller/shop/create/page.tsx` - Use `Partial<Shop>` for form state
+
+**Pattern**:
+
+```typescript
+// Two separate states
+const [productUI, setProductUI] = useState<ProductUI | null>(null); // Display
+const [formData, setFormData] = useState<Partial<Product>>({}); // Form fields
+
+useEffect(() => {
+  const { ui, raw } = await productsService.getForEdit(id);
+  setProductUI(ui); // For shop.name, category.name display
+  setFormData(raw); // For form inputs
+}, []);
+
+// Submit raw format directly
+await productsService.update(id, formData);
+```
+
+### 10.3 Fix Inline Edit Components
+
+- [ ] `src/components/common/InlineEditTable.tsx`
+  - Accept both UI and backend types via generics
+  - Use UI type for display, backend type for edit values
+  - Map UI → backend when entering edit mode
+
+**Pattern**:
+
+```typescript
+interface InlineEditTableProps<TUI, TBackend> {
+  data: TUI[]; // Display with UI type
+  onSave: (id: string, data: Partial<TBackend>) => Promise<void>; // Save backend format
+  toBackend: (ui: TUI) => Partial<TBackend>; // Convert for editing
+}
+```
+
+### 10.4 Move Bulk Action Routes to Resource Level
+
+Bulk actions should be accessible to multiple user types:
+
+- **Public users**: Add to cart, wishlist (products/auctions)
+- **Sellers**: All admin bulk actions for their own resources
+- **Admins**: All bulk actions
+
+Current structure (admin-only):
+
+- ❌ `src/app/api/admin/products/bulk/route.ts`
+- ❌ `src/app/api/admin/auctions/bulk/route.ts`
+- ❌ `src/app/api/admin/categories/bulk/route.ts`
+
+New structure (resource-level with permission checks):
+
+- [ ] Move to `src/app/api/products/bulk/route.ts`
+  - Public: Add to cart (multiple products)
+  - Sellers: Update own products, delete own products
+  - Admins: All operations
+- [ ] Move to `src/app/api/auctions/bulk/route.ts`
+  - Public: Watch/unwatch multiple
+  - Sellers: Update own auctions, cancel own auctions
+  - Admins: All operations
+- [ ] Move to `src/app/api/categories/bulk/route.ts`
+  - Admins only: Bulk edit, delete, reorder
+- [ ] Move to `src/app/api/shops/bulk/route.ts`
+  - Sellers: Update own shop settings
+  - Admins: Verify, ban, feature flags
+- [ ] Move to `src/app/api/orders/bulk/route.ts`
+  - Sellers: Update status, create shipments for own orders
+  - Admins: All operations
+- [ ] Move to `src/app/api/reviews/bulk/route.ts`
+  - Admins: Approve, feature, delete
+
+**Pattern**:
+
+```typescript
+// src/app/api/products/bulk/route.ts
+export async function POST(req: Request) {
+  const { action, ids, data } = await req.json();
+  const { user } = await getAuthUser(req);
+
+  // Permission checks based on action
+  if (action === "addToCart") {
+    // Public - no auth needed
+  } else if (action === "update" || action === "delete") {
+    // Sellers can only modify own products
+    if (!user.isAdmin) {
+      const products = await getProductsByIds(ids);
+      const allOwnedByUser = products.every((p) => p.shopId === user.shopId);
+      if (!allOwnedByUser) throw new Error("Unauthorized");
+    }
+  } else {
+    // Admin-only actions
+    if (!user.isAdmin) throw new Error("Admin only");
+  }
+
+  // Execute bulk action
+}
+```
+
+### 10.5 Document Edit/Create Forms & Bulk Actions Patterns
+
+- [x] Create `docs/project/04-EDIT-FORMS-PATTERN.md`
+- [x] Create `docs/project/05-BULK-ACTIONS-PATTERN.md`
+- [ ] Add examples to `docs/project/02-SERVICE-LAYER-GUIDE.md`
+- [ ] Update `docs/ai/AI-AGENT-GUIDE.md` with edit form pattern
+- [ ] Add inline edit examples
+- [ ] Document bulk action permissions in resource docs
+
+## Phase 11: Deprecation & Cleanup
+
+### 11.1 Remove Old Type Files
 
 - [x] Mark `src/types/index.ts` as deprecated with migration guide
 - [x] Add @deprecated tags to major entity interfaces:
@@ -788,14 +970,14 @@ docs/
   - [x] SupportTicket → SupportTicketUI
 - [ ] Gradually remove old type definitions as usage decreases
 
-### 10.2 Update API Routes Constants
+### 11.2 Update API Routes Constants
 
 - [x] Resource-specific endpoint files created and in use
 - [x] All services use new endpoint constants
 - [x] Mark `src/constants/api-routes.ts` as deprecated with migration guide
 - [x] Keep for backward compatibility initially
 
-### 10.3 Code Cleanup
+### 11.3 Code Cleanup
 
 - [x] Remove unused imports from updated files
 - [x] Remove duplicate type definitions
@@ -804,18 +986,32 @@ docs/
 
 ---
 
-## Phase 11: Testing & Validation
+## Phase 12: Testing & Validation
 
-### 11.1 Type Safety Validation
+### 12.1 Type Safety Validation
 
 - [x] Run `npm run type-check` - identifies remaining migration work
-- [ ] Fix admin/seller page type errors (display types vs editable values)
+- [ ] Fix admin/seller edit form type errors (UI → backend mapping)
+- [ ] Fix inline edit component type errors
 - [ ] Fix test workflow type errors (service method signatures)
 - [ ] Verify all components use correct UI schemas
 - [ ] Verify all services use correct endpoints
 - [ ] Verify all API routes use mappers
+- [ ] Verify all edit forms use reverse mappers
 
-### 11.2 Runtime Testing
+### 12.2 Runtime Testing
+
+**Edit Form Testing** (Critical - test UI → backend mapping):
+
+- [ ] Test product create/edit with nested UI values
+- [ ] Test auction create/edit with nested UI values
+- [ ] Test shop create/edit with nested UI values
+- [ ] Test category create/edit with nested UI values
+- [ ] Test inline edits extract raw values correctly
+- [ ] Verify backend receives correct format
+- [ ] Verify validation works with backend schemas
+
+**CRUD Operations**:
 
 - [ ] Test all product CRUD operations
 - [ ] Test all auction operations
@@ -827,36 +1023,41 @@ docs/
 - [ ] Test seller operations
 - [ ] Test user profile operations
 
-### 11.3 Integration Testing
+### 12.3 Integration Testing
 
 - [ ] Run all test workflows: `npm run test:workflows:all`
 - [ ] Verify all tests pass
 - [ ] Fix any broken tests
 - [ ] Add new tests for mapper functions
+- [ ] Add new tests for reverse mapper functions
 
 ---
 
-## Phase 12: Documentation Updates
+## Phase 13: Documentation Updates
 
-### 12.1 Update AI Agent Documentation
+### 13.1 Update AI Agent Documentation
 
 - [ ] Update `docs/ai/AI-AGENT-GUIDE.md` with schema system
 - [ ] Update `docs/project/00-QUICK-START.md` with new patterns
 - [ ] Update `docs/project/02-SERVICE-LAYER-GUIDE.md` with UI schema usage
+- [ ] Create `docs/project/04-EDIT-FORMS-PATTERN.md` with UI ↔ backend mapping
 
-### 12.2 Complete Resource Documentation
+### 13.2 Complete Resource Documentation
 
 - [ ] Verify all resource docs in `docs/resources/` are complete
 - [ ] Include examples for each resource
 - [ ] Include schema definitions
 - [ ] Include API endpoint examples
+- [ ] Add reverse mapping examples for edit forms
 
-### 12.3 Add Migration Guide
+### 13.3 Add Migration Guide
 
 - [ ] Create `docs/project/SCHEMA-MIGRATION-GUIDE.md`
 - [ ] Document how to migrate existing code
 - [ ] Document common pitfalls
 - [ ] Document best practices
+- [ ] Document UI → backend mapping pattern
+- [ ] Add inline edit migration examples
 
 ---
 
@@ -904,12 +1105,25 @@ docs/
 
 ## Progress Tracking
 
-**Total Tasks**: 299
-**Completed**: 219 (73%)
-**In Progress**: 5 (Phase 4 components, Phase 7 validation, Phase 8 hooks)
-**Remaining**: 75
+**Total Tasks**: 324
+**Completed**: 289 (89%)
+**In Progress**: 7 (Service `getForEdit` methods)
+**Remaining**: 28
 
-**Estimated Time**: 2-3 weeks (working incrementally)
+**Critical Priority**:
+
+1. **Phase 10.1**: Add `getForEdit()` methods to services (returns both UI + raw)
+2. **Phase 10.2**: Fix edit form pages to use dual state (UI for display, raw for form)
+3. **Phase 10.3**: Fix inline edit component to handle both formats
+
+**Key Pattern**:
+
+- Services return `{ ui: ProductUI, raw: Product }` for editing
+- Forms use `Partial<Product>` state for inputs
+- Forms use `ProductUI` state for display fields (shop.name, category.name)
+- Submit `raw` format directly - no transformation needed
+
+**Estimated Time**: 1-2 days (service methods + edit form updates)
 
 ---
 
@@ -921,6 +1135,30 @@ docs/
 - **Mapper Consistency**: All API responses must use mappers
 - **Documentation Required**: Every resource must have complete docs
 - **Test Everything**: No changes without testing
+
+### Critical Pattern: UI ↔ Backend Data Flow
+
+**Frontend Components/Pages**:
+
+- ✅ **ALWAYS use UI schemas** (`ProductUI`, `OrderUI`, etc.) for display
+- ✅ **NEVER use backend schemas** (`Product`, `Order`) in UI components
+- ✅ **Extract raw values from nested UI objects** when submitting to backend:
+  - `productUI.price.raw` → `product.price` (number)
+  - `productUI.stock.count` → `product.stockCount` (number)
+  - `productUI.status.value` → `product.status` (string)
+  - `productUI.category.id` → `product.categoryId` (string)
+
+**Backend API Routes**:
+
+- ✅ **Accept backend schemas** for validation (Zod schemas)
+- ✅ **Return UI schemas** via mappers for responses
+- ✅ **Mappers transform** backend → UI (never UI → backend)
+
+**Services Layer**:
+
+- ✅ **Return UI schemas** from all read operations
+- ✅ **Accept backend format** for write operations (create/update)
+- ✅ **Components map UI → backend** before calling service methods
 
 ---
 
@@ -945,13 +1183,20 @@ docs/
 17. ✅ Update all API routes to use mappers
 18. ✅ Complete all resource documentation
 19. ✅ Complete Phase 7.2: API validation audit
-20. 🚧 Phase 4 & 8: Component/Hook migrations in progress
+20. ✅ Phase 4: Component type files created
+21. ✅ Phase 4 & 8: Component/Hook migrations (most complete)
+22. 🚧 Admin/seller pages need nested field access updates
 
 ---
 
-**Last Updated**: November 12, 2025
-**Maintainer**: Development Team
-**Status**: Phase 3 Complete ✅ | Phase 4 Ready to Start � | All Core Resources Complete
+**Last Updated**: November 13, 2025
+**Maintainer**: Development Team  
+**Status**: Phase 3 Complete ✅ | Phase 4-9 In Progress 🚧 | **Phase 10 Critical** 🔴 | 86% Complete
+
+**🔴 CRITICAL**:
+
+1. Edit/create forms need backend format for form state (via `getForEdit()` or direct `Partial<Product>`)
+2. Bulk action routes need to move from `/api/admin/*/bulk` to `/api/*/bulk` with permission checks
 
 ```
 

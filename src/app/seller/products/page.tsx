@@ -242,7 +242,8 @@ export default function ProductsPage() {
                     <div className="aspect-square bg-gray-100">
                       <img
                         src={
-                          product.images[0]?.url || "/placeholder-product.jpg"
+                          product.primaryImage?.url ||
+                          "/placeholder-product.jpg"
                         }
                         alt={product.name}
                         className="h-full w-full object-cover"
@@ -405,7 +406,7 @@ export default function ProductsPage() {
                               key={product.id}
                               fields={fields}
                               initialValues={{
-                                images: product.images[0]?.url || "",
+                                images: product.primaryImage?.url || "",
                                 name: product.name,
                                 price: product.price.amount,
                                 stockCount: product.stock.count,
@@ -439,7 +440,7 @@ export default function ProductsPage() {
                                       ...values,
                                       images: values.images
                                         ? [values.images]
-                                        : product.images,
+                                        : product.images.map((img) => img.url),
                                     }
                                   );
                                   await loadProducts();
@@ -486,9 +487,9 @@ export default function ProductsPage() {
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden">
-                                  {product.images?.[0] ? (
+                                  {product.primaryImage ? (
                                     <img
-                                      src={product.images[0]?.url}
+                                      src={product.primaryImage.url}
                                       alt={product.name}
                                       className="h-full w-full object-cover"
                                     />

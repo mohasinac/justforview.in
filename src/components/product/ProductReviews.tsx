@@ -6,7 +6,7 @@ import { reviewsService } from "@/services/reviews.service";
 import { EmptyState } from "@/components/common/EmptyState";
 import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
-import type { Review } from "@/types";
+import type { ReviewUI } from "@/schemas/ui/review.ui";
 
 interface ProductReviewsProps {
   productId: string;
@@ -17,7 +17,7 @@ export function ProductReviews({
   productId,
   productSlug,
 }: ProductReviewsProps) {
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<ReviewUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [stats, setStats] = useState({
@@ -46,12 +46,12 @@ export function ProductReviews({
       // Calculate stats
       if (reviewsList.length > 0) {
         const totalRating = reviewsList.reduce(
-          (sum: number, r: Review) => sum + r.rating,
-          0,
+          (sum: number, r: ReviewUI) => sum + r.rating.rating,
+          0
         );
         const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-        reviewsList.forEach((r: Review) => {
-          breakdown[r.rating as keyof typeof breakdown]++;
+        reviewsList.forEach((r: ReviewUI) => {
+          breakdown[r.rating.rating as keyof typeof breakdown]++;
         });
 
         setStats({

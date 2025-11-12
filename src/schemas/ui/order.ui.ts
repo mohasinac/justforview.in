@@ -174,6 +174,12 @@ export interface OrderUI {
   // Badges
   badges: OrderBadge[];
 
+  // Backward compatibility for admin pages
+  subtotal: number; // alias for pricing.subtotal.raw
+  tax: number; // alias for pricing.tax.raw
+  discount: number; // alias for pricing.discount.raw
+  total: number; // alias for pricing.total.raw
+
   // URLs
   url: string;
   invoiceUrl: string;

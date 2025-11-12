@@ -132,6 +132,11 @@ export interface AuctionUI {
   showOnHomepage: boolean;
   featuredPriority: number;
 
+  // Backward compatibility for pages/tests
+  currentBid: number; // alias for bid.current.raw
+  startingBid: number; // alias for bid.starting.raw
+  bidCount: number; // alias for bid.count
+
   // Timestamps
   createdAt: TimeDisplay;
   updatedAt: TimeDisplay;

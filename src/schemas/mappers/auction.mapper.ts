@@ -342,6 +342,11 @@ export const mapAuctionToUI = (auction: Auction): AuctionUI => {
     // Bidding
     bid: getBidInfo(auction),
 
+    // Backward compatibility
+    currentBid: auction.currentBid || 0,
+    startingBid: auction.startingBid,
+    bidCount: auction.bidCount || 0,
+
     // Timing
     startTime: formatTimeDisplay(auction.startTime),
     endTime: formatTimeDisplay(auction.endTime),

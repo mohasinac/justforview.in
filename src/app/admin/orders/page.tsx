@@ -22,7 +22,8 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { UnifiedFilterSidebar } from "@/components/common/inline-edit";
 import { ORDER_FILTERS } from "@/constants/filters";
 import { useIsMobile } from "@/hooks/useMobile";
-import type { Order, OrderStatus, PaymentStatus, Shop } from "@/types";
+import type { OrderUI } from "@/schemas/ui/order.ui";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -31,8 +32,8 @@ export default function AdminOrdersPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [shops, setShops] = useState<Shop[]>([]);
+  const [orders, setOrders] = useState<OrderUI[]>([]);
+  const [shops, setShops] = useState<ShopUI[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -60,18 +61,16 @@ export default function AdminOrdersPage() {
       setLoading(true);
       setError(null);
 
-      const filters: OrderFilters = {
+      const filters: any = {
         page: currentPage,
         limit,
         search: searchQuery || undefined,
         ...filterValues,
-        sortBy: "createdAt",
-        sortOrder: "desc",
       };
 
       const [ordersData, shopsData, statsData] = await Promise.all([
         ordersService.list(filters),
-        shopsService.list({ limit: 1000 }),
+        shopsService.list({}),
         ordersService.getStats().catch(() => null),
       ]);
 
@@ -126,29 +125,6 @@ export default function AdminOrdersPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  const getStatusColor = (status: OrderStatus) => {
-    const colors: Record<OrderStatus, string> = {
-      pending: "bg-yellow-100 text-yellow-700",
-      confirmed: "bg-blue-100 text-blue-700",
-      processing: "bg-purple-100 text-purple-700",
-      shipped: "bg-indigo-100 text-indigo-700",
-      delivered: "bg-green-100 text-green-700",
-      cancelled: "bg-red-100 text-red-700",
-      refunded: "bg-gray-100 text-gray-700",
-    };
-    return colors[status] || "bg-gray-100 text-gray-700";
-  };
-
-  const getPaymentStatusColor = (status: PaymentStatus) => {
-    const colors: Record<PaymentStatus, string> = {
-      pending: "bg-yellow-100 text-yellow-700",
-      paid: "bg-green-100 text-green-700",
-      failed: "bg-red-100 text-red-700",
-      refunded: "bg-gray-100 text-gray-700",
-    };
-    return colors[status] || "bg-gray-100 text-gray-700";
   };
 
   if (!isAdmin) {
@@ -381,12 +357,13 @@ export default function AdminOrdersPage() {
                             {order.shippingAddress.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {order.shippingAddress.phone}
+                            {order.shippingAddress.phoneFormatted}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        {order.createdAtFormatted ||
+                          new Date(order.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {order.items.length} item
@@ -394,25 +371,24 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-medium text-gray-900">
-                          ₹{order.total.toLocaleString()}
+                          {order.pricing?.total?.formatted || "₹0"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
-                            order.status
-                          )}`}
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${order.status.className}`}
                         >
-                          {order.status}
+                          {order.status.label}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getPaymentStatusColor(
-                            order.paymentStatus
-                          )}`}
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            order.paymentStatus?.className ||
+                            "bg-gray-100 text-gray-700"
+                          }`}
                         >
-                          {order.paymentStatus}
+                          {order.paymentStatus?.label || "N/A"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">

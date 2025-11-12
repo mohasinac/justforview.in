@@ -15,7 +15,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { ordersService } from "@/services/orders.service";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import type { Order } from "@/types";
+import type { OrderUI } from "@/schemas/ui/order.ui";
 
 interface OrderPageProps {
   params: Promise<{
@@ -26,7 +26,7 @@ interface OrderPageProps {
 export default function OrderDetailPage({ params }: OrderPageProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderUI | null>(null);
   const [loading, setLoading] = useState(true);
   const [orderId, setOrderId] = useState<string | null>(null);
 
@@ -70,9 +70,7 @@ export default function OrderDetailPage({ params }: OrderPageProps) {
     if (!confirm("Are you sure you want to cancel this order?")) return;
 
     try {
-      await ordersService.cancel(orderId, {
-        reason: "Customer requested cancellation",
-      });
+      await ordersService.cancel(orderId);
       await loadOrder();
       alert("Order cancelled successfully");
     } catch (error) {
@@ -98,7 +96,8 @@ export default function OrderDetailPage({ params }: OrderPageProps) {
     return null;
   }
 
-  const canCancel = order.status === "pending" || order.status === "confirmed";
+  const canCancel =
+    order.status.value === "pending" || order.status.value === "confirmed";
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -115,11 +114,10 @@ export default function OrderDetailPage({ params }: OrderPageProps) {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Order #{order.id.slice(0, 8)}
+                Order #{order.orderNumber}
               </h1>
               <p className="text-gray-600 mt-1">
-                Placed on{" "}
-                {new Date(order.createdAt).toLocaleDateString("en-IN")}
+                Placed on {order.createdAtFormatted}
               </p>
             </div>
             <div className="flex gap-3">
@@ -147,22 +145,22 @@ export default function OrderDetailPage({ params }: OrderPageProps) {
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             Order Status
           </h2>
-          <OrderTimeline status={order.status} />
+          <OrderTimeline status={order.status.value} />
         </div>
 
         {/* Order Items */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Items ({order.items?.length || 0})
+            Items ({order.itemCount})
           </h2>
           <div className="space-y-4">
-            {order.items?.map((item: any, index: number) => (
+            {order.items.map((item, index: number) => (
               <div
                 key={index}
                 className="flex gap-4 pb-4 border-b last:border-b-0"
               >
                 <img
-                  src={item.imageUrl || "/placeholder.png"}
+                  src={item.productImage || "/placeholder.png"}
                   alt={item.productName}
                   className="w-20 h-20 object-cover rounded"
                 />
@@ -174,10 +172,10 @@ export default function OrderDetailPage({ params }: OrderPageProps) {
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-gray-900">
-                    ₹{item.price.toLocaleString()}
+                    {item.price.formatted}
                   </p>
                   <p className="text-sm text-gray-600">
-                    Total: ₹{(item.price * item.quantity).toLocaleString()}
+                    Total: {item.total.formatted}
                   </p>
                 </div>
               </div>
@@ -193,16 +191,16 @@ export default function OrderDetailPage({ params }: OrderPageProps) {
               Shipping Address
             </h2>
             <div className="text-gray-700">
-              <p className="font-medium">{order.shippingAddress?.name}</p>
-              <p>{order.shippingAddress?.line1}</p>
-              {order.shippingAddress?.line2 && (
+              <p className="font-medium">{order.shippingAddress.name}</p>
+              <p>{order.shippingAddress.line1}</p>
+              {order.shippingAddress.line2 && (
                 <p>{order.shippingAddress.line2}</p>
               )}
               <p>
-                {order.shippingAddress?.city}, {order.shippingAddress?.state}{" "}
-                {order.shippingAddress?.pincode}
+                {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
+                {order.shippingAddress.pincode}
               </p>
-              <p className="mt-2">Phone: {order.shippingAddress?.phone}</p>
+              <p className="mt-2">Phone: {order.shippingAddress.phone}</p>
             </div>
           </div>
 
@@ -215,43 +213,45 @@ export default function OrderDetailPage({ params }: OrderPageProps) {
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="text-gray-900">
-                  ₹{order.subtotal?.toLocaleString()}
+                  {order.pricing.subtotal.formatted}
                 </span>
               </div>
-              {order.discount > 0 && (
+              {order.pricing.discount.raw > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Discount</span>
-                  <span>-₹{order.discount.toLocaleString()}</span>
+                  <span>-{order.pricing.discount.formatted}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
                 <span className="text-gray-900">
-                  {order.shipping === 0 ? "FREE" : `₹${order.shipping}`}
+                  {order.pricing.shipping.raw === 0
+                    ? "FREE"
+                    : order.pricing.shipping.formatted}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax</span>
                 <span className="text-gray-900">
-                  ₹{order.tax?.toLocaleString()}
+                  {order.pricing.tax.formatted}
                 </span>
               </div>
               <div className="flex justify-between pt-2 border-t font-semibold text-lg">
                 <span>Total</span>
                 <span className="text-primary">
-                  ₹{order.total.toLocaleString()}
+                  {order.pricing.total.formatted}
                 </span>
               </div>
               <div className="pt-2 border-t">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Payment Method</span>
                   <span className="text-gray-900 uppercase">
-                    {order.paymentMethod}
+                    {order.paymentMethodLabel}
                   </span>
                 </div>
                 <div className="flex justify-between mt-1">
                   <span className="text-gray-600">Payment Status</span>
-                  <StatusBadge status={order.paymentStatus} />
+                  <StatusBadge status={order.paymentStatus.value} />
                 </div>
               </div>
             </div>
@@ -320,8 +320,8 @@ function OrderTimeline({ status }: { status: string }) {
                   isCurrent
                     ? "text-primary"
                     : isCompleted
-                      ? "text-gray-900"
-                      : "text-gray-400"
+                    ? "text-gray-900"
+                    : "text-gray-400"
                 }`}
               >
                 {step.label}

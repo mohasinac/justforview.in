@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Eye, Loader2, Upload, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import RichTextEditor from "@/components/common/RichTextEditor";
-import { blogService } from "@/services/blog.service";
+import { combinedBlogService as blogService } from "@/services/blog.service";
 import { useMediaUploadWithCleanup } from "@/hooks/useMediaUploadWithCleanup";
 
 export default function CreateBlogPostPage() {
@@ -153,15 +153,14 @@ export default function CreateBlogPostPage() {
     try {
       setLoading(true);
 
-      const category = customCategory || formData.category;
+      const category = (customCategory || formData.category) as any;
 
       await blogService.create({
         ...formData,
         category,
         status,
         featuredImage: uploadedUrls[0],
-        publishedAt: status === "published" ? new Date() : undefined,
-      });
+      } as any);
 
       // Don't cleanup on success - blog post now owns the images
       router.push("/admin/blog");

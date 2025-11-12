@@ -35,7 +35,8 @@ import {
   productsService,
   type ProductFilters,
 } from "@/services/products.service";
-import type { Product, ProductStatus } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
+import type { ProductStatus } from "@/types";
 import { PRODUCT_FILTERS } from "@/constants/filters";
 import { useIsMobile } from "@/hooks/useMobile";
 import {
@@ -50,7 +51,7 @@ export default function AdminProductsPage() {
   const isMobile = useIsMobile();
   const [view, setView] = useState<"grid" | "table">("table");
   const [showFilters, setShowFilters] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,13 +85,12 @@ export default function AdminProductsPage() {
       setLoading(true);
       setError(null);
 
-      const filters: ProductFilters = {
+      const filters: any = {
         page: currentPage,
         limit,
         search: searchQuery || undefined,
         ...filterValues,
-        sortBy: "createdAt",
-        sortOrder: "desc",
+        sort: "newest",
       };
 
       const response = await productsService.list(filters);
@@ -188,12 +188,12 @@ export default function AdminProductsPage() {
     const rows = products.map((p) => [
       p.name,
       p.sku || "",
-      p.price,
-      p.stockCount,
-      p.status,
-      p.shopId,
-      p.categoryId,
-      p.rating,
+      p.price.formatted,
+      p.stock.count,
+      p.status.label,
+      p.shop?.name || "",
+      p.category?.name || "",
+      p.rating.average,
       p.salesCount,
     ]);
 
@@ -361,9 +361,9 @@ export default function AdminProductsPage() {
                   className="group relative rounded-lg border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition-shadow"
                 >
                   <div className="aspect-square bg-gray-100 relative">
-                    {product.images[0] ? (
+                    {product.primaryImage ? (
                       <img
-                        src={product.images[0]}
+                        src={product.primaryImage.url}
                         alt={product.name}
                         className="h-full w-full object-cover"
                       />
@@ -390,19 +390,19 @@ export default function AdminProductsPage() {
                           SKU: {product.sku || "N/A"}
                         </p>
                       </div>
-                      <StatusBadge status={product.status} />
+                      <StatusBadge status={product.status.value} />
                     </div>
                     <div className="mt-2">
                       <p className="text-lg font-semibold text-gray-900">
-                        {formatPrice(product.price)}
+                        {product.price.formatted}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Stock: {product.stockCount}
+                        Stock: {product.stock.count}
                       </p>
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-sm">
                       <span className="text-gray-500">
-                        ⭐ {product.rating.toFixed(1)}
+                        ⭐ {product.rating.average.toFixed(1)}
                       </span>
                       <span className="text-gray-400">•</span>
                       <span className="text-gray-500">
@@ -487,9 +487,9 @@ export default function AdminProductsPage() {
                             fields={fields}
                             initialValues={{
                               name: product.name,
-                              price: product.price,
-                              stockCount: product.stockCount,
-                              status: product.status,
+                              price: product.price.amount,
+                              stockCount: product.stock.count,
+                              status: product.status.value,
                             }}
                             onSave={async (values) => {
                               try {
@@ -554,9 +554,9 @@ export default function AdminProductsPage() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="h-12 w-12 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center overflow-hidden">
-                                {product.images[0] ? (
+                                {product.primaryImage ? (
                                   <img
-                                    src={product.images[0]}
+                                    src={product.primaryImage.url}
                                     alt={product.name}
                                     className="h-full w-full object-cover"
                                   />
@@ -581,34 +581,32 @@ export default function AdminProductsPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
-                              {formatPrice(product.price)}
+                              {product.price.formatted}
                             </div>
-                            {product.originalPrice &&
-                              product.originalPrice > product.price && (
-                                <div className="text-xs text-gray-500 line-through">
-                                  {formatPrice(product.originalPrice)}
-                                </div>
-                              )}
+                            {product.originalPrice && (
+                              <div className="text-xs text-gray-500 line-through">
+                                {product.originalPrice.formatted}
+                              </div>
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`text-sm font-medium ${
-                                product.stockCount === 0
+                                product.stock.outOfStock
                                   ? "text-red-600"
-                                  : product.stockCount <
-                                    product.lowStockThreshold
+                                  : product.stock.isLow
                                   ? "text-yellow-600"
                                   : "text-green-600"
                               }`}
                             >
-                              {product.stockCount}
+                              {product.stock.count}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <StatusBadge status={product.status} />
+                            <StatusBadge status={product.status.value} />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            <div>⭐ {product.rating.toFixed(1)}</div>
+                            <div>⭐ {product.rating.average.toFixed(1)}</div>
                             <div className="text-xs text-gray-500">
                               {product.salesCount} sales
                             </div>

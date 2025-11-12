@@ -397,6 +397,12 @@ export function mapOrderToUI(order: Order): OrderUI {
 
     badges: generateBadges(order),
 
+    // Backward compatibility
+    subtotal: order.subtotal,
+    tax: order.tax,
+    discount: order.discount,
+    total: order.total,
+
     url: `/user/orders/${order.id}`,
     invoiceUrl: `/user/orders/${order.id}/invoice`,
     trackingUrl:

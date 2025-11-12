@@ -176,9 +176,9 @@ export default function CategoriesPage() {
   );
 
   // Calculate hierarchy level (for display)
-  const getCategoryLevel = (category: Category): number => {
-    if (!category.parent_id) return 0;
-    const parent = categories.find((c) => c.id === category.parent_id);
+  const getCategoryLevel = (category: CategoryUI): number => {
+    if (!category.parentId) return 0;
+    const parent = categories.find((c) => c.id === category.parentId);
     return parent ? getCategoryLevel(parent) + 1 : 0;
   };
 

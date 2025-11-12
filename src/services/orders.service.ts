@@ -58,8 +58,20 @@ class OrdersService {
     return apiService.get<OrderUI[]>("/api/user/orders");
   }
 
-  async getSellerOrders(): Promise<OrderUI[]> {
-    return apiService.get<OrderUI[]>("/api/seller/orders");
+  async getSellerOrders(
+    filters?: Partial<OrderFilter>
+  ): Promise<PaginatedResponse<OrderUI>> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      });
+    }
+    const qs = params.toString();
+    const endpoint = qs ? `/api/seller/orders?${qs}` : "/api/seller/orders";
+    return apiService.get<PaginatedResponse<OrderUI>>(endpoint);
   }
 
   async updateStatus(

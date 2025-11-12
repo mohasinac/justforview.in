@@ -94,19 +94,19 @@ export default function SellerOrdersPage() {
               <div className="bg-white p-4 rounded-lg shadow">
                 <div className="text-sm text-gray-600">Pending</div>
                 <div className="text-2xl font-bold text-yellow-600">
-                  {orders.filter((o) => o.status === "pending").length}
+                  {orders.filter((o) => o.status.value === "pending").length}
                 </div>
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
                 <div className="text-sm text-gray-600">Processing</div>
                 <div className="text-2xl font-bold text-blue-600">
-                  {orders.filter((o) => o.status === "processing").length}
+                  {orders.filter((o) => o.status.value === "processing").length}
                 </div>
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
                 <div className="text-sm text-gray-600">Delivered</div>
                 <div className="text-2xl font-bold text-green-600">
-                  {orders.filter((o) => o.status === "delivered").length}
+                  {orders.filter((o) => o.status.value === "delivered").length}
                 </div>
               </div>
             </div>
@@ -154,39 +154,41 @@ export default function SellerOrdersPage() {
                           {order.id}
                         </td>
                         <td className="px-6 py-4 text-sm">
-                          <div>{order.customerName}</div>
+                          <div>{order.customer?.name || "N/A"}</div>
                           <div className="text-gray-500">
-                            {order.customerEmail}
+                            {order.customer?.email || "N/A"}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm">
                           {order.items?.length || 0} items
                         </td>
                         <td className="px-6 py-4 text-sm font-semibold">
-                          {formatCurrency(order.total)}
+                          {order.pricing?.total?.formatted ||
+                            formatCurrency(order.total)}
                         </td>
                         <td className="px-6 py-4">
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              order.status === "delivered"
+                              order.status.value === "delivered"
                                 ? "bg-green-100 text-green-800"
-                                : order.status === "shipped"
+                                : order.status.value === "shipped"
                                 ? "bg-blue-100 text-blue-800"
-                                : order.status === "processing"
+                                : order.status.value === "processing"
                                 ? "bg-purple-100 text-purple-800"
-                                : order.status === "cancelled"
+                                : order.status.value === "cancelled"
                                 ? "bg-red-100 text-red-800"
                                 : "bg-yellow-100 text-yellow-800"
                             }`}
                           >
-                            {order.status}
+                            {order.status.label}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {order.createdAtFormatted ||
+                            new Date(order.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-sm space-x-2">
-                          {order.status === "pending" && (
+                          {order.status.value === "pending" && (
                             <button
                               onClick={() =>
                                 handleUpdateStatus(order.id, "processing")
@@ -197,7 +199,7 @@ export default function SellerOrdersPage() {
                               <Package className="w-5 h-5" />
                             </button>
                           )}
-                          {order.status === "processing" && (
+                          {order.status.value === "processing" && (
                             <button
                               onClick={() =>
                                 handleUpdateStatus(order.id, "shipped")

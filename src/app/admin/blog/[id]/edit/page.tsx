@@ -6,7 +6,10 @@ import Link from "next/link";
 import { ArrowLeft, Save, Eye, Loader2, Upload, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import RichTextEditor from "@/components/common/RichTextEditor";
-import { blogService, type BlogPost } from "@/services/blog.service";
+import {
+  combinedBlogService as blogService,
+  type BlogPost,
+} from "@/services/blog.service";
 import { useMediaUploadWithCleanup } from "@/hooks/useMediaUploadWithCleanup";
 
 export default function EditBlogPostPage() {
@@ -67,11 +70,11 @@ export default function EditBlogPostPage() {
         slug: data.slug,
         excerpt: data.excerpt,
         content: data.content,
-        category: data.category,
+        category: data.category.value,
         tags: data.tags,
-        status: data.status as "draft" | "published",
+        status: data.status.value as "draft" | "published",
         isFeatured: data.isFeatured,
-        showOnHomepage: data.showOnHomepage,
+        showOnHomepage: data.showOnHomepage || false,
         featuredImage: data.featuredImage || "",
       });
     } catch (error) {

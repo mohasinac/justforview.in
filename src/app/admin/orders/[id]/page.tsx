@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ordersService } from "@/services/orders.service";
-import type { Order, OrderStatus } from "@/types";
+import type { OrderUI } from "@/schemas/ui/order.ui";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import Link from "next/link";
@@ -12,20 +12,20 @@ export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const orderId = (params.id as string) || "";
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderUI | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   // Status update
   const [showStatusDialog, setShowStatusDialog] = useState(false);
-  const [newStatus, setNewStatus] = useState<OrderStatus>("pending");
+  const [newStatus, setNewStatus] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
 
   // Shipment
   const [showShipmentDialog, setShowShipmentDialog] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [shippingProvider, setShippingProvider] = useState("");
+  const [carrier, setCarrier] = useState("");
   const [estimatedDelivery, setEstimatedDelivery] = useState("");
 
   // Cancel
@@ -55,7 +55,7 @@ export default function OrderDetailPage() {
       setSaving(true);
       const updated = await ordersService.updateStatus(order.id, {
         status: newStatus,
-        internalNotes: internalNotes || undefined,
+        note: internalNotes || undefined,
       });
       setOrder(updated);
       setShowStatusDialog(false);
@@ -71,8 +71,8 @@ export default function OrderDetailPage() {
   const handleCreateShipment = async () => {
     if (!order) return;
 
-    if (!trackingNumber.trim() || !shippingProvider.trim()) {
-      alert("Please provide tracking number and shipping provider");
+    if (!trackingNumber.trim() || !carrier.trim()) {
+      alert("Please provide tracking number and carrier");
       return;
     }
 
@@ -80,7 +80,7 @@ export default function OrderDetailPage() {
       setSaving(true);
       const updated = await ordersService.createShipment(order.id, {
         trackingNumber: trackingNumber.trim(),
-        shippingProvider: shippingProvider.trim(),
+        carrier: carrier.trim(),
         estimatedDelivery: estimatedDelivery
           ? new Date(estimatedDelivery)
           : undefined,
@@ -88,7 +88,7 @@ export default function OrderDetailPage() {
       setOrder(updated);
       setShowShipmentDialog(false);
       setTrackingNumber("");
-      setShippingProvider("");
+      setCarrier("");
       setEstimatedDelivery("");
     } catch (err: any) {
       alert(err.message || "Failed to create shipment");
@@ -107,9 +107,7 @@ export default function OrderDetailPage() {
 
     try {
       setSaving(true);
-      const updated = await ordersService.cancel(order.id, {
-        reason: cancelReason.trim(),
-      });
+      const updated = await ordersService.cancel(order.id);
       setOrder(updated);
       setShowCancelDialog(false);
       setCancelReason("");
@@ -135,27 +133,6 @@ export default function OrderDetailPage() {
       document.body.removeChild(a);
     } catch (err: any) {
       alert(err.message || "Failed to download invoice");
-    }
-  };
-
-  const getStatusColor = (status: OrderStatus) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "confirmed":
-        return "bg-blue-100 text-blue-800";
-      case "processing":
-        return "bg-indigo-100 text-indigo-800";
-      case "shipped":
-        return "bg-purple-100 text-purple-800";
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      case "refunded":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -220,11 +197,12 @@ export default function OrderDetailPage() {
   }
 
   const canUpdateStatus = !["cancelled", "delivered", "refunded"].includes(
-    order.status
+    order.status.value
   );
-  const canShip = order.status === "confirmed" || order.status === "processing";
+  const canShip =
+    order.status.value === "confirmed" || order.status.value === "processing";
   const canCancel = !["shipped", "delivered", "cancelled", "refunded"].includes(
-    order.status
+    order.status.value
   );
 
   return (
@@ -268,12 +246,12 @@ export default function OrderDetailPage() {
               </h2>
               <div className="flex items-center gap-3">
                 <StatusBadge
-                  status={order.status}
-                  className={getStatusColor(order.status)}
+                  status={order.status.label}
+                  className={order.status.className}
                 />
                 <StatusBadge
-                  status={order.paymentStatus}
-                  className={getPaymentStatusColor(order.paymentStatus)}
+                  status={order.paymentStatus.label}
+                  className={getPaymentStatusColor(order.paymentStatus.value)}
                 />
               </div>
             </div>
@@ -283,7 +261,7 @@ export default function OrderDetailPage() {
               {canUpdateStatus && (
                 <button
                   onClick={() => {
-                    setNewStatus(order.status);
+                    setNewStatus(order.status.value);
                     setShowStatusDialog(true);
                   }}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -291,7 +269,7 @@ export default function OrderDetailPage() {
                   Update Status
                 </button>
               )}
-              {canShip && !order.trackingNumber && (
+              {canShip && !order.shipping.trackingNumber && (
                 <button
                   onClick={() => setShowShipmentDialog(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -310,7 +288,7 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Tracking Info */}
-            {order.trackingNumber && (
+            {order.shipping.trackingNumber && (
               <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm font-medium text-gray-900 mb-1">
                   Tracking Information
@@ -319,28 +297,28 @@ export default function OrderDetailPage() {
                   <div>
                     <p className="text-gray-600">Provider</p>
                     <p className="font-medium text-gray-900">
-                      {order.shippingProvider || "N/A"}
+                      {order.shipping.shippingProvider || "N/A"}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-600">Tracking Number</p>
                     <p className="font-medium text-gray-900">
-                      {order.trackingNumber}
+                      {order.shipping.trackingNumber}
                     </p>
                   </div>
-                  {order.estimatedDelivery && (
+                  {order.shipping.estimatedDelivery && (
                     <div>
                       <p className="text-gray-600">Estimated Delivery</p>
                       <p className="font-medium text-gray-900">
-                        {formatDate(order.estimatedDelivery)}
+                        {formatDate(order.shipping.estimatedDelivery)}
                       </p>
                     </div>
                   )}
-                  {order.deliveredAt && (
+                  {order.shipping.deliveredAt && (
                     <div>
                       <p className="text-gray-600">Delivered At</p>
                       <p className="font-medium text-gray-900">
-                        {formatDate(order.deliveredAt)}
+                        {formatDate(order.shipping.deliveredAt)}
                       </p>
                     </div>
                   )}
@@ -391,13 +369,13 @@ export default function OrderDetailPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-gray-900">
-                      {formatCurrency(item.price)}
+                      {item.price.formatted}
                     </p>
                     <p className="text-sm text-gray-600">
                       Qty: {item.quantity}
                     </p>
                     <p className="text-sm font-semibold text-gray-900 mt-1">
-                      {formatCurrency(item.total)}
+                      {item.total.formatted}
                     </p>
                   </div>
                 </div>
@@ -409,35 +387,37 @@ export default function OrderDetailPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="text-gray-900">
-                  {formatCurrency(order.subtotal)}
+                  {order.pricing.subtotal.formatted}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Shipping</span>
                 <span className="text-gray-900">
-                  {formatCurrency(order.shipping)}
+                  {order.pricing.shipping.formatted}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Tax</span>
                 <span className="text-gray-900">
-                  {formatCurrency(order.tax)}
+                  {order.pricing.tax.formatted}
                 </span>
               </div>
-              {order.discount > 0 && (
+              {order.pricing.discount.raw > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">
-                    Discount {order.couponCode && `(${order.couponCode})`}
+                    Discount{" "}
+                    {order.pricing.couponCode &&
+                      `(${order.pricing.couponCode})`}
                   </span>
                   <span className="text-green-600">
-                    -{formatCurrency(order.discount)}
+                    -{order.pricing.discount.formatted}
                   </span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
                 <span className="text-gray-900">Total</span>
                 <span className="text-gray-900">
-                  {formatCurrency(order.total)}
+                  {order.pricing.total.formatted}
                 </span>
               </div>
             </div>
@@ -557,8 +537,8 @@ export default function OrderDetailPage() {
               <div>
                 <p className="text-gray-600">Payment Status</p>
                 <StatusBadge
-                  status={order.paymentStatus}
-                  className={getPaymentStatusColor(order.paymentStatus)}
+                  status={order.paymentStatus.label}
+                  className={getPaymentStatusColor(order.paymentStatus.value)}
                 />
               </div>
             </div>
@@ -583,7 +563,7 @@ export default function OrderDetailPage() {
             </label>
             <select
               value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value as OrderStatus)}
+              onChange={(e) => setNewStatus(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="pending">Pending</option>
@@ -635,12 +615,12 @@ export default function OrderDetailPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Shipping Provider *
+              Carrier *
             </label>
             <input
               type="text"
-              value={shippingProvider}
-              onChange={(e) => setShippingProvider(e.target.value)}
+              value={carrier}
+              onChange={(e) => setCarrier(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="e.g., India Post, Delhivery, Blue Dart"
             />

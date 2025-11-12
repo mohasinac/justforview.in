@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Star, MapPin, Heart, Share2 } from "lucide-react";
-import type { Shop } from "@/types";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
 import { shopsService } from "@/services/shops.service";
 
 interface ShopHeaderProps {
-  shop: Shop;
+  shop: ShopUI;
 }
 
 export function ShopHeader({ shop }: ShopHeaderProps) {
@@ -106,22 +106,22 @@ export function ShopHeader({ shop }: ShopHeaderProps) {
                   {shop.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                  {shop.rating > 0 && (
+                  {shop.stats.rating.hasReviews && (
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <span className="font-medium">
-                        {shop.rating.toFixed(1)}
+                        {shop.stats.rating.ratingFormatted}
                       </span>
-                      <span>({shop.reviewCount} reviews)</span>
+                      <span>({shop.stats.rating.reviewCountLabel})</span>
                     </div>
                   )}
-                  {shop.location && (
+                  {shop.contact.location && (
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
-                      <span>{shop.location}</span>
+                      <span>{shop.contact.location}</span>
                     </div>
                   )}
-                  {shop.isVerified && (
+                  {shop.status.isVerified && (
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
                       Verified Seller
                     </span>
@@ -148,8 +148,8 @@ export function ShopHeader({ shop }: ShopHeaderProps) {
                   {checkingFollow
                     ? "..."
                     : isFollowing
-                      ? "Following"
-                      : "Follow"}
+                    ? "Following"
+                    : "Follow"}
                 </button>
                 <button
                   onClick={handleShare}
@@ -164,7 +164,7 @@ export function ShopHeader({ shop }: ShopHeaderProps) {
             <div className="flex flex-wrap gap-6 text-sm">
               <div>
                 <span className="font-semibold text-gray-900">
-                  {shop.productCount || 0}
+                  {shop.stats.productCount || 0}
                 </span>
                 <span className="text-gray-600 ml-1">Products</span>
               </div>
