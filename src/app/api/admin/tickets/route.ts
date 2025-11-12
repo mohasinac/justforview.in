@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/api/lib/session";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
+import { mapSupportTicketToUI } from "@/schemas/mappers/support.mapper";
+import type { SupportTicket } from "@/schemas/resources/support.schema";
 
 /**
  * GET /admin/tickets
@@ -55,16 +57,9 @@ export async function GET(request: NextRequest) {
     // Execute query
     const snapshot = await query.get();
 
-    const tickets = snapshot.docs.map((doc: any) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate?.() || data.createdAt,
-        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-        resolvedAt: data.resolvedAt?.toDate?.() || data.resolvedAt,
-      };
-    });
+    const tickets = snapshot.docs.map((doc: any) =>
+      mapSupportTicketToUI({ id: doc.id, ...doc.data() } as SupportTicket & { id: string })
+    );
 
     // Get statistics
     const statsSnapshot = await db.collection("support_tickets").get();

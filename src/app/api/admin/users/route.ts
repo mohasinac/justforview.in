@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "@/app/api/lib/session";
 import { UserRole } from "@/types";
+import { mapUserToUI } from "@/schemas/mappers/user.mapper";
+import type { User } from "@/schemas/resources/user.schema";
 
 /**
  * GET /admin/users
@@ -42,10 +44,9 @@ export async function GET(request: NextRequest) {
 
     const snapshot = await query.limit(limit).offset(offset).get();
 
-    let users = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    let users = snapshot.docs.map((doc) =>
+      mapUserToUI({ id: doc.id, ...doc.data() } as User & { id: string })
+    );
 
     // Client-side search filter (Firestore doesn't support full-text search)
     if (search) {
@@ -148,7 +149,7 @@ export async function PATCH(request: NextRequest) {
 
     // Fetch updated user
     const userDoc = await Collections.users().doc(userId).get();
-    const userData = { id: userDoc.id, ...userDoc.data() };
+    const userData = mapUserToUI({ id: userDoc.id, ...userDoc.data() } as User & { id: string });
 
     return NextResponse.json({
       success: true,
