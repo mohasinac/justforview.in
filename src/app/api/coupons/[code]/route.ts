@@ -8,7 +8,7 @@ import type { Coupon } from "@/schemas/resources/coupon.schema";
 // GET /api/coupons/[code] - Public if active, owner/admin otherwise
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ code: string }> },
+  { params }: { params: Promise<{ code: string }> }
 ) {
   try {
     const { code } = await params;
@@ -22,7 +22,7 @@ export async function GET(
     if (snapshot.empty) {
       return NextResponse.json(
         { success: false, error: "Coupon not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
     const doc = snapshot.docs[0];
@@ -32,7 +32,7 @@ export async function GET(
     if ((role === "guest" || role === "user") && !rawData.is_active) {
       return NextResponse.json(
         { success: false, error: "Coupon not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -41,7 +41,7 @@ export async function GET(
     console.error("Error fetching coupon:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch coupon" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -49,14 +49,14 @@ export async function GET(
 // PATCH /api/coupons/[code] - Update by code (owner/admin)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ code: string }> },
+  { params }: { params: Promise<{ code: string }> }
 ) {
   try {
     const user = await getCurrentUser(request);
     if (!user?.email) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
     }
     const role = user.role;
@@ -69,7 +69,7 @@ export async function PATCH(
     if (snapshot.empty) {
       return NextResponse.json(
         { success: false, error: "Coupon not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -81,7 +81,7 @@ export async function PATCH(
       if (!ownsShop) {
         return NextResponse.json(
           { success: false, error: "Forbidden" },
-          { status: 403 },
+          { status: 403 }
         );
       }
     }
@@ -95,7 +95,9 @@ export async function PATCH(
 
     await Collections.coupons().doc(coupon.id).update(update);
     const updated = await Collections.coupons().doc(coupon.id).get();
-    const updatedData = { id: updated.id, ...updated.data() } as Coupon & { id: string };
+    const updatedData = { id: updated.id, ...updated.data() } as Coupon & {
+      id: string;
+    };
     return NextResponse.json({
       success: true,
       data: mapCouponToUI(updatedData),
@@ -104,7 +106,7 @@ export async function PATCH(
     console.error("Error updating coupon:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update coupon" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -112,14 +114,14 @@ export async function PATCH(
 // DELETE /api/coupons/[code] - Delete (owner/admin)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ code: string }> },
+  { params }: { params: Promise<{ code: string }> }
 ) {
   try {
     const user = await getCurrentUser(request);
     if (!user?.email) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
     }
     const role = user.role;
@@ -132,7 +134,7 @@ export async function DELETE(
     if (snapshot.empty) {
       return NextResponse.json(
         { success: false, error: "Coupon not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -144,7 +146,7 @@ export async function DELETE(
       if (!ownsShop) {
         return NextResponse.json(
           { success: false, error: "Forbidden" },
-          { status: 403 },
+          { status: 403 }
         );
       }
     }
@@ -155,7 +157,7 @@ export async function DELETE(
     console.error("Error deleting coupon:", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete coupon" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -9,22 +9,10 @@ import {
   formatDiscount,
   formatCompactNumber,
 } from "@/lib/formatters";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 export interface ProductCardProps {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  rating?: number;
-  reviewCount?: number;
-  shopName: string;
-  shopSlug: string;
-  shopId?: string;
-  inStock: boolean;
-  isFeatured?: boolean;
-  condition?: "new" | "used" | "refurbished";
+  product: ProductUI;
   onAddToCart?: (
     id: string,
     productDetails?: {
@@ -43,20 +31,7 @@ export interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
-  id,
-  name,
-  slug,
-  price,
-  originalPrice,
-  image,
-  rating = 0,
-  reviewCount = 0,
-  shopName,
-  shopSlug,
-  shopId,
-  inStock,
-  isFeatured = false,
-  condition = "new",
+  product,
   onAddToCart,
   onToggleFavorite,
   onQuickView,
@@ -64,6 +39,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   showShopName = true,
   compact = false,
 }) => {
+  const {
+    id,
+    name,
+    slug,
+    price: priceDisplay,
+    originalPrice: originalPriceDisplay,
+    primaryImage,
+    stock,
+    condition,
+    shop,
+    rating,
+    isFeatured,
+  } = product;
+
+  const price = priceDisplay.amount;
+  const originalPrice = originalPriceDisplay?.amount;
+  const image = primaryImage.url;
+  const inStock = stock.inStock;
+  const ratingValue = rating.average || 0;
+  const reviewCount = rating.reviewCount || 0;
+  const shopName = shop?.name || "";
+  const shopSlug = shop?.slug || "";
+  const shopId = shop?.id || "";
+  const conditionValue = condition.value;
+
   const discountPercentage = originalPrice
     ? formatDiscount(originalPrice, price)
     : "";
@@ -125,9 +125,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               Out of Stock
             </span>
           )}
-          {condition !== "new" && (
+          {conditionValue !== "new" && (
             <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded capitalize">
-              {condition}
+              {condition.label}
             </span>
           )}
           {discountPercentage && (
@@ -205,12 +205,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         )}
 
         {/* Rating */}
-        {!compact && rating > 0 && (
+        {!compact && ratingValue > 0 && (
           <div className="flex items-center gap-1 mb-2">
             <div className="flex items-center">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span className="text-sm font-medium text-gray-900 ml-1">
-                {rating.toFixed(1)}
+                {ratingValue.toFixed(1)}
               </span>
             </div>
             {reviewCount > 0 && (

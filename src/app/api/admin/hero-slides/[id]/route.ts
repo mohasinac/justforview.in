@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
 import { COLLECTIONS } from "@/constants/database";
+import { mapHeroSlideToUI } from "@/schemas/mappers/hero-slide.mapper";
+import type { HeroSlide } from "@/schemas/resources/hero-slide.schema";
 
 // GET /admin/hero-slides/[id] - Get hero slide
 export async function GET(
@@ -19,10 +21,10 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      id: doc.id,
-      ...doc.data(),
-    });
+    const slideData = { id: doc.id, ...doc.data() } as HeroSlide & {
+      id: string;
+    };
+    return NextResponse.json(mapHeroSlideToUI(slideData));
   } catch (error) {
     console.error("Error fetching hero slide:", error);
     return NextResponse.json(
@@ -70,11 +72,15 @@ export async function PATCH(
 
     await db.collection(COLLECTIONS.HERO_SLIDES).doc(id).update(updateData);
 
-    return NextResponse.json({
-      id: id,
-      ...doc.data(),
-      ...updateData,
-    });
+    const updatedDoc = await db
+      .collection(COLLECTIONS.HERO_SLIDES)
+      .doc(id)
+      .get();
+    const updatedSlide = {
+      id: updatedDoc.id,
+      ...updatedDoc.data(),
+    } as HeroSlide & { id: string };
+    return NextResponse.json(mapHeroSlideToUI(updatedSlide));
   } catch (error) {
     console.error("Error updating hero slide:", error);
     return NextResponse.json(

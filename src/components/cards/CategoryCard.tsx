@@ -4,34 +4,36 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Package } from "lucide-react";
+import type { CategoryUI } from "@/schemas/ui/category.ui";
 
 export interface CategoryCardProps {
-  id: string;
-  name: string;
-  slug: string;
-  image?: string;
-  description?: string;
-  productCount: number;
-  isFeatured?: boolean;
-  showOnHomepage?: boolean;
-  parentCategory?: string;
-  subcategoryCount?: number;
+  category: CategoryUI;
   variant?: "default" | "compact" | "large";
 }
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({
-  id,
-  name,
-  slug,
-  image,
-  description,
-  productCount,
-  isFeatured = false,
-  showOnHomepage = false,
-  parentCategory,
-  subcategoryCount = 0,
+  category,
   variant = "default",
 }) => {
+  const {
+    id,
+    name,
+    slug,
+    media,
+    description,
+    stats,
+    isFeatured,
+    showOnHomepage,
+    hierarchy,
+  } = category;
+
+  const image = media.image;
+  const productCount = stats.productCount;
+  const subcategoryCount = hierarchy.childCount;
+  const parentCategory =
+    hierarchy.breadcrumbs.length > 1
+      ? hierarchy.breadcrumbs[hierarchy.breadcrumbs.length - 2]?.name
+      : undefined;
   const sizeClasses = {
     compact: "aspect-square",
     default: "aspect-[4/3]",

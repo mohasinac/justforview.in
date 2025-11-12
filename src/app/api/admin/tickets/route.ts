@@ -58,7 +58,9 @@ export async function GET(request: NextRequest) {
     const snapshot = await query.get();
 
     const tickets = snapshot.docs.map((doc: any) =>
-      mapSupportTicketToUI({ id: doc.id, ...doc.data() } as SupportTicket & { id: string })
+      mapSupportTicketToUI({ id: doc.id, ...doc.data() } as SupportTicket & {
+        id: string;
+      })
     );
 
     // Get statistics

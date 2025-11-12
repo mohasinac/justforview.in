@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/api/lib/session";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
+import { mapSupportTicketToUI } from "@/schemas/mappers/support.mapper";
+import type { SupportTicket } from "@/schemas/resources/support.schema";
 
 /**
  * GET /admin/tickets/[id]
@@ -42,10 +44,38 @@ export async function GET(
       const data = doc.data();
       return {
         id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate?.() || data.createdAt,
+        userId: data.senderId || data.userId,
+        userType: data.senderRole || data.userType || "user",
+        message: data.message,
+        attachments: data.attachments || [],
+        isInternal: data.isInternal || false,
+        createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
       };
     });
+
+    // Build ticket object
+    const ticketWithMessages = {
+      id: ticketDoc.id,
+      ...ticketData,
+      messages,
+      createdAt:
+        ticketData?.createdAt?.toDate?.() || new Date(ticketData?.createdAt),
+      updatedAt:
+        ticketData?.updatedAt?.toDate?.() || new Date(ticketData?.updatedAt),
+      resolvedAt: ticketData?.resolvedAt
+        ? ticketData.resolvedAt?.toDate?.() || new Date(ticketData.resolvedAt)
+        : undefined,
+      closedAt: ticketData?.closedAt
+        ? ticketData.closedAt?.toDate?.() || new Date(ticketData.closedAt)
+        : undefined,
+      assignedAt: ticketData?.assignedAt
+        ? ticketData.assignedAt?.toDate?.() || new Date(ticketData.assignedAt)
+        : undefined,
+      lastMessageAt: ticketData?.lastMessageAt
+        ? ticketData.lastMessageAt?.toDate?.() ||
+          new Date(ticketData.lastMessageAt)
+        : undefined,
+    } as SupportTicket;
 
     // Get user details
     const userDoc = await db.collection("users").doc(ticketData?.userId).get();
@@ -54,13 +84,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: {
-        id: ticketDoc.id,
-        ...ticketData,
-        createdAt: ticketData?.createdAt?.toDate?.() || ticketData?.createdAt,
-        updatedAt: ticketData?.updatedAt?.toDate?.() || ticketData?.updatedAt,
-        resolvedAt:
-          ticketData?.resolvedAt?.toDate?.() || ticketData?.resolvedAt,
-        messages,
+        ...mapSupportTicketToUI(ticketWithMessages),
         user: userData
           ? {
               id: userDoc.id,

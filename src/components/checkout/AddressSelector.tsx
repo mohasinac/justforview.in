@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, MapPin, Edit2, Trash2, Check } from "lucide-react";
 import { addressService } from "@/services/address.service";
-import { Address } from "@/types";
+import type { AddressUI } from "@/schemas/ui/address.ui";
 import { ConfirmDialog } from "../common/ConfirmDialog";
 import { AddressForm } from "./AddressForm";
 
@@ -18,7 +18,7 @@ export function AddressSelector({
   onSelect,
   type,
 }: AddressSelectorProps) {
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addresses, setAddresses] = useState<AddressUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -31,13 +31,12 @@ export function AddressSelector({
   const loadAddresses = async () => {
     try {
       setLoading(true);
-      const data = await addressService.getAll();
-      const addressList = data.addresses || [];
+      const addressList = await addressService.list();
       setAddresses(addressList);
 
       // Auto-select default or first address
       if (!selectedId && addressList.length > 0) {
-        const defaultAddress = addressList.find((a: Address) => a.isDefault);
+        const defaultAddress = addressList.find((a: AddressUI) => a.isDefault);
         onSelect(defaultAddress?.id || addressList[0].id);
       }
     } catch (error) {
@@ -124,9 +123,9 @@ export function AddressSelector({
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h4 className="font-semibold text-gray-900">
-                      {address.name}
+                      {address.recipientName}
                     </h4>
-                    <p className="text-sm text-gray-600">{address.phone}</p>
+                    <p className="text-sm text-gray-600">{address.recipientPhoneFormatted}</p>
                   </div>
                   {address.isDefault && (
                     <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
@@ -136,12 +135,7 @@ export function AddressSelector({
                 </div>
 
                 <p className="text-sm text-gray-700">
-                  {address.line1}
-                  {address.line2 && `, ${address.line2}`}
-                  <br />
-                  {address.city}, {address.state} {address.pincode}
-                  <br />
-                  {address.country || "India"}
+                  {address.formattedAddress}
                 </p>
 
                 <div className="flex items-center gap-3 mt-3">

@@ -3,11 +3,12 @@
  * Transform backend Auction to UI format
  */
 
-import type { Auction } from "@/schemas/resources/auction.schema";
+import type { Auction, Bid } from "@/schemas/resources/auction.schema";
 import type {
   AuctionUI,
   AuctionCardUI,
   AuctionListItemUI,
+  BidUI,
   PriceDisplay,
   TimeDisplay,
   TimeRemaining,
@@ -457,4 +458,41 @@ export const mapAuctionsToListItems = (
   auctions: Auction[]
 ): AuctionListItemUI[] => {
   return auctions.map(mapAuctionToListItem);
+};
+
+/**
+ * Map bid data to BidUI
+ */
+export const mapBidToUI = (bid: Bid & { id: string }): BidUI => {
+  return {
+    id: bid.id,
+    auctionId: bid.auctionId,
+    auctionName: "",
+    userId: bid.userId,
+    userName: "Bidder",
+    bidAmount: formatPrice(bid.bidAmount),
+    bidTime: {
+      raw: bid.bidTime,
+      formatted: formatDate(bid.bidTime),
+      relative: getRelativeTime(bid.bidTime),
+      timestamp: bid.bidTime.getTime(),
+    },
+    isWinning: bid.isWinning || false,
+    isAutoBid: bid.isAutoBid || false,
+    maxAutoBid: bid.maxAutoBid ? formatPrice(bid.maxAutoBid) : undefined,
+    status: {
+      label: bid.isWinning ? "Winning" : "Outbid",
+      color: bid.isWinning ? "#10B981" : "#9CA3AF",
+      className: bid.isWinning
+        ? "bg-green-100 text-green-800"
+        : "bg-gray-100 text-gray-800",
+    },
+  };
+};
+
+/**
+ * Bulk Mapper: Array of Bids to UI
+ */
+export const mapBidsToUI = (bids: (Bid & { id: string })[]): BidUI[] => {
+  return bids.map(mapBidToUI);
 };

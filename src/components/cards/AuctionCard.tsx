@@ -13,27 +13,10 @@ import Link from "next/link";
 import { Clock, Gavel, Eye, Heart, ExternalLink } from "lucide-react";
 import { formatCurrency, formatTimeRemaining } from "@/lib/formatters";
 import { getTimeRemaining } from "@/lib/validation/auction";
+import type { AuctionUI } from "@/schemas/ui/auction.ui";
 
 export interface AuctionCardProps {
-  auction: {
-    id: string;
-    name: string;
-    slug: string;
-    images: string[];
-    currentBid: number;
-    startingBid: number;
-    bidCount: number;
-    endTime: Date | string;
-    condition?: "new" | "used" | "refurbished";
-    isFeatured?: boolean;
-    shop?: {
-      id: string;
-      name: string;
-      logo?: string;
-      isVerified?: boolean;
-    };
-    viewCount?: number;
-  };
+  auction: AuctionUI;
   onWatch?: (auctionId: string) => void;
   isWatched?: boolean;
   showShopInfo?: boolean;
@@ -47,24 +30,10 @@ export default function AuctionCard({
   showShopInfo = true,
   priority = false,
 }: AuctionCardProps) {
-  // Convert endTime to Date object, handling various formats
-  let endTime: Date | null = null;
-  if (typeof auction.endTime === "string") {
-    endTime = new Date(auction.endTime);
-  } else if (auction.endTime instanceof Date) {
-    endTime = auction.endTime;
-  } else if (
-    auction.endTime &&
-    typeof auction.endTime === "object" &&
-    "toDate" in auction.endTime
-  ) {
-    // Handle Firestore Timestamp
-    endTime = (auction.endTime as any).toDate();
-  }
-
-  const timeRemaining = getTimeRemaining(endTime);
-  const currentBid = auction.currentBid || auction.startingBid;
+  const timeRemaining = auction.timeRemaining;
+  const currentBid = auction.bid.current.raw;
   const hasImage = auction.images && auction.images.length > 0;
+  const primaryImageUrl = hasImage ? auction.images[0].url : "";
 
   const handleWatchClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -76,7 +45,7 @@ export default function AuctionCard({
 
   // Determine urgency level for styling
   const isEndingSoon =
-    timeRemaining.totalMs <= 24 * 60 * 60 * 1000 && !timeRemaining.isEnded;
+    timeRemaining.total <= 24 * 60 * 60 * 1000 && !timeRemaining.isEnded;
   const isEnded = timeRemaining.isEnded;
 
   return (
@@ -88,7 +57,7 @@ export default function AuctionCard({
       <div className="relative aspect-square overflow-hidden rounded-t-lg bg-gray-100">
         {hasImage ? (
           <Image
-            src={auction.images[0]}
+            src={primaryImageUrl}
             alt={auction.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -106,11 +75,6 @@ export default function AuctionCard({
           {auction.isFeatured && (
             <span className="bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded">
               FEATURED
-            </span>
-          )}
-          {auction.condition && (
-            <span className="bg-gray-900 text-white text-xs font-semibold px-2 py-1 rounded uppercase">
-              {auction.condition}
             </span>
           )}
           {isEnded && (
@@ -138,49 +102,10 @@ export default function AuctionCard({
             }
           />
         </button>
-
-        {/* View Count */}
-        {auction.viewCount && auction.viewCount > 0 && (
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
-            <Eye size={12} />
-            <span>{auction.viewCount}</span>
-          </div>
-        )}
       </div>
 
       {/* Content Section */}
       <div className="p-4">
-        {/* Shop Info */}
-        {showShopInfo && auction.shop && (
-          <div className="flex items-center gap-2 mb-2">
-            {auction.shop.logo && (
-              <Image
-                src={auction.shop.logo}
-                alt={auction.shop.name}
-                width={20}
-                height={20}
-                className="rounded-full"
-              />
-            )}
-            <span className="text-xs text-gray-600 truncate">
-              {auction.shop.name}
-            </span>
-            {auction.shop.isVerified && (
-              <svg
-                className="w-4 h-4 text-blue-500 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            )}
-          </div>
-        )}
-
         {/* Auction Name */}
         <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
           {auction.name}
@@ -191,11 +116,11 @@ export default function AuctionCard({
           <div className="text-xs text-gray-500 mb-1">Current Bid</div>
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-green-600">
-              {formatCurrency(currentBid)}
+              {auction.bid.current.formatted}
             </span>
-            {auction.bidCount > 0 && (
+            {auction.bid.count > 0 && (
               <span className="text-xs text-gray-500">
-                ({auction.bidCount} {auction.bidCount === 1 ? "bid" : "bids"})
+                ({auction.bid.countLabel})
               </span>
             )}
           </div>
@@ -212,7 +137,7 @@ export default function AuctionCard({
           }`}
         >
           <Clock size={14} />
-          <span>{isEnded ? "Ended" : formatTimeRemaining(endTime)}</span>
+          <span>{timeRemaining.display}</span>
         </div>
 
         {/* Quick Action Button */}

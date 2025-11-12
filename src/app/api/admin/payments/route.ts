@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "../../lib/auth-helpers";
 import { getFirestoreAdmin } from "../../lib/firebase/admin";
+import { mapPaymentToUI } from "@/schemas/mappers/payment.mapper";
+import type { Payment } from "@/schemas/resources/payment.schema";
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,10 +44,12 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
     const snapshot = await query.limit(limit).offset(offset).get();
 
-    const payments = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const payments = snapshot.docs.map((doc: any) => {
+      const paymentData = { id: doc.id, ...doc.data() } as Payment & {
+        id: string;
+      };
+      return mapPaymentToUI(paymentData);
+    });
 
     return NextResponse.json({
       data: payments,

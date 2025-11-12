@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
 import { COLLECTIONS } from "@/constants/database";
+import { mapHeroSlideToUI } from "@/schemas/mappers/hero-slide.mapper";
+import type { HeroSlide } from "@/schemas/resources/hero-slide.schema";
 
 // GET /api/homepage/hero-slides - Public endpoint for active hero slides
 export async function GET(req: NextRequest) {
@@ -14,20 +16,11 @@ export async function GET(req: NextRequest) {
       .orderBy("position", "asc")
       .get();
 
-    const slides = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        image: data.image_url,
-        title: data.title,
-        subtitle: data.subtitle || "",
-        description: data.description || "",
-        ctaText: data.cta_text || "Shop Now",
-        ctaLink: data.link_url || "/",
-        order: data.position,
-        enabled: data.is_active,
-      };
-    });
+    const slides = snapshot.docs.map((doc) =>
+      mapHeroSlideToUI({ id: doc.id, ...doc.data() } as HeroSlide & {
+        id: string;
+      })
+    );
 
     return NextResponse.json({ slides });
   } catch (error) {

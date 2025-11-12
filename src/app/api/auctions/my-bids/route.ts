@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../../lib/session";
+import { mapBidToUI } from "@/schemas/mappers/auction.mapper";
+import type { Bid } from "@/schemas/resources/auction.schema";
 
 // GET /api/auctions/my-bids - authenticated user's bids
 export async function GET(request: NextRequest) {
@@ -9,7 +11,7 @@ export async function GET(request: NextRequest) {
     if (!user?.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
     }
     const snap = await Collections.bids()
@@ -17,13 +19,15 @@ export async function GET(request: NextRequest) {
       .orderBy("created_at", "desc")
       .limit(50)
       .get();
-    const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const data = snap.docs.map((d) =>
+      mapBidToUI({ id: d.id, ...d.data() } as Bid & { id: string })
+    );
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("My bids error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to load my bids" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

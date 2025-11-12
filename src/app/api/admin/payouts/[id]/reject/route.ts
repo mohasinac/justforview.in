@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "../../../../lib/auth-helpers";
 import { getFirestoreAdmin } from "../../../../lib/firebase/admin";
+import { mapPayoutToUI } from "@/schemas/mappers/payout.mapper";
+import type { Payout } from "@/schemas/resources/payout.schema";
 
 export async function POST(
   request: NextRequest,
@@ -46,17 +48,13 @@ export async function POST(
       updatedAt: new Date(),
     });
 
+    const updatedDoc = await payoutRef.get();
     const updatedPayout = {
-      id: payoutDoc.id,
-      ...payout,
-      status: "rejected",
-      rejectedAt: new Date(),
-      rejectedBy: user.id,
-      rejectionReason: reason,
-      updatedAt: new Date(),
-    };
+      id: updatedDoc.id,
+      ...updatedDoc.data(),
+    } as Payout & { id: string };
 
-    return NextResponse.json(updatedPayout);
+    return NextResponse.json(mapPayoutToUI(updatedPayout));
   } catch (error: any) {
     return handleAuthError(error);
   }

@@ -149,7 +149,10 @@ export async function PATCH(request: NextRequest) {
 
     // Fetch updated user
     const userDoc = await Collections.users().doc(userId).get();
-    const userData = mapUserToUI({ id: userDoc.id, ...userDoc.data() } as User & { id: string });
+    const userData = mapUserToUI({
+      id: userDoc.id,
+      ...userDoc.data(),
+    } as User & { id: string });
 
     return NextResponse.json({
       success: true,

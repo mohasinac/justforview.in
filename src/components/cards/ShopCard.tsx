@@ -4,25 +4,10 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Star, MapPin, BadgeCheck, ShoppingBag } from "lucide-react";
-import { formatCompactNumber } from "@/lib/formatters";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
 
 export interface ShopCardProps {
-  id: string;
-  name: string;
-  slug: string;
-  logo?: string;
-  banner?: string;
-  description?: string;
-  rating?: number;
-  reviewCount?: number;
-  productCount: number;
-  liveProductCount?: number;
-  auctionCount?: number;
-  liveAuctionCount?: number;
-  location?: string;
-  isVerified?: boolean;
-  isFeatured?: boolean;
-  categories?: string[];
+  shop: ShopUI;
   onFollow?: (id: string) => void;
   isFollowing?: boolean;
   showBanner?: boolean;
@@ -30,27 +15,31 @@ export interface ShopCardProps {
 }
 
 export const ShopCard: React.FC<ShopCardProps> = ({
-  id,
-  name,
-  slug,
-  logo,
-  banner,
-  description,
-  rating = 0,
-  reviewCount = 0,
-  productCount,
-  liveProductCount = 0,
-  auctionCount = 0,
-  liveAuctionCount = 0,
-  location,
-  isVerified = false,
-  isFeatured = false,
-  categories = [],
+  shop,
   onFollow,
   isFollowing = false,
   showBanner = true,
   compact = false,
 }) => {
+  const {
+    id,
+    name,
+    slug,
+    logo,
+    banner,
+    description,
+    categories,
+    stats,
+    status,
+    contact,
+  } = shop;
+
+  const rating = stats.rating.rating;
+  const reviewCount = stats.rating.reviewCount;
+  const productCount = stats.productCount;
+  const location = contact.location;
+  const isVerified = status.isVerified;
+  const isFeatured = status.isFeatured;
   const handleFollow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -207,7 +196,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({
                   {rating.toFixed(1)}
                 </span>
                 <span className="text-gray-500">
-                  ({formatCompactNumber(reviewCount)} reviews)
+                  ({stats.rating.reviewCountLabel} reviews)
                 </span>
               </div>
             </div>
@@ -217,29 +206,15 @@ export const ShopCard: React.FC<ShopCardProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center py-2 bg-blue-50 rounded-lg">
               <div className="text-lg font-bold text-blue-600">
-                {formatCompactNumber(productCount)}
+                {stats.productCountLabel}
               </div>
-              <div className="text-xs text-gray-600">
-                Products
-                {liveProductCount > 0 && (
-                  <span className="ml-1 text-green-600">
-                    ({liveProductCount} live)
-                  </span>
-                )}
-              </div>
+              <div className="text-xs text-gray-600">Products</div>
             </div>
             <div className="text-center py-2 bg-purple-50 rounded-lg">
               <div className="text-lg font-bold text-purple-600">
-                {formatCompactNumber(auctionCount)}
+                {stats.followerCountLabel}
               </div>
-              <div className="text-xs text-gray-600">
-                Auctions
-                {liveAuctionCount > 0 && (
-                  <span className="ml-1 text-red-600">
-                    ({liveAuctionCount} live)
-                  </span>
-                )}
-              </div>
+              <div className="text-xs text-gray-600">Followers</div>
             </div>
           </div>
 

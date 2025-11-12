@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
 import { COLLECTIONS } from "@/constants/database";
+import { mapHeroSlideToUI } from "@/schemas/mappers/hero-slide.mapper";
+import type { HeroSlide } from "@/schemas/resources/hero-slide.schema";
 
 // GET /admin/hero-slides - List hero slides
 export async function GET(req: NextRequest) {
@@ -13,10 +15,11 @@ export async function GET(req: NextRequest) {
       .orderBy("position", "asc")
       .get();
 
-    const slides = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const slides = snapshot.docs.map((doc) =>
+      mapHeroSlideToUI({ id: doc.id, ...doc.data() } as HeroSlide & {
+        id: string;
+      })
+    );
 
     return NextResponse.json({ slides });
   } catch (error) {
@@ -68,14 +71,13 @@ export async function POST(req: NextRequest) {
     };
 
     const docRef = await db.collection(COLLECTIONS.HERO_SLIDES).add(slideData);
+    const createdDoc = await docRef.get();
+    const createdSlide = {
+      id: createdDoc.id,
+      ...createdDoc.data(),
+    } as HeroSlide & { id: string };
 
-    return NextResponse.json(
-      {
-        id: docRef.id,
-        ...slideData,
-      },
-      { status: 201 }
-    );
+    return NextResponse.json(mapHeroSlideToUI(createdSlide), { status: 201 });
   } catch (error) {
     console.error("Error creating hero slide:", error);
     return NextResponse.json(
