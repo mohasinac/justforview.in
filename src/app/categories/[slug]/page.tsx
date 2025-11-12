@@ -21,7 +21,8 @@ import { categoriesService } from "@/services/categories.service";
 import { productsService } from "@/services/products.service";
 import { useCart } from "@/hooks/useCart";
 import { useIsMobile } from "@/hooks/useMobile";
-import type { Category, Product } from "@/types";
+import type { CategoryUI } from "@/schemas/ui/category.ui";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -35,13 +36,13 @@ export default function CategoryDetailPage({ params }: PageProps) {
   const subcategoriesScrollRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  const [category, setCategory] = useState<Category | null>(null);
-  const [breadcrumb, setBreadcrumb] = useState<Category[]>([]);
-  const [subcategories, setSubcategories] = useState<Category[]>([]);
+  const [category, setCategory] = useState<CategoryUI | null>(null);
+  const [breadcrumb, setBreadcrumb] = useState<CategoryUI[]>([]);
+  const [subcategories, setSubcategories] = useState<CategoryUI[]>([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState<
-    Category[]
+    CategoryUI[]
   >([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductUI[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(false);
@@ -79,15 +80,13 @@ export default function CategoryDetailPage({ params }: PageProps) {
       filtered = filtered.filter((cat) =>
         cat.name.toLowerCase().includes(query)
       );
-    }
-
-    filtered.sort((a, b) => {
-      if (subcategorySort === "alphabetical") {
-        return a.name.localeCompare(b.name);
-      } else {
-        return b.productCount - a.productCount;
-      }
-    });
+    }      filtered.sort((a, b) => {
+        if (subcategorySort === "alphabetical") {
+          return a.name.localeCompare(b.name);
+        } else {
+          return b.stats.productCount - a.stats.productCount;
+        }
+      });
 
     setFilteredSubcategories(filtered);
   }, [subcategories, subcategorySearch, subcategorySort]);
@@ -104,7 +103,7 @@ export default function CategoryDetailPage({ params }: PageProps) {
       if (pathParam) {
         // Use the path from URL
         const pathSlugs = pathParam.split(",");
-        const pathCategories: Category[] = [];
+        const pathCategories: CategoryUI[] = [];
 
         for (const pathSlug of pathSlugs) {
           try {
@@ -190,10 +189,10 @@ export default function CategoryDetailPage({ params }: PageProps) {
         }
         productDetails = {
           name: product.name,
-          price: product.price,
-          image: product.images?.[0] || "",
-          shopId: product.shopId,
-          shopName: product.shopId,
+          price: product.price.amount,
+          image: product.images?.[0]?.url || "",
+          shopId: product.shop?.id || "",
+          shopName: product.shop?.name || "",
         };
       }
 
@@ -266,10 +265,10 @@ export default function CategoryDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Banner Section */}
-      {category.banner && (
+      {category.media.banner && (
         <div className="relative h-64 w-full bg-gradient-to-r from-blue-500 to-purple-600 overflow-hidden">
           <img
-            src={category.banner}
+            src={category.media.banner}
             alt={category.name}
             className="w-full h-full object-cover"
           />
@@ -279,20 +278,20 @@ export default function CategoryDetailPage({ params }: PageProps) {
 
       <div className="max-w-7xl mx-auto px-4">
         {/* Category Header */}
-        <div className={`relative ${category.banner ? "-mt-16" : "pt-8"} mb-8`}>
+        <div className={`relative ${category.media.banner ? "-mt-16" : "pt-8"} mb-8`}>
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center gap-6">
               {/* Profile Image */}
-              {category.image && (
+              {category.media.hasImage && category.media.image && (
                 <div
                   className={`w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 ${
-                    category.banner
+                    category.media.banner
                       ? "-mt-12 border-4 border-white shadow-lg"
                       : ""
                   }`}
                 >
                   <img
-                    src={category.image}
+                    src={category.media.image}
                     alt={category.name}
                     className="w-full h-full object-cover"
                   />
@@ -332,15 +331,13 @@ export default function CategoryDetailPage({ params }: PageProps) {
                   {category.name}
                 </h1>
                 {category.description && (
-                  <p className="text-gray-600">
-                    {category.description.replace(/<[^>]*>/g, "")}
-                  </p>
+                  <p className="text-gray-600">{category.description}</p>
                 )}
               </div>
 
               <div className="text-right">
                 <div className="text-3xl font-bold text-blue-600">
-                  {category.productCount}
+                  {category.stats.productCount}
                 </div>
                 <div className="text-sm text-gray-500">Products</div>
               </div>
@@ -509,25 +506,7 @@ export default function CategoryDetailPage({ params }: PageProps) {
                   {viewMode === "grid" ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {products.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          id={product.id}
-                          name={product.name}
-                          slug={product.slug}
-                          price={product.price}
-                          originalPrice={product.originalPrice}
-                          image={product.images?.[0] || ""}
-                          rating={product.rating}
-                          reviewCount={product.reviewCount}
-                          shopName={product.shopId}
-                          shopSlug={product.shopId}
-                          shopId={product.shopId}
-                          inStock={product.stockCount > 0}
-                          isFeatured={product.isFeatured}
-                          condition={product.condition}
-                          onAddToCart={handleAddToCart}
-                          showShopName={true}
-                        />
+                        <ProductCard key={product.id} product={product} />
                       ))}
                     </div>
                   ) : (
@@ -558,7 +537,7 @@ export default function CategoryDetailPage({ params }: PageProps) {
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
                                   <img
-                                    src={product.images?.[0] || ""}
+                                    src={product.images[0]?.url || ""}
                                     alt={product.name}
                                     className="w-12 h-12 rounded object-cover"
                                   />
@@ -567,44 +546,35 @@ export default function CategoryDetailPage({ params }: PageProps) {
                                       {product.name}
                                     </div>
                                     <div className="text-sm text-gray-500">
-                                      {product.condition}
+                                      {product.condition.label}
                                     </div>
                                   </div>
                                 </div>
                               </td>
                               <td className="px-6 py-4">
                                 <div className="font-medium">
-                                  ₹{product.price.toLocaleString()}
+                                  {product.price.formatted}
                                 </div>
-                                {product.originalPrice &&
-                                  product.originalPrice > product.price && (
-                                    <div className="text-sm text-gray-500 line-through">
-                                      ₹{product.originalPrice.toLocaleString()}
-                                    </div>
-                                  )}
+                                {product.discount && (
+                                  <div className="text-sm text-gray-500">
+                                    {product.discount.label}
+                                  </div>
+                                )}
                               </td>
                               <td className="px-6 py-4">
-                                <span
-                                  className={`px-2 py-1 text-xs rounded ${
-                                    product.stockCount > 0
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-red-100 text-red-700"
-                                  }`}
-                                >
-                                  {product.stockCount > 0
-                                    ? `${product.stockCount} in stock`
-                                    : "Out of stock"}
+                                <span className={product.stock.className}>
+                                  {product.stock.label}
                                 </span>
                               </td>
                               <td className="px-6 py-4">
-                                {product.rating > 0 && (
+                                {product.rating.average > 0 && (
                                   <div className="flex items-center gap-1">
                                     <span className="text-yellow-500">★</span>
                                     <span className="font-medium">
-                                      {product.rating.toFixed(1)}
+                                      {product.rating.formatted}
                                     </span>
                                     <span className="text-sm text-gray-500">
-                                      ({product.reviewCount})
+                                      ({product.rating.reviewCount})
                                     </span>
                                   </div>
                                 )}
@@ -618,7 +588,7 @@ export default function CategoryDetailPage({ params }: PageProps) {
                                 >
                                   View
                                 </button>
-                                {product.stockCount > 0 && (
+                                {product.stock.inStock && (
                                   <button
                                     onClick={() => handleAddToCart(product.id)}
                                     className="text-blue-600 hover:underline text-sm"
@@ -708,10 +678,10 @@ export default function CategoryDetailPage({ params }: PageProps) {
                         }?path=${buildCategoryPath(subcat.slug)}`}
                         className="flex-shrink-0 w-40 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all p-3 group"
                       >
-                        {subcat.image && (
+                        {subcat.media.hasImage && subcat.media.image && (
                           <div className="w-full h-24 mb-2 rounded-lg overflow-hidden bg-white">
                             <img
-                              src={subcat.image}
+                              src={subcat.media.image}
                               alt={subcat.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             />
@@ -722,7 +692,7 @@ export default function CategoryDetailPage({ params }: PageProps) {
                         </h3>
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Tag className="w-3 h-3" />
-                          <span>{subcat.productCount} items</span>
+                          <span>{subcat.stats.productCount} items</span>
                         </div>
                         <div className="mt-2 flex items-center justify-end">
                           <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />

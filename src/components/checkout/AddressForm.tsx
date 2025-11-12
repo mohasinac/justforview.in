@@ -6,17 +6,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { X, Loader2 } from "lucide-react";
 import { addressService } from "@/services/address.service";
-import { Address } from "@/types";
+import type { AddressUI } from "@/schemas/ui/address.ui";
 
 const AddressSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().min(10, "Phone must be at least 10 digits"),
+  recipientName: z.string().min(2, "Name must be at least 2 characters"),
+  recipientPhone: z.string().min(10, "Phone must be at least 10 digits"),
   line1: z.string().min(5, "Address line 1 is required"),
   line2: z.string().optional(),
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State is required"),
   pincode: z.string().regex(/^\d{6}$/, "Pincode must be 6 digits"),
   country: z.string().min(2, "Country is required"),
+  landmark: z.string().optional(),
+  label: z.enum(["home", "work", "other"]),
   isDefault: z.boolean(),
 });
 
@@ -57,14 +59,16 @@ export function AddressForm({ addressId, onClose }: AddressFormProps) {
       setFetchLoading(true);
       const address = await addressService.getById(addressId);
 
-      setValue("name", address.name);
-      setValue("phone", address.phone);
+      setValue("recipientName", address.recipientName);
+      setValue("recipientPhone", address.recipientPhone);
       setValue("line1", address.line1);
       setValue("line2", address.line2 || "");
       setValue("city", address.city);
       setValue("state", address.state);
       setValue("pincode", address.pincode);
       setValue("country", address.country);
+      setValue("landmark", address.landmark || "");
+      setValue("label", address.label.value);
       setValue("isDefault", address.isDefault);
     } catch (error) {
       console.error("Failed to load address:", error);
@@ -119,14 +123,14 @@ export function AddressForm({ addressId, onClose }: AddressFormProps) {
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...register("name")}
+                  {...register("recipientName")}
                   type="text"
                   className="input"
                   placeholder="John Doe"
                 />
-                {errors.name && (
+                {errors.recipientName && (
                   <p className="text-sm text-red-600 mt-1">
-                    {errors.name.message}
+                    {errors.recipientName.message}
                   </p>
                 )}
               </div>
@@ -136,14 +140,14 @@ export function AddressForm({ addressId, onClose }: AddressFormProps) {
                   Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...register("phone")}
+                  {...register("recipientPhone")}
                   type="tel"
                   className="input"
                   placeholder="9876543210"
                 />
-                {errors.phone && (
+                {errors.recipientPhone && (
                   <p className="text-sm text-red-600 mt-1">
-                    {errors.phone.message}
+                    {errors.recipientPhone.message}
                   </p>
                 )}
               </div>

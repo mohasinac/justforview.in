@@ -18,10 +18,12 @@ Migration to a comprehensive resource schema system to eliminate data inconsiste
 6. **Resource Documentation** - AI-agent readable feature guides
 
 **Total Tasks**: 299
-**Completed**: 165 (55%)
-**In Progress**: 0
-**Remaining**: 134
-│ │ ├── product.schema.ts
+**Completed**: 176 (59%)
+**In Progress**: 5
+**Remaining**: 118
+
+---
+
 │ │ ├── auction.schema.ts
 │ │ ├── category.schema.ts
 │ │ ├── shop.schema.ts
@@ -533,17 +535,18 @@ docs/
 **Product Components**:
 
 - [x] `src/components/cards/ProductCard.tsx`
-- [ ] `src/components/product/ProductDetails.tsx`
-- [ ] `src/components/product/ProductGrid.tsx`
+- [x] `src/components/product/ProductInfo.tsx`
+- [x] `src/components/product/ProductGallery.tsx`
+- [x] `src/components/product/SimilarProducts.tsx`
 - [ ] `src/components/product/ProductForm.tsx`
 - [ ] All other product components
 
 **Auction Components**:
 
 - [x] `src/components/cards/AuctionCard.tsx`
-- [ ] `src/components/auction/AuctionDetails.tsx`
-- [ ] `src/components/auction/AuctionGrid.tsx`
-- [ ] `src/components/auction/BidForm.tsx`
+- [x] `src/components/auction/AutoBidSetup.tsx`
+- [x] `src/components/auction/LiveBidHistory.tsx`
+- [x] `src/components/auction/LiveCountdown.tsx`
 - [ ] All other auction components
 
 **Category Components**:
@@ -562,21 +565,23 @@ docs/
 
 **Order Components**:
 
-- [ ] `src/components/order/OrderCard.tsx`
-- [ ] `src/components/order/OrderList.tsx`
+- [x] `src/components/order/OrderCard.tsx`
+- [x] `src/components/order/OrderList.tsx`
 - [ ] `src/components/order/OrderDetails.tsx`
 - [ ] All other order components
 
 **Cart & Checkout Components**:
 
-- [ ] `src/components/cart/CartItem.tsx`
-- [ ] `src/components/cart/CartSummary.tsx`
+- [x] `src/components/cart/CartItem.tsx`
+- [x] `src/components/cart/CartSummary.tsx`
 - [x] `src/components/checkout/AddressSelector.tsx`
+- [x] `src/components/checkout/AddressForm.tsx` (partial - needs service layer fix)
 - [ ] `src/components/checkout/CheckoutForm.tsx`
 - [ ] All other cart/checkout components
 
 ### 4.2 Create Component Type Files
 
+- [x] `src/schemas/ui/cart.ui.ts` - Cart UI schema
 - [ ] `src/types/components/cards.types.ts` - Card component props
 - [ ] `src/types/components/forms.types.ts` - Form component props
 - [ ] `src/types/components/modals.types.ts` - Modal component props
@@ -591,9 +596,9 @@ docs/
 
 **Product Pages**:
 
-- [ ] `src/app/products/page.tsx`
-- [ ] `src/app/products/[slug]/page.tsx`
-- [ ] `src/app/seller/products/page.tsx`
+- [x] `src/app/products/page.tsx`
+- [x] `src/app/products/[slug]/page.tsx`
+- [x] `src/app/seller/products/page.tsx`
 - [ ] `src/app/seller/products/[id]/page.tsx`
 - [ ] `src/app/admin/products/page.tsx`
 
@@ -606,27 +611,27 @@ docs/
 
 **Category Pages**:
 
-- [ ] `src/app/categories/page.tsx`
+- [x] `src/app/categories/page.tsx`
 - [ ] `src/app/categories/[slug]/page.tsx`
 - [ ] `src/app/admin/categories/page.tsx`
 
 **Shop Pages**:
 
-- [ ] `src/app/shops/page.tsx`
+- [x] `src/app/shops/page.tsx`
 - [ ] `src/app/shops/[slug]/page.tsx`
 - [ ] `src/app/seller/shop/page.tsx`
 - [ ] `src/app/admin/shops/page.tsx`
 
 **Order Pages**:
 
-- [ ] `src/app/user/orders/page.tsx`
+- [x] `src/app/user/orders/page.tsx`
 - [ ] `src/app/user/orders/[id]/page.tsx`
 - [ ] `src/app/seller/orders/page.tsx`
 - [ ] `src/app/admin/orders/page.tsx`
 
 **Checkout Pages**:
 
-- [ ] `src/app/cart/page.tsx`
+- [x] `src/app/cart/page.tsx`
 - [ ] `src/app/checkout/page.tsx`
 
 ---
@@ -847,9 +852,9 @@ docs/
 ## Progress Tracking
 
 **Total Tasks**: 299
-**Completed**: 166 (56%)
-**In Progress**: 0
-**Remaining**: 133
+**Completed**: 189 (63%)
+**In Progress**: 3
+**Remaining**: 107
 
 **Estimated Time**: 2-3 weeks (working incrementally)
 

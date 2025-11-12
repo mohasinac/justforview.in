@@ -11,7 +11,8 @@ import { ProductReviews } from "@/components/product/ProductReviews";
 import { SimilarProducts } from "@/components/product/SimilarProducts";
 import { productsService } from "@/services/products.service";
 import { shopsService } from "@/services/shops.service";
-import type { Product, Shop } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
 
 interface ProductPageProps {
   params: Promise<{
@@ -23,11 +24,11 @@ export default function ProductPage({ params }: ProductPageProps) {
   const router = useRouter();
   const { slug } = use(params);
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [shop, setShop] = useState<Shop | null>(null);
-  const [variants, setVariants] = useState<Product[]>([]);
-  const [shopProducts, setShopProducts] = useState<Product[]>([]);
-  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
+  const [product, setProduct] = useState<ProductUI | null>(null);
+  const [shop, setShop] = useState<ShopUI | null>(null);
+  const [variants, setVariants] = useState<ProductUI[]>([]);
+  const [shopProducts, setShopProducts] = useState<ProductUI[]>([]);
+  const [similarProducts, setSimilarProducts] = useState<ProductUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [variantsLoading, setVariantsLoading] = useState(false);
   const [shopProductsLoading, setShopProductsLoading] = useState(false);
@@ -102,7 +103,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   // Prepare media for gallery
   const media = [
-    ...product.images.map((url) => ({ url, type: "image" as const })),
+    ...product.images.map((img) => ({ url: img.url, type: "image" as const })),
     ...(product.videos || []).map((url) => ({ url, type: "video" as const })),
   ];
 
@@ -130,28 +131,14 @@ export default function ProductPage({ params }: ProductPageProps) {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Gallery */}
-                <ProductGallery media={media} productName={product.name} />
+                <ProductGallery
+                  images={product.images}
+                  videos={product.videos}
+                  productName={product.name}
+                />
 
                 {/* Info & Actions */}
-                <ProductInfo
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    slug: product.slug,
-                    actualPrice: product.costPrice,
-                    originalPrice: product.originalPrice,
-                    salePrice: product.price,
-                    stock: product.stockCount,
-                    rating: product.rating,
-                    reviewCount: product.reviewCount,
-                    shop_id: product.shopId,
-                    shop_name: shop?.name || product.shopId,
-                    returnable: product.isReturnable,
-                    condition: product.condition,
-                    status: product.status,
-                    image: product.images?.[0] || "",
-                  }}
-                />
+                <ProductInfo product={product} />
               </div>
             </div>
 
@@ -182,7 +169,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                     >
                       <div className="aspect-square relative">
                         <img
-                          src={variant.images?.[0] || ""}
+                          src={variant.images[0]?.url || ""}
                           alt={variant.name}
                           className="w-full h-full object-cover"
                         />
@@ -192,14 +179,13 @@ export default function ProductPage({ params }: ProductPageProps) {
                           {variant.name}
                         </h3>
                         <div className="text-lg font-bold text-gray-900">
-                          ₹{variant.price.toLocaleString()}
+                          {variant.price.formatted}
                         </div>
-                        {variant.originalPrice &&
-                          variant.originalPrice > variant.price && (
-                            <div className="text-xs text-gray-500 line-through">
-                              ₹{variant.originalPrice.toLocaleString()}
-                            </div>
-                          )}
+                        {variant.discount && (
+                          <div className="text-xs text-gray-500 line-through">
+                            {variant.originalPrice?.formatted}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -235,7 +221,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                     >
                       <div className="aspect-square relative">
                         <img
-                          src={item.images?.[0] || ""}
+                          src={item.images[0]?.url || ""}
                           alt={item.name}
                           className="w-full h-full object-cover"
                         />
@@ -245,14 +231,13 @@ export default function ProductPage({ params }: ProductPageProps) {
                           {item.name}
                         </h3>
                         <div className="text-lg font-bold text-gray-900">
-                          ₹{item.price.toLocaleString()}
+                          {item.price.formatted}
                         </div>
-                        {item.originalPrice &&
-                          item.originalPrice > item.price && (
-                            <div className="text-xs text-gray-500 line-through">
-                              ₹{item.originalPrice.toLocaleString()}
-                            </div>
-                          )}
+                        {item.discount && (
+                          <div className="text-xs text-gray-500 line-through">
+                            {item.originalPrice?.formatted}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -299,7 +284,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                       <h4 className="font-semibold text-gray-900">
                         {shop.name}
                       </h4>
-                      {shop.isVerified && (
+                      {shop.status.isVerified && (
                         <span className="inline-flex items-center gap-1 text-xs text-green-600 mt-1">
                           ✓ Verified Seller
                         </span>
@@ -307,14 +292,14 @@ export default function ProductPage({ params }: ProductPageProps) {
                     </div>
 
                     {/* Rating */}
-                    {shop.rating > 0 && (
+                    {shop.stats.rating.hasReviews && (
                       <div className="flex items-center justify-center gap-2 text-sm">
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <Star
                               key={star}
                               className={`w-4 h-4 ${
-                                star <= Math.round(shop.rating)
+                                star <= Math.round(shop.stats.rating.rating)
                                   ? "fill-yellow-400 text-yellow-400"
                                   : "text-gray-300"
                               }`}
@@ -322,7 +307,8 @@ export default function ProductPage({ params }: ProductPageProps) {
                           ))}
                         </div>
                         <span className="text-gray-600">
-                          {shop.rating.toFixed(1)} ({shop.reviewCount || 0})
+                          {shop.stats.rating.ratingFormatted} (
+                          {shop.stats.rating.reviewCountLabel})
                         </span>
                       </div>
                     )}
@@ -331,7 +317,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                     <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200">
                       <div className="text-center">
                         <p className="text-2xl font-bold text-gray-900">
-                          {shop.productCount || 0}
+                          {shop.stats.productCount || 0}
                         </p>
                         <p className="text-xs text-gray-600">Products</p>
                       </div>
@@ -352,9 +338,9 @@ export default function ProductPage({ params }: ProductPageProps) {
                     </Link>
 
                     {/* Contact Seller Button */}
-                    {shop.email && (
+                    {shop.contact.email && (
                       <a
-                        href={`mailto:${shop.email}`}
+                        href={`mailto:${shop.contact.email}`}
                         className="block w-full text-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         Contact Seller
@@ -372,8 +358,8 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <div className="space-y-2 text-gray-600">
                   <p>• Free delivery on orders above ₹5,000</p>
                   <p>• Standard delivery: 5-7 business days</p>
-                  {product.isReturnable && (
-                    <p>• 7-day return policy available</p>
+                  {product.returnPolicy.isReturnable && (
+                    <p>• {product.returnPolicy.label}</p>
                   )}
                   <p>• Cash on delivery available</p>
                 </div>

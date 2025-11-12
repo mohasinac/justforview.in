@@ -4,18 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ordersService } from "@/services/orders.service";
 import { DataTable } from "@/components/common/DataTable";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { EmptyState } from "@/components/common/EmptyState";
-import type { Order } from "@/types";
+import type { OrderUI } from "@/schemas/ui/order.ui";
 
 export const dynamic = "force-dynamic";
 
 export default function OrdersPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({});
 
@@ -28,8 +27,10 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const data = await ordersService.list(filters);
-      setOrders(data.data || []);
+      // TODO: Implement ordersService.list when service is ready
+      // const data = await ordersService.list(filters);
+      // setOrders(data.data || []);
+      setOrders([]);
     } catch (error) {
       console.error("Failed to load orders:", error);
     } finally {
@@ -39,15 +40,15 @@ export default function OrdersPage() {
 
   const columns = [
     {
-      key: "orderId",
+      key: "orderNumber",
       label: "Order ID",
       sortable: true,
-      render: (order: any) => (
+      render: (_: any, order: OrderUI) => (
         <button
-          onClick={() => router.push(`/user/orders/${order.id}`)}
+          onClick={() => router.push(order.url)}
           className="font-medium text-primary hover:underline"
         >
-          #{order.orderId}
+          #{order.orderNumber}
         </button>
       ),
     },
@@ -55,29 +56,32 @@ export default function OrdersPage() {
       key: "createdAt",
       label: "Date",
       sortable: true,
-      render: (order: any) =>
-        new Date(order.createdAt).toLocaleDateString("en-IN"),
+      render: (_: any, order: OrderUI) => order.createdAtFormatted,
     },
     {
-      key: "shopName",
-      label: "Shop",
-      render: (order: any) => order.shopName || "N/A",
+      key: "itemCount",
+      label: "Items",
+      render: (_: any, order: OrderUI) => `${order.itemCount} items`,
     },
     {
       key: "total",
       label: "Total",
       sortable: true,
-      render: (order: any) => `₹${order.total.toLocaleString()}`,
+      render: (_: any, order: OrderUI) => order.pricing.total.formatted,
     },
     {
       key: "status",
       label: "Status",
-      render: (order: any) => <StatusBadge status={order.status} />,
+      render: (_: any, order: OrderUI) => (
+        <StatusBadge status={order.status.value} />
+      ),
     },
     {
       key: "paymentStatus",
       label: "Payment",
-      render: (order: any) => <StatusBadge status={order.paymentStatus} />,
+      render: (_: any, order: OrderUI) => (
+        <StatusBadge status={order.paymentStatus.value} />
+      ),
     },
   ];
 
@@ -114,9 +118,7 @@ export default function OrdersPage() {
               columns={columns}
               keyExtractor={(order) => order.id}
               isLoading={loading}
-              onRowClick={(order: any) =>
-                router.push(`/user/orders/${order.id}`)
-              }
+              onRowClick={(order: OrderUI) => router.push(order.url)}
             />
           )}
         </div>

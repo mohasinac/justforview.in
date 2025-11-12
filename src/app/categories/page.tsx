@@ -5,10 +5,10 @@ import Link from "next/link";
 import { ChevronRight, Tag, Loader2, Search, List } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { categoriesService } from "@/services/categories.service";
-import type { Category } from "@/types";
+import type { CategoryUI } from "@/schemas/ui/category.ui";
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<
@@ -43,7 +43,7 @@ export default function CategoriesPage() {
       filtered = filtered.filter(
         (cat) =>
           cat.name.toLowerCase().includes(query) ||
-          cat.description?.toLowerCase().includes(query),
+          cat.description.toLowerCase().includes(query)
       );
     }
 
@@ -54,14 +54,14 @@ export default function CategoriesPage() {
           return a.name.localeCompare(b.name);
         case "productCount":
           // Parents first (they have children's product counts), then by count
-          if (a.level !== b.level) {
-            return a.level - b.level;
+          if (a.hierarchy.level !== b.hierarchy.level) {
+            return a.hierarchy.level - b.hierarchy.level;
           }
-          return b.productCount - a.productCount;
+          return b.stats.productCount - a.stats.productCount;
         case "level":
           // Sort by level, then alphabetically within level
-          if (a.level !== b.level) {
-            return a.level - b.level;
+          if (a.hierarchy.level !== b.hierarchy.level) {
+            return a.hierarchy.level - b.hierarchy.level;
           }
           return a.name.localeCompare(b.name);
         default:
@@ -151,10 +151,10 @@ export default function CategoriesPage() {
               className="bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all overflow-hidden group"
             >
               {/* Category Image */}
-              {category.image && (
+              {category.media.hasImage && category.media.image && (
                 <div className="w-full h-48 bg-gray-100 overflow-hidden">
                   <img
-                    src={category.image}
+                    src={category.media.image}
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
@@ -170,7 +170,7 @@ export default function CategoriesPage() {
                 <div className="flex items-center justify-between text-sm mb-2">
                   <div className="flex items-center gap-1 text-gray-500">
                     <Tag className="w-3 h-3" />
-                    <span>{category.productCount} products</span>
+                    <span>{category.stats.productCount} products</span>
                   </div>
                   {category.isFeatured && (
                     <span className="px-2 py-0.5 bg-blue-100 text-blue-600 text-xs font-medium rounded">
@@ -180,10 +180,10 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* Show level indicator */}
-                {category.level > 0 && (
+                {category.hierarchy.level > 0 && (
                   <div className="flex items-center gap-1 text-xs text-gray-400">
                     <List className="w-3 h-3" />
-                    <span>Level {category.level}</span>
+                    <span>Level {category.hierarchy.level}</span>
                   </div>
                 )}
               </div>

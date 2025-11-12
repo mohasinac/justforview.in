@@ -15,25 +15,10 @@ import {
   Plus,
 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 interface ProductInfoProps {
-  product: {
-    id: string;
-    name: string;
-    slug: string;
-    actualPrice?: number;
-    originalPrice?: number;
-    salePrice: number;
-    stock: number;
-    rating?: number;
-    reviewCount?: number;
-    shop_id: string;
-    shop_name: string;
-    returnable?: boolean;
-    condition?: "new" | "refurbished" | "used";
-    status: string;
-    image?: string;
-  };
+  product: ProductUI;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
@@ -42,16 +27,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const discountPercent =
-    product.originalPrice && product.originalPrice > product.salePrice
-      ? Math.round(
-          ((product.originalPrice - product.salePrice) /
-            product.originalPrice) *
-            100,
-        )
-      : 0;
-
-  const inStock = product.stock > 0 && product.status === "active";
+  const discountPercent = product.discount?.percentage || 0;
+  const inStock = product.stock.inStock && product.status.value === "published";
 
   const handleAddToCart = async () => {
     if (!inStock) return;
@@ -59,10 +36,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
     try {
       await addItem(product.id, quantity, undefined, {
         name: product.name,
-        price: product.salePrice,
-        image: product.image || "",
-        shopId: product.shop_id,
-        shopName: product.shop_name,
+        price: product.price.amount,
+        image: product.primaryImage.url,
+        shopId: product.shopId,
+        shopName: product.shop?.name || "",
       });
       alert("Added to cart!");
     } catch (error) {
@@ -87,7 +64,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
         console.error("Share failed:", error);
       }
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert("Link copied to clipboard!");
     }
@@ -101,31 +77,29 @@ export function ProductInfo({ product }: ProductInfoProps) {
           {product.name}
         </h1>
         <div className="flex items-center gap-4 text-sm">
-          {product.rating && (
+          {product.rating.hasReviews && (
             <div className="flex items-center gap-1">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
                     className={`w-4 h-4 ${
-                      star <= Math.round(product.rating!)
+                      star <= Math.round(product.rating.average)
                         ? "fill-yellow-400 text-yellow-400"
                         : "text-gray-300"
                     }`}
                   />
                 ))}
               </div>
-              <span className="font-medium">{product.rating.toFixed(1)}</span>
+              <span className="font-medium">{product.rating.formatted}</span>
               <span className="text-gray-500">
-                ({product.reviewCount || 0} reviews)
+                ({product.rating.reviewCountFormatted})
               </span>
             </div>
           )}
-          {product.condition && (
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium uppercase">
-              {product.condition}
-            </span>
-          )}
+          <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium uppercase">
+            {product.condition.label}
+          </span>
         </div>
       </div>
 
@@ -133,19 +107,18 @@ export function ProductInfo({ product }: ProductInfoProps) {
       <div className="border-t border-b py-4">
         <div className="flex items-baseline gap-3">
           <span className="text-4xl font-bold text-primary">
-            ₹{product.salePrice.toLocaleString()}
+            {product.price.formatted}
           </span>
-          {product.originalPrice &&
-            product.originalPrice > product.salePrice && (
-              <>
-                <span className="text-xl text-gray-400 line-through">
-                  ₹{product.originalPrice.toLocaleString()}
-                </span>
-                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm font-semibold">
-                  {discountPercent}% OFF
-                </span>
-              </>
-            )}
+          {product.discount && (
+            <>
+              <span className="text-xl text-gray-400 line-through">
+                {product.originalPrice?.formatted}
+              </span>
+              <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm font-semibold">
+                {product.discount.label}
+              </span>
+            </>
+          )}
         </div>
         <p className="text-sm text-gray-500 mt-1">Inclusive of all taxes</p>
       </div>
@@ -155,12 +128,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
         {inStock ? (
           <div className="flex items-center gap-2 text-green-600">
             <Check className="w-5 h-5" />
-            <span className="font-medium">
-              In Stock ({product.stock} available)
-            </span>
+            <span className="font-medium">{product.stock.label}</span>
           </div>
         ) : (
-          <div className="text-red-600 font-medium">Out of Stock</div>
+          <div className="text-red-600 font-medium">{product.stock.label}</div>
         )}
       </div>
 
@@ -181,22 +152,24 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <input
               type="number"
               min="1"
-              max={product.stock}
+              max={product.stock.count}
               value={quantity}
               onChange={(e) =>
                 setQuantity(
                   Math.min(
                     Math.max(1, parseInt(e.target.value) || 1),
-                    product.stock,
-                  ),
+                    product.stock.count
+                  )
                 )
               }
               className="w-20 text-center border border-gray-300 rounded-lg py-2"
             />
             <button
-              onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+              onClick={() =>
+                setQuantity(Math.min(product.stock.count, quantity + 1))
+              }
               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              disabled={quantity >= product.stock}
+              disabled={quantity >= product.stock.count}
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -251,10 +224,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <Store className="w-5 h-5 text-gray-400" />
           <span className="text-sm text-gray-600">Sold by</span>
           <button
-            onClick={() => router.push(`/shops/${product.shop_id}`)}
+            onClick={() => router.push(`/shops/${product.shopId}`)}
             className="text-primary hover:underline font-medium"
           >
-            {product.shop_name}
+            {product.shop?.name || "Shop"}
           </button>
         </div>
 
@@ -262,12 +235,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <Truck className="w-4 h-4" />
-            <span>Free shipping on orders above ₹5,000</span>
+            <span>{product.shipping.label}</span>
           </div>
-          {product.returnable && (
+          {product.returnPolicy.isReturnable && (
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
-              <span>7-day return policy</span>
+              <span>{product.returnPolicy.label}</span>
             </div>
           )}
           <div className="flex items-center gap-2">

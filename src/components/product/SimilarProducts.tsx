@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { ProductCard } from "@/components/cards/ProductCard";
 import { CardGrid } from "@/components/cards/CardGrid";
-import { EmptyState } from "@/components/common/EmptyState";
-import { productsService } from "@/services/products.service";
-import type { Product } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 interface SimilarProductsProps {
   productId: string;
@@ -18,7 +16,7 @@ export function SimilarProducts({
   categoryId,
   currentShopId,
 }: SimilarProductsProps) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductUI[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,22 +26,21 @@ export function SimilarProducts({
   const loadSimilarProducts = async () => {
     try {
       setLoading(true);
-      // Fetch products from same category, exclude current product
-      const data = await productsService.list({
-        categoryId,
-        status: "active" as any,
-        limit: 12,
-      });
+      // TODO: Implement products API call when service is ready
+      // const data = await productsService.list({
+      //   categoryId,
+      //   status: "published" as any,
+      //   limit: 12,
+      // });
 
-      // Filter out current product and diversify shops
+      // Temporary: empty array until service is implemented
+      const data = { data: [] };
+
       const filtered = (data.data || []).filter(
-        (p: Product) => p.id !== productId,
+        (p: ProductUI) => p.id !== productId
       );
 
-      // Diversify by prioritizing different shops
       const diversified = diversifyByShop(filtered, currentShopId);
-
-      // Take max 10 products
       setProducts(diversified.slice(0, 10));
     } catch (error) {
       console.error("Failed to load similar products:", error);
@@ -52,10 +49,9 @@ export function SimilarProducts({
     }
   };
 
-  // Helper to diversify products by shop
-  const diversifyByShop = (products: Product[], currentShopId: string) => {
-    const otherShops: Product[] = [];
-    const sameShop: Product[] = [];
+  const diversifyByShop = (products: ProductUI[], currentShopId: string) => {
+    const otherShops: ProductUI[] = [];
+    const sameShop: ProductUI[] = [];
 
     products.forEach((p) => {
       if (p.shopId === currentShopId) {
@@ -65,7 +61,6 @@ export function SimilarProducts({
       }
     });
 
-    // Prioritize other shops to show variety
     return [...otherShops, ...sameShop];
   };
 
@@ -86,7 +81,7 @@ export function SimilarProducts({
   }
 
   if (!products || products.length === 0) {
-    return null; // Don't show section if no similar products
+    return null;
   }
 
   return (
@@ -94,23 +89,7 @@ export function SimilarProducts({
       <h2 className="text-2xl font-bold text-gray-900">Similar Products</h2>
       <CardGrid>
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            slug={product.slug}
-            price={product.price}
-            originalPrice={product.originalPrice}
-            image={product.images?.[0] || ""}
-            rating={product.rating}
-            reviewCount={product.reviewCount}
-            shopName={product.shopId}
-            shopSlug={product.shopId}
-            inStock={product.stockCount > 0}
-            isFeatured={product.isFeatured}
-            condition={product.condition}
-            showShopName={true}
-          />
+          <ProductCard key={product.id} product={product} showShopName={true} />
         ))}
       </CardGrid>
     </div>

@@ -8,31 +8,34 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { FormModal } from "@/components/common/FormModal";
 import { ProductInlineForm } from "./ProductInlineForm";
-import { productsService } from "@/services/products.service";
-import type { Product } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 interface ProductTableProps {
-  products: Product[];
+  products: ProductUI[];
   isLoading?: boolean;
   onRefresh?: () => void;
+  onDelete?: (slug: string) => Promise<void>;
 }
 
 export default function ProductTable({
   products,
   isLoading = false,
   onRefresh,
+  onDelete,
 }: ProductTableProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductUI | null>(
+    null
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !onDelete) return;
 
     try {
       setIsDeleting(true);
-      await productsService.delete(selectedProduct.slug);
+      await onDelete(selectedProduct.slug);
       setShowDeleteDialog(false);
       setSelectedProduct(null);
       onRefresh?.();
@@ -50,16 +53,16 @@ export default function ProductTable({
     onRefresh?.();
   };
 
-  const columns: Column<Product>[] = [
+  const columns: Column<ProductUI>[] = [
     {
       key: "image",
       label: "Image",
       width: "80px",
       render: (_, product) => (
         <div className="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-          {product.images?.[0] ? (
+          {product.primaryImage?.url ? (
             <img
-              src={product.images[0]}
+              src={product.primaryImage.url}
               alt={product.name}
               className="h-full w-full object-cover"
             />
@@ -88,9 +91,9 @@ export default function ProductTable({
       key: "categoryId",
       label: "Category",
       sortable: true,
-      render: (categoryId) => (
+      render: (_, product) => (
         <div className="text-sm text-gray-900">
-          {categoryId || "Uncategorized"}
+          {product.category?.name || "Uncategorized"}
         </div>
       ),
     },
@@ -110,42 +113,40 @@ export default function ProductTable({
       render: (_, product) => (
         <div className="min-w-[100px]">
           <div className="font-medium text-gray-900">
-            ₹{product.price?.toLocaleString("en-IN") || "0"}
+            {product.price.formatted}
           </div>
-          {product.originalPrice && product.originalPrice > product.price && (
+          {product.originalPrice && (
             <div className="text-xs text-gray-500 line-through">
-              ₹{product.originalPrice.toLocaleString("en-IN")}
+              {product.originalPrice.formatted}
             </div>
           )}
         </div>
       ),
     },
     {
-      key: "stockCount",
+      key: "stock",
       label: "Stock",
       sortable: true,
-      render: (stockCount, product) => {
-        const isLowStock =
-          stockCount <= (product.lowStockThreshold || 5) && stockCount > 0;
-        const isOutOfStock = stockCount === 0;
+      render: (_, product) => {
+        const { stock } = product;
 
         return (
           <div className="min-w-[80px]">
             <span
               className={`font-medium ${
-                isOutOfStock
+                stock.outOfStock
                   ? "text-red-600"
-                  : isLowStock
-                    ? "text-yellow-600"
-                    : "text-gray-900"
+                  : stock.isLow
+                  ? "text-yellow-600"
+                  : "text-gray-900"
               }`}
             >
-              {stockCount}
+              {stock.count}
             </span>
-            {isLowStock && (
+            {stock.isLow && !stock.outOfStock && (
               <div className="text-xs text-yellow-600 mt-1">Low stock</div>
             )}
-            {isOutOfStock && (
+            {stock.outOfStock && (
               <div className="text-xs text-red-600 mt-1">Out of stock</div>
             )}
           </div>
@@ -156,7 +157,7 @@ export default function ProductTable({
       key: "status",
       label: "Status",
       sortable: true,
-      render: (status) => <StatusBadge status={status} />,
+      render: (_, product) => <StatusBadge status={product.status.value} />,
     },
     {
       key: "actions",
@@ -224,6 +225,7 @@ export default function ProductTable({
       />
 
       {/* Quick Edit Modal */}
+      {/* TODO: Update ProductInlineForm to use ProductUI schema */}
       <FormModal
         isOpen={showEditModal}
         onClose={() => {
@@ -232,14 +234,18 @@ export default function ProductTable({
         }}
         title="Quick Edit Product"
       >
-        <ProductInlineForm
+        {/* Temporarily disabled until ProductInlineForm is migrated to UI schema */}
+        {/* <ProductInlineForm
           product={selectedProduct || undefined}
           onSuccess={handleQuickEditSuccess}
           onCancel={() => {
             setShowEditModal(false);
             setSelectedProduct(null);
           }}
-        />
+        /> */}
+        <div className="p-4 text-center text-gray-600">
+          Quick edit feature will be available after ProductInlineForm migration
+        </div>
       </FormModal>
 
       {/* Delete Confirmation Dialog */}

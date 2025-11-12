@@ -27,7 +27,9 @@ import {
   AuctionFilterValues,
 } from "@/components/filters/AuctionFilters";
 import { useCart } from "@/hooks/useCart";
-import type { Shop, Product, Auction } from "@/types";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
+import type { ProductUI } from "@/schemas/ui/product.ui";
+import type { Auction } from "@/types";
 
 interface ShopPageProps {
   params: Promise<{
@@ -42,8 +44,8 @@ export default function ShopPage({ params }: ShopPageProps) {
   const { addItem } = useCart();
   const { slug } = use(params);
 
-  const [shop, setShop] = useState<Shop | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [shop, setShop] = useState<ShopUI | null>(null);
+  const [products, setProducts] = useState<ProductUI[]>([]);
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -217,10 +219,10 @@ export default function ShopPage({ params }: ShopPageProps) {
         if (!product) throw new Error("Product not found");
         productDetails = {
           name: product.name,
-          price: product.price,
-          image: product.images?.[0] || "",
-          shopId: product.shopId,
-          shopName: shop?.name || "",
+          price: product.price.amount,
+          image: product.images?.[0]?.url || "",
+          shopId: product.shop?.id || shop?.id || "",
+          shopName: product.shop?.name || shop?.name || "",
         };
       }
       await addItem(productId, 1, undefined, productDetails);
@@ -280,7 +282,7 @@ export default function ShopPage({ params }: ShopPageProps) {
                   : "border-transparent text-gray-600 hover:text-gray-900"
               }`}
             >
-              Reviews ({shop.reviewCount || 0})
+              Reviews ({shop.stats.rating.reviewCount || 0})
             </button>
             <button
               onClick={() => setActiveTab("about")}
@@ -426,25 +428,7 @@ export default function ShopPage({ params }: ShopPageProps) {
                   {view === "grid" ? (
                     <CardGrid>
                       {products.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          id={product.id}
-                          name={product.name}
-                          slug={product.slug}
-                          price={product.price}
-                          originalPrice={product.originalPrice}
-                          image={product.images?.[0] || ""}
-                          rating={product.rating}
-                          reviewCount={product.reviewCount}
-                          shopName={shop.name}
-                          shopSlug={shop.slug}
-                          shopId={shop.id}
-                          inStock={product.stockCount > 0}
-                          isFeatured={product.isFeatured}
-                          condition={product.condition}
-                          showShopName={false}
-                          onAddToCart={handleAddToCart}
-                        />
+                        <ProductCard key={product.id} product={product} />
                       ))}
                     </CardGrid>
                   ) : (

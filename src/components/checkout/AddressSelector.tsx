@@ -125,7 +125,9 @@ export function AddressSelector({
                     <h4 className="font-semibold text-gray-900">
                       {address.recipientName}
                     </h4>
-                    <p className="text-sm text-gray-600">{address.recipientPhoneFormatted}</p>
+                    <p className="text-sm text-gray-600">
+                      {address.recipientPhoneFormatted}
+                    </p>
                   </div>
                   {address.isDefault && (
                     <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">

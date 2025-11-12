@@ -9,7 +9,7 @@ import { PRODUCT_FILTERS } from "@/constants/filters";
 import { useIsMobile } from "@/hooks/useMobile";
 import { productsService } from "@/services/products.service";
 import { useCart } from "@/hooks/useCart";
-import type { Product } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 function ProductsContent() {
   const router = useRouter();
@@ -17,7 +17,7 @@ function ProductsContent() {
   const { addItem } = useCart();
   const isMobile = useIsMobile();
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"grid" | "table">("grid");
   const [showFilters, setShowFilters] = useState(false);
@@ -87,10 +87,10 @@ function ProductsContent() {
         }
         productDetails = {
           name: product.name,
-          price: product.price,
-          image: product.images?.[0] || "",
+          price: product.price.amount,
+          image: product.images[0]?.url || "",
           shopId: product.shopId,
-          shopName: product.shopId, // TODO: Get actual shop name from shop service
+          shopName: product.shop?.name || product.shopId,
         };
       }
 
@@ -241,20 +241,7 @@ function ProductsContent() {
                     {products.map((product) => (
                       <ProductCard
                         key={product.id}
-                        id={product.id}
-                        name={product.name}
-                        slug={product.slug}
-                        price={product.price}
-                        originalPrice={product.originalPrice}
-                        image={product.images?.[0] || ""}
-                        rating={product.rating}
-                        reviewCount={product.reviewCount}
-                        shopName={product.shopId}
-                        shopSlug={product.shopId}
-                        shopId={product.shopId}
-                        inStock={product.stockCount > 0}
-                        isFeatured={product.isFeatured}
-                        condition={product.condition}
+                        product={product}
                         onAddToCart={handleAddToCart}
                         showShopName={true}
                       />
@@ -288,7 +275,7 @@ function ProductsContent() {
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <img
-                                  src={product.images?.[0] || ""}
+                                  src={product.images[0]?.url || ""}
                                   alt={product.name}
                                   className="w-12 h-12 rounded object-cover"
                                 />
@@ -297,44 +284,41 @@ function ProductsContent() {
                                     {product.name}
                                   </div>
                                   <div className="text-sm text-gray-500">
-                                    {product.condition}
+                                    {product.condition.label}
                                   </div>
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="font-medium">
-                                ₹{product.price.toLocaleString()}
+                                {product.price.formatted}
                               </div>
-                              {product.originalPrice &&
-                                product.originalPrice > product.price && (
-                                  <div className="text-sm text-gray-500 line-through">
-                                    ₹{product.originalPrice.toLocaleString()}
-                                  </div>
-                                )}
+                              {product.discount && (
+                                <div className="text-sm text-gray-500 line-through">
+                                  {product.originalPrice?.formatted}
+                                </div>
+                              )}
                             </td>
                             <td className="px-6 py-4">
                               <span
                                 className={`px-2 py-1 text-xs rounded ${
-                                  product.stockCount > 0
+                                  product.stock.inStock
                                     ? "bg-green-100 text-green-700"
                                     : "bg-red-100 text-red-700"
                                 }`}
                               >
-                                {product.stockCount > 0
-                                  ? `${product.stockCount} in stock`
-                                  : "Out of stock"}
+                                {product.stock.label}
                               </span>
                             </td>
                             <td className="px-6 py-4">
-                              {product.rating > 0 && (
+                              {product.rating.hasReviews && (
                                 <div className="flex items-center gap-1">
                                   <span className="text-yellow-500">★</span>
                                   <span className="font-medium">
-                                    {product.rating.toFixed(1)}
+                                    {product.rating.formatted}
                                   </span>
                                   <span className="text-sm text-gray-500">
-                                    ({product.reviewCount})
+                                    ({product.rating.reviewCountFormatted})
                                   </span>
                                 </div>
                               )}
@@ -348,7 +332,7 @@ function ProductsContent() {
                               >
                                 View
                               </button>
-                              {product.stockCount > 0 && (
+                              {product.stock.inStock && (
                                 <button
                                   onClick={() => handleAddToCart(product.id)}
                                   className="text-blue-600 hover:underline text-sm"

@@ -5,13 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
-import type { CartItem as CartItemType } from "@/types";
+import type { CartItemUI } from "@/schemas/ui/cart.ui";
 
 interface CartItemProps {
-  item: CartItemType & {
-    originalPrice?: number;
-    stockCount?: number;
-  };
+  item: CartItemUI;
   onUpdateQuantity: (itemId: string, quantity: number) => Promise<void>;
   onRemove: (itemId: string) => Promise<void>;
   disabled?: boolean;
@@ -52,19 +49,14 @@ export function CartItem({
     }
   };
 
-  const subtotal = item.price * quantity;
-  const hasDiscount = item.originalPrice && item.originalPrice > item.price;
-  const discountPercent = hasDiscount
-    ? Math.round(
-        ((item.originalPrice! - item.price) / item.originalPrice!) * 100,
-      )
-    : 0;
+  const subtotal = item.subtotal;
+  const hasDiscount = !!item.discount;
 
   return (
     <>
       <div className="flex gap-4 py-4 border-b border-gray-200">
         {/* Product Image */}
-        <Link href={`/products/${item.productId}`} className="flex-shrink-0">
+        <Link href={`/products/${item.productSlug}`} className="flex-shrink-0">
           <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
             {item.productImage ? (
               <Image
@@ -86,7 +78,7 @@ export function CartItem({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <Link
-                href={`/products/${item.productId}`}
+                href={`/products/${item.productSlug}`}
                 className="text-sm font-medium text-gray-900 hover:text-blue-600 line-clamp-2"
               >
                 {item.productName}
@@ -94,7 +86,7 @@ export function CartItem({
 
               <div className="mt-1 text-xs text-gray-600">
                 <Link
-                  href={`/shops/${item.shopId}`}
+                  href={`/shops/${item.shopSlug}`}
                   className="hover:text-blue-600"
                 >
                   {item.shopName}
@@ -107,8 +99,7 @@ export function CartItem({
                 </div>
               )}
 
-              {/* Out of stock warning */}
-              {item.stockCount !== undefined && item.stockCount < quantity && (
+              {item.isLowStock && (
                 <div className="mt-1 text-xs text-red-600">
                   Only {item.stockCount} left in stock
                 </div>
@@ -118,15 +109,15 @@ export function CartItem({
             {/* Price */}
             <div className="text-right flex-shrink-0">
               <div className="text-sm font-bold text-gray-900">
-                ₹{item.price.toLocaleString("en-IN")}
+                {item.price.formatted}
               </div>
-              {hasDiscount && (
+              {hasDiscount && item.originalPrice && (
                 <>
                   <div className="text-xs text-gray-500 line-through">
-                    ₹{item.originalPrice!.toLocaleString("en-IN")}
+                    {item.originalPrice.formatted}
                   </div>
                   <div className="text-xs text-green-600 font-medium">
-                    {discountPercent}% off
+                    {item.discount?.label}
                   </div>
                 </>
               )}
@@ -148,7 +139,7 @@ export function CartItem({
               <input
                 type="number"
                 min="1"
-                max="99"
+                max={item.maxQuantity}
                 value={quantity}
                 onChange={(e) => {
                   const val = parseInt(e.target.value) || 1;
@@ -160,7 +151,7 @@ export function CartItem({
 
               <button
                 onClick={() => handleQuantityChange(quantity + 1)}
-                disabled={quantity >= 99 || disabled || updating}
+                disabled={quantity >= item.maxQuantity || disabled || updating}
                 className="p-1 rounded border border-gray-300 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="h-4 w-4 text-gray-600" />
@@ -174,7 +165,7 @@ export function CartItem({
             {/* Subtotal & Remove */}
             <div className="flex items-center gap-4">
               <div className="text-sm font-semibold text-gray-900">
-                ₹{subtotal.toLocaleString("en-IN")}
+                {subtotal.formatted}
               </div>
 
               <button

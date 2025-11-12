@@ -3,15 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Tag, X, Loader2, ShoppingBag } from "lucide-react";
+import type { CartSummaryUI } from "@/schemas/ui/cart.ui";
 
 interface CartSummaryProps {
-  subtotal: number;
-  shipping: number;
-  tax: number;
-  discount: number;
-  total: number;
-  itemCount: number;
-  couponCode?: string;
+  summary: CartSummaryUI;
   onApplyCoupon?: (code: string) => Promise<void>;
   onRemoveCoupon?: () => Promise<void>;
   onCheckout?: () => void;
@@ -19,13 +14,7 @@ interface CartSummaryProps {
 }
 
 export function CartSummary({
-  subtotal,
-  shipping,
-  tax,
-  discount,
-  total,
-  itemCount,
-  couponCode,
+  summary,
   onApplyCoupon,
   onRemoveCoupon,
   onCheckout,
@@ -70,10 +59,8 @@ export function CartSummary({
     }
   };
 
-  const freeShippingThreshold = 5000;
-  const amountToFreeShipping = freeShippingThreshold - subtotal;
   const showFreeShippingProgress =
-    subtotal > 0 && subtotal < freeShippingThreshold;
+    !summary.hasFreeShipping && summary.amountToFreeShipping > 0;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-4">
@@ -86,11 +73,16 @@ export function CartSummary({
         <div className="mb-4 p-3 bg-blue-50 rounded-lg">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="text-blue-900">
-              Add ₹{amountToFreeShipping.toLocaleString("en-IN")} more for FREE
-              shipping
+              Add {summary.amountToFreeShipping} more for FREE shipping
             </span>
             <span className="text-blue-600 font-medium">
-              {Math.round((subtotal / freeShippingThreshold) * 100)}%
+              {Math.round(
+                ((summary.freeShippingThreshold -
+                  summary.amountToFreeShipping) /
+                  summary.freeShippingThreshold) *
+                  100
+              )}
+              %
             </span>
           </div>
           <div className="w-full bg-blue-200 rounded-full h-2">
@@ -98,8 +90,11 @@ export function CartSummary({
               className="bg-blue-600 h-2 rounded-full transition-all"
               style={{
                 width: `${Math.min(
-                  (subtotal / freeShippingThreshold) * 100,
-                  100,
+                  ((summary.freeShippingThreshold -
+                    summary.amountToFreeShipping) /
+                    summary.freeShippingThreshold) *
+                    100,
+                  100
                 )}%`,
               }}
             />
@@ -108,7 +103,7 @@ export function CartSummary({
       )}
 
       {/* Coupon Input */}
-      {!couponCode && onApplyCoupon && (
+      {!summary.couponCode && onApplyCoupon && (
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Have a coupon code?
@@ -147,13 +142,13 @@ export function CartSummary({
       )}
 
       {/* Applied Coupon */}
-      {couponCode && (
+      {summary.couponCode && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Tag className="h-4 w-4 text-green-600" />
               <span className="text-sm font-medium text-green-900">
-                {couponCode}
+                {summary.couponCode}
               </span>
             </div>
             {onRemoveCoupon && (
@@ -167,7 +162,7 @@ export function CartSummary({
             )}
           </div>
           <p className="mt-1 text-xs text-green-700">
-            You saved ₹{discount.toLocaleString("en-IN")}!
+            You saved {summary.discount.formatted}!
           </p>
         </div>
       )}
@@ -176,18 +171,19 @@ export function CartSummary({
       <div className="space-y-3 mb-4">
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">
-            Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
+            Subtotal ({summary.itemCount}{" "}
+            {summary.itemCount === 1 ? "item" : "items"})
           </span>
           <span className="font-medium text-gray-900">
-            ₹{subtotal.toLocaleString("en-IN")}
+            {summary.subtotal.formatted}
           </span>
         </div>
 
-        {discount > 0 && (
+        {summary.discount.amount > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Discount</span>
             <span className="font-medium text-green-600">
-              -₹{discount.toLocaleString("en-IN")}
+              -{summary.discount.formatted}
             </span>
           </div>
         )}
@@ -195,10 +191,10 @@ export function CartSummary({
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Shipping</span>
           <span className="font-medium text-gray-900">
-            {shipping === 0 ? (
+            {summary.shipping.amount === 0 ? (
               <span className="text-green-600">FREE</span>
             ) : (
-              `₹${shipping.toLocaleString("en-IN")}`
+              summary.shipping.formatted
             )}
           </span>
         </div>
@@ -206,7 +202,7 @@ export function CartSummary({
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Tax (GST 18%)</span>
           <span className="font-medium text-gray-900">
-            ₹{tax.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+            {summary.tax.formatted}
           </span>
         </div>
       </div>
@@ -216,7 +212,7 @@ export function CartSummary({
         <div className="flex justify-between items-center">
           <span className="text-base font-semibold text-gray-900">Total</span>
           <span className="text-2xl font-bold text-gray-900">
-            ₹{total.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+            {summary.total.formatted}
           </span>
         </div>
         <p className="text-xs text-gray-600 mt-1">Inclusive of all taxes</p>
@@ -225,7 +221,7 @@ export function CartSummary({
       {/* Checkout Button */}
       <button
         onClick={handleCheckout}
-        disabled={loading || itemCount === 0}
+        disabled={loading || summary.itemCount === 0}
         className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
       >
         {loading ? (

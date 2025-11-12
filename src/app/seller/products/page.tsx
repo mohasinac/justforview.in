@@ -34,13 +34,13 @@ import {
 } from "@/constants/form-fields";
 import { validateForm } from "@/lib/form-validation";
 import { useIsMobile } from "@/hooks/useMobile";
-import type { Product } from "@/types";
+import type { ProductUI } from "@/schemas/ui/product.ui";
 
 export default function ProductsPage() {
   const isMobile = useIsMobile();
   const [view, setView] = useState<"grid" | "table">("table");
   const [showFilters, setShowFilters] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -241,7 +241,9 @@ export default function ProductsPage() {
                   >
                     <div className="aspect-square bg-gray-100">
                       <img
-                        src={product.images?.[0] || "/placeholder-product.jpg"}
+                        src={
+                          product.images[0]?.url || "/placeholder-product.jpg"
+                        }
                         alt={product.name}
                         className="h-full w-full object-cover"
                       />
@@ -257,13 +259,13 @@ export default function ProductsPage() {
                       </p>
                       <div className="mt-3 flex items-center justify-between">
                         <span className="text-lg font-semibold text-gray-900">
-                          ₹{product.price.toLocaleString()}
+                          {product.price.formatted}
                         </span>
-                        <StatusBadge status={product.status} />
+                        <StatusBadge status={product.status.value} />
                       </div>
                       <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-                        <span>Stock: {product.stockCount}</span>
-                        <span>Sales: {product.salesCount || 0}</span>
+                        <span>Stock: {product.stock.count}</span>
+                        <span>Sales: {product.salesCount}</span>
                       </div>
                       <div className="mt-4 flex gap-2">
                         <Link
@@ -403,12 +405,12 @@ export default function ProductsPage() {
                               key={product.id}
                               fields={fields}
                               initialValues={{
-                                images: product.images?.[0] || "",
+                                images: product.images[0]?.url || "",
                                 name: product.name,
-                                price: product.price,
-                                stockCount: product.stockCount,
+                                price: product.price.amount,
+                                stockCount: product.stock.count,
                                 categoryId: product.categoryId || "",
-                                status: product.status,
+                                status: product.status.value,
                               }}
                               onSave={async (values) => {
                                 try {
@@ -456,11 +458,8 @@ export default function ProductsPage() {
                           );
                         }
 
-                        const isLowStock =
-                          product.stockCount <=
-                            (product.lowStockThreshold || 5) &&
-                          product.stockCount > 0;
-                        const isOutOfStock = product.stockCount === 0;
+                        const isLowStock = product.stock.isLow;
+                        const isOutOfStock = product.stock.outOfStock;
 
                         return (
                           <tr
@@ -489,7 +488,7 @@ export default function ProductsPage() {
                                 <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden">
                                   {product.images?.[0] ? (
                                     <img
-                                      src={product.images[0]}
+                                      src={product.images[0]?.url}
                                       alt={product.name}
                                       className="h-full w-full object-cover"
                                     />
@@ -513,17 +512,13 @@ export default function ProductsPage() {
                             {/* Price */}
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="font-medium text-gray-900">
-                                ₹{product.price?.toLocaleString("en-IN") || "0"}
+                                {product.price.formatted}
                               </div>
-                              {product.originalPrice &&
-                                product.originalPrice > product.price && (
-                                  <div className="text-xs text-gray-500 line-through">
-                                    ₹
-                                    {product.originalPrice.toLocaleString(
-                                      "en-IN"
-                                    )}
-                                  </div>
-                                )}
+                              {product.discount && (
+                                <div className="text-xs text-gray-500 line-through">
+                                  {product.originalPrice?.formatted}
+                                </div>
+                              )}
                             </td>
 
                             {/* Stock */}
@@ -537,7 +532,7 @@ export default function ProductsPage() {
                                     : "text-gray-900"
                                 }`}
                               >
-                                {product.stockCount}
+                                {product.stock.count}
                               </span>
                               {isLowStock && (
                                 <div className="text-xs text-yellow-600 mt-1">
@@ -558,7 +553,7 @@ export default function ProductsPage() {
 
                             {/* Status */}
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <StatusBadge status={product.status} />
+                              <StatusBadge status={product.status.value} />
                             </td>
 
                             {/* Actions */}

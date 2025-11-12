@@ -185,13 +185,52 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-4 mt-8 lg:mt-0">
               <CartSummary
-                subtotal={cart.subtotal}
-                shipping={cart.shipping}
-                tax={cart.tax}
-                discount={cart.discount}
-                total={cart.total}
-                itemCount={cart.itemCount}
-                couponCode={cart.couponCode}
+                summary={{
+                  itemCount: cart.itemCount,
+                  subtotal: {
+                    amount: cart.subtotal,
+                    formatted: `₹${cart.subtotal.toLocaleString()}`,
+                    currency: "₹",
+                    currencyCode: "INR",
+                  },
+                  discount: cart.discount
+                    ? {
+                        amount: cart.discount,
+                        formatted: `₹${cart.discount.toLocaleString()}`,
+                        currency: "₹",
+                        currencyCode: "INR",
+                      }
+                    : {
+                        amount: 0,
+                        formatted: "₹0",
+                        currency: "₹",
+                        currencyCode: "INR",
+                      },
+                  shipping: {
+                    amount: cart.shipping,
+                    formatted: `₹${cart.shipping.toLocaleString()}`,
+                    currency: "₹",
+                    currencyCode: "INR",
+                  },
+                  tax: {
+                    amount: cart.tax,
+                    formatted: `₹${cart.tax.toLocaleString()}`,
+                    currency: "₹",
+                    currencyCode: "INR",
+                  },
+                  total: {
+                    amount: cart.total,
+                    formatted: `₹${cart.total.toLocaleString()}`,
+                    currency: "₹",
+                    currencyCode: "INR",
+                  },
+                  couponCode: cart.couponCode,
+                  freeShippingThreshold: 5000,
+                  amountToFreeShipping:
+                    cart.subtotal < 5000 ? 5000 - cart.subtotal : 0,
+                  hasFreeShipping: cart.subtotal >= 5000,
+                  items: [],
+                }}
                 onApplyCoupon={handleApplyCoupon}
                 onRemoveCoupon={removeCoupon}
                 onCheckout={handleCheckout}

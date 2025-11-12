@@ -8,13 +8,13 @@ import { UnifiedFilterSidebar } from "@/components/common/inline-edit";
 import { SHOP_FILTERS } from "@/constants/filters";
 import { useIsMobile } from "@/hooks/useMobile";
 import { shopsService } from "@/services/shops.service";
-import type { Shop } from "@/types";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
 
 function ShopsContent() {
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
 
-  const [shops, setShops] = useState<Shop[]>([]);
+  const [shops, setShops] = useState<ShopUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState(
@@ -44,12 +44,17 @@ function ShopsContent() {
 
       // Sort shops
       if (sortBy === "rating") {
-        shopsData.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        shopsData.sort(
+          (a: ShopUI, b: ShopUI) =>
+            b.stats.rating.rating - a.stats.rating.rating
+        );
       } else if (sortBy === "products") {
-        shopsData.sort((a, b) => (b.productCount || 0) - (a.productCount || 0));
+        shopsData.sort(
+          (a: ShopUI, b: ShopUI) => b.stats.productCount - a.stats.productCount
+        );
       } else if (sortBy === "newest") {
         shopsData.sort(
-          (a, b) =>
+          (a: ShopUI, b: ShopUI) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       }
@@ -198,21 +203,7 @@ function ShopsContent() {
                 {view === "grid" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {shops.map((shop) => (
-                      <ShopCard
-                        key={shop.id}
-                        id={shop.id}
-                        name={shop.name}
-                        slug={shop.slug}
-                        description={shop.description || ""}
-                        logo={shop.logo}
-                        banner={shop.banner}
-                        rating={shop.rating}
-                        reviewCount={shop.reviewCount}
-                        productCount={shop.productCount}
-                        isVerified={shop.isVerified}
-                        isFeatured={shop.isFeatured}
-                        location={shop.location}
-                      />
+                      <ShopCard key={shop.id} shop={shop} />
                     ))}
                   </div>
                 ) : (
@@ -220,18 +211,7 @@ function ShopsContent() {
                     {shops.map((shop) => (
                       <ShopCard
                         key={shop.id}
-                        id={shop.id}
-                        name={shop.name}
-                        slug={shop.slug}
-                        description={shop.description || ""}
-                        logo={shop.logo}
-                        banner={shop.banner}
-                        rating={shop.rating}
-                        reviewCount={shop.reviewCount}
-                        productCount={shop.productCount}
-                        isVerified={shop.isVerified}
-                        isFeatured={shop.isFeatured}
-                        location={shop.location}
+                        shop={shop}
                         showBanner={false}
                         compact={true}
                       />

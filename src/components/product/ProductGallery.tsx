@@ -3,21 +3,31 @@
 import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ZoomIn, X } from "lucide-react";
-
-interface Media {
-  url: string;
-  type: "image" | "video";
-  alt?: string;
-}
+import type { ProductImage } from "@/schemas/ui/product.ui";
 
 interface ProductGalleryProps {
-  media: Media[];
+  images: ProductImage[];
+  videos?: string[];
   productName: string;
 }
 
-export function ProductGallery({ media, productName }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  videos = [],
+  productName,
+}: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const media = [
+    ...images.map((img) => ({ ...img, type: "image" as const })),
+    ...videos.map((url, i) => ({
+      url,
+      alt: `${productName} video ${i + 1}`,
+      type: "video" as const,
+      isPrimary: false,
+    })),
+  ];
 
   if (!media || media.length === 0) {
     return (
