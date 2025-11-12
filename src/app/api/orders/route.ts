@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       if (!owns)
         return NextResponse.json(
           { success: false, error: "Forbidden" },
-          { status: 403 },
+          { status: 403 }
         );
       query = query.where("shop_id", "==", shopId);
     } else if (role === "user") {
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     console.error("Orders list error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to list orders" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -54,14 +54,14 @@ export async function POST(request: NextRequest) {
     if (!user?.id)
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
     const body = await request.json();
     const { shop_id, items, amount } = body;
     if (!shop_id || !Array.isArray(items) || !Number.isFinite(Number(amount))) {
       return NextResponse.json(
         { success: false, error: "Invalid payload" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     const now = new Date().toISOString();
@@ -75,16 +75,18 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     });
     const created = await docRef.get();
-    const createdData = { ...created.data(), id: created.id } as Order & { id: string };
+    const createdData = { ...created.data(), id: created.id } as Order & {
+      id: string;
+    };
     return NextResponse.json(
       { success: true, data: mapOrderToUI(createdData) },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     console.error("Create order error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to create order" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
+import { mapBlogPostToUI } from "@/schemas/mappers/blog-post.mapper";
+import type { BlogPost } from "@/schemas/resources/blog-post.schema";
 
 const COLLECTION = "blog_posts";
 
@@ -46,10 +48,9 @@ export async function GET(req: NextRequest) {
 
     const snapshot = await query.get();
 
-    const posts = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const posts = snapshot.docs.map((doc) =>
+      mapBlogPostToUI({ id: doc.id, ...doc.data() } as BlogPost)
+    );
 
     // Get total count for pagination
     let countQuery = db.collection(COLLECTION).where("status", "==", status);
@@ -145,10 +146,9 @@ export async function POST(req: NextRequest) {
 
     const docRef = await db.collection(COLLECTION).add(post);
 
-    return NextResponse.json({
-      id: docRef.id,
-      ...post,
-    });
+    return NextResponse.json(
+      mapBlogPostToUI({ id: docRef.id, ...post } as any)
+    );
   } catch (error) {
     console.error("Error creating blog post:", error);
     return NextResponse.json(

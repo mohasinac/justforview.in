@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../../lib/session";
 import { userOwnsShop } from "@/app/api/lib/firebase/queries";
+import { mapCouponToUI } from "@/schemas/mappers/coupon.mapper";
+import type { Coupon } from "@/schemas/resources/coupon.schema";
 
 // GET /api/coupons/[code] - Public if active, owner/admin otherwise
 export async function GET(
@@ -24,16 +26,17 @@ export async function GET(
       );
     }
     const doc = snapshot.docs[0];
-    const data: any = { id: doc.id, ...doc.data() };
+    const data = { id: doc.id, ...doc.data() } as Coupon & { id: string };
+    const rawData = doc.data();
 
-    if ((role === "guest" || role === "user") && !data.is_active) {
+    if ((role === "guest" || role === "user") && !rawData.is_active) {
       return NextResponse.json(
         { success: false, error: "Coupon not found" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, data: mapCouponToUI(data) });
   } catch (error) {
     console.error("Error fetching coupon:", error);
     return NextResponse.json(
@@ -92,9 +95,10 @@ export async function PATCH(
 
     await Collections.coupons().doc(coupon.id).update(update);
     const updated = await Collections.coupons().doc(coupon.id).get();
+    const updatedData = { id: updated.id, ...updated.data() } as Coupon & { id: string };
     return NextResponse.json({
       success: true,
-      data: { id: updated.id, ...updated.data() },
+      data: mapCouponToUI(updatedData),
     });
   } catch (error) {
     console.error("Error updating coupon:", error);

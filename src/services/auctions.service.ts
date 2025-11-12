@@ -1,231 +1,80 @@
 import { apiService } from "./api.service";
-import { AUCTION_ROUTES, buildUrl } from "@/constants/api-routes";
-import type { Auction, AuctionStatus, Bid, PaginatedResponse } from "@/types";
-
-interface AuctionFilters {
-  shopId?: string;
-  status?: AuctionStatus;
-  search?: string;
-  minBid?: number;
-  maxBid?: number;
-  isFeatured?: boolean;
-  showOnHomepage?: boolean;
-  endingSoon?: boolean; // Within 24 hours
-  page?: number;
-  limit?: number;
-  sortBy?: "endTime" | "currentBid" | "bidCount" | "createdAt";
-  sortOrder?: "asc" | "desc";
-}
-
-interface CreateAuctionData {
-  shopId: string;
-  name: string;
-  slug: string;
-  description: string;
-  startingBid: number;
-  reservePrice?: number;
-  startTime: Date;
-  endTime: Date;
-  status: AuctionStatus;
-}
-
-interface UpdateAuctionData extends Partial<CreateAuctionData> {
-  images?: string[];
-  videos?: string[];
-  isFeatured?: boolean;
-  featuredPriority?: number;
-}
-
-interface PlaceBidData {
-  bidAmount: number;
-  isAutoBid?: boolean;
-  maxAutoBid?: number;
-}
+import {
+  AUCTION_ENDPOINTS,
+  SELLER_AUCTION_ENDPOINTS,
+} from "@/constants/endpoints/auction.endpoints";
+import type { AuctionUI } from "@/schemas/ui/auction.ui";
+import type {
+  CreateAuction,
+  UpdateAuction,
+  AuctionFilter,
+} from "@/schemas/resources/auction.schema";
 
 class AuctionsService {
-  // List auctions (role-filtered)
-  async list(filters?: AuctionFilters): Promise<PaginatedResponse<Auction>> {
-    const endpoint = buildUrl(AUCTION_ROUTES.LIST, filters);
-    return apiService.get<PaginatedResponse<Auction>>(endpoint);
+  async list(filters?: Partial<AuctionFilter>): Promise<AuctionUI[]> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    const response = await apiService.get<{
+      success: boolean;
+      data: AuctionUI[];
+    }>(`${AUCTION_ENDPOINTS.LIST}${queryParams}`);
+    return response.data;
   }
 
-  // Get auction by ID
-  async getById(id: string): Promise<Auction> {
-    return apiService.get<Auction>(AUCTION_ROUTES.BY_ID(id));
+  async getById(id: string): Promise<AuctionUI> {
+    return apiService.get<AuctionUI>(AUCTION_ENDPOINTS.BY_ID(id));
   }
 
-  // Get auction by slug
-  async getBySlug(slug: string): Promise<Auction> {
-    return apiService.get<Auction>(AUCTION_ROUTES.BY_SLUG(slug));
+  async getBySlug(slug: string): Promise<AuctionUI> {
+    return apiService.get<AuctionUI>(AUCTION_ENDPOINTS.BY_SLUG(slug));
   }
 
-  // Create auction (seller/admin)
-  async create(data: CreateAuctionData): Promise<Auction> {
-    return apiService.post<Auction>(AUCTION_ROUTES.LIST, data);
+  async create(data: CreateAuction): Promise<AuctionUI> {
+    const response = await apiService.post<{
+      success: boolean;
+      data: AuctionUI;
+    }>(AUCTION_ENDPOINTS.LIST, data);
+    return response.data;
   }
 
-  // Update auction (owner/admin)
-  async update(id: string, data: UpdateAuctionData): Promise<Auction> {
-    return apiService.patch<Auction>(AUCTION_ROUTES.BY_ID(id), data);
+  async update(id: string, data: Partial<UpdateAuction>): Promise<AuctionUI> {
+    return apiService.patch<AuctionUI>(AUCTION_ENDPOINTS.BY_ID(id), data);
   }
 
-  // Delete auction (owner/admin)
   async delete(id: string): Promise<{ message: string }> {
-    return apiService.delete<{ message: string }>(AUCTION_ROUTES.BY_ID(id));
+    return apiService.delete<{ message: string }>(AUCTION_ENDPOINTS.BY_ID(id));
   }
 
-  // Validate slug availability (for form validation)
-  async validateSlug(
-    slug: string,
-    shopId?: string
-  ): Promise<{ available: boolean; message?: string }> {
-    const params = new URLSearchParams();
-    params.append("slug", slug);
-    if (shopId) params.append("shop_id", shopId);
-
-    return apiService.get<{ available: boolean; message?: string }>(
-      `/auctions/validate-slug?${params.toString()}`
-    );
+  async getLive(): Promise<AuctionUI[]> {
+    return apiService.get<AuctionUI[]>(AUCTION_ENDPOINTS.LIVE);
   }
 
-  // Get auction bids
-  async getBids(
-    id: string,
-    page?: number,
-    limit?: number
-  ): Promise<PaginatedResponse<Bid>> {
-    const params = new URLSearchParams();
-    if (page) params.append("page", page.toString());
-    if (limit) params.append("limit", limit.toString());
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/auctions/${id}/bid?${queryString}`
-      : `/auctions/${id}/bid`;
-
-    return apiService.get<PaginatedResponse<Bid>>(endpoint);
+  async getFeatured(): Promise<AuctionUI[]> {
+    return apiService.get<AuctionUI[]>(AUCTION_ENDPOINTS.FEATURED);
   }
 
-  // Place bid (authenticated users)
-  async placeBid(id: string, data: PlaceBidData): Promise<Bid> {
-    return apiService.post<Bid>(`/auctions/${id}/bid`, data);
-  }
-
-  // Set featured auction (admin only)
-  async setFeatured(
-    id: string,
-    isFeatured: boolean,
-    priority?: number
-  ): Promise<Auction> {
-    return apiService.patch<Auction>(`/auctions/${id}/feature`, {
-      isFeatured,
-      featuredPriority: priority,
+  async placeBid(id: string, bidAmount: number): Promise<AuctionUI> {
+    return apiService.post<AuctionUI>(AUCTION_ENDPOINTS.PLACE_BID(id), {
+      bidAmount,
     });
   }
 
-  // Get live auctions
-  async getLive(): Promise<Auction[]> {
-    return apiService.get<Auction[]>("/auctions/live");
+  async getBids(id: string): Promise<any[]> {
+    return apiService.get<any[]>(AUCTION_ENDPOINTS.BIDS(id));
   }
 
-  // Get featured auctions
-  async getFeatured(): Promise<Auction[]> {
-    return apiService.get<Auction[]>("/auctions/featured");
-  }
-
-  // Get homepage auctions
-  async getHomepage(): Promise<Auction[]> {
-    const response = await this.list({
-      showOnHomepage: true,
-      status: "live",
-      limit: 20,
-    });
-    return Array.isArray(response) ? response : (response as any).data || [];
-  }
-
-  // Get similar auctions
-  async getSimilar(id: string, limit?: number): Promise<Auction[]> {
-    const params = new URLSearchParams();
-    if (limit) params.append("limit", limit.toString());
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/auctions/${id}/similar?${queryString}`
-      : `/auctions/${id}/similar`;
-
-    return apiService.get<Auction[]>(endpoint);
-  }
-
-  // Get seller's other auctions
-  async getSellerAuctions(id: string, limit?: number): Promise<Auction[]> {
-    const params = new URLSearchParams();
-    if (limit) params.append("limit", limit.toString());
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/auctions/${id}/seller-items?${queryString}`
-      : `/auctions/${id}/seller-items`;
-
-    return apiService.get<Auction[]>(endpoint);
-  }
-
-  // Watch/unwatch auction
-  async toggleWatch(id: string): Promise<{ watching: boolean }> {
-    return apiService.post<{ watching: boolean }>(`/auctions/${id}/watch`, {});
-  }
-
-  // Get user's watchlist
-  async getWatchlist(): Promise<Auction[]> {
-    return apiService.get<Auction[]>("/auctions/watchlist");
-  }
-
-  // Get user's active bids
-  async getMyBids(): Promise<Bid[]> {
-    return apiService.get<Bid[]>("/auctions/my-bids");
-  }
-
-  // Get user's won auctions
-  async getWonAuctions(): Promise<Auction[]> {
-    return apiService.get<Auction[]>("/auctions/won");
-  }
-
-  // Bulk actions for seller dashboard
   async bulkAction(
     action: string,
-    ids: string[]
+    ids: string[],
+    data?: any
   ): Promise<{ success: boolean }> {
-    return apiService.post("/api/seller/auctions/bulk", {
+    return apiService.post(SELLER_AUCTION_ENDPOINTS.BULK_UPDATE, {
       action,
       ids,
+      data,
     });
-  }
-
-  // Quick create for inline editing (minimal fields)
-  async quickCreate(data: {
-    name: string;
-    startingBid: number;
-    startTime: Date | string;
-    endTime: Date | string;
-    status?: string;
-    images?: string[];
-  }): Promise<Auction> {
-    return apiService.post("/api/seller/auctions", {
-      ...data,
-      description: "", // Required field with default
-      slug: data.name.toLowerCase().replace(/\s+/g, "-"),
-    });
-  }
-
-  // Quick update for inline editing (any fields)
-  async quickUpdate(id: string, data: any): Promise<Auction> {
-    return apiService.patch(`/api/auctions/${id}`, data);
   }
 }
 
 export const auctionsService = new AuctionsService();
-export type {
-  AuctionFilters,
-  CreateAuctionData,
-  UpdateAuctionData,
-  PlaceBidData,
-};

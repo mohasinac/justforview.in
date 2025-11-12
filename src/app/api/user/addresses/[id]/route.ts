@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "../../../lib/session";
 import { getFirestoreAdmin } from "../../../lib/firebase/admin";
+import { mapAddressToUI } from "@/schemas/mappers/address.mapper";
+import type { Address } from "@/schemas/resources/address.schema";
 
 export async function GET(
   request: NextRequest,
@@ -21,14 +23,16 @@ export async function GET(
     }
 
     const addressData = addressDoc.data();
-    const address = { id: addressDoc.id, ...addressData };
+    const address = { id: addressDoc.id, ...addressData } as Address & {
+      id: string;
+    };
 
     // Verify ownership
     if (addressData?.userId !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    return NextResponse.json({ address });
+    return NextResponse.json({ address: mapAddressToUI(address) });
   } catch (error: any) {
     console.error("Get address error:", error);
     return NextResponse.json(
@@ -92,9 +96,12 @@ export async function PATCH(
     await addressRef.update(updateData);
 
     const updatedDoc = await addressRef.get();
-    const updatedAddress = { id: updatedDoc.id, ...updatedDoc.data() };
+    const updatedAddress = {
+      id: updatedDoc.id,
+      ...updatedDoc.data(),
+    } as Address & { id: string };
 
-    return NextResponse.json({ address: updatedAddress });
+    return NextResponse.json({ address: mapAddressToUI(updatedAddress) });
   } catch (error: any) {
     console.error("Update address error:", error);
     return NextResponse.json(

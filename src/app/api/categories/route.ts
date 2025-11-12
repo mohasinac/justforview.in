@@ -94,7 +94,9 @@ export async function POST(request: NextRequest) {
     });
 
     const created = await docRef.get();
-    const createdData = { ...created.data(), id: created.id } as Category & { id: string };
+    const createdData = { ...created.data(), id: created.id } as Category & {
+      id: string;
+    };
     return NextResponse.json(
       {
         success: true,

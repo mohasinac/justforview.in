@@ -159,7 +159,10 @@ export async function POST(request: NextRequest) {
 
     const docRef = await Collections.products().add(productData);
     const createdDoc = await docRef.get();
-    const createdProduct = { ...createdDoc.data(), id: docRef.id } as Product & { id: string };
+    const createdProduct = {
+      ...createdDoc.data(),
+      id: docRef.id,
+    } as Product & { id: string };
 
     return NextResponse.json(
       { success: true, data: mapProductToUI(createdProduct) },

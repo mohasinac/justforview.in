@@ -3,6 +3,8 @@ import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../lib/session";
 import { userOwnsShop } from "@/app/api/lib/firebase/queries";
 import { getUserShops } from "../lib/auth-helpers";
+import { mapCouponToUI } from "@/schemas/mappers/coupon.mapper";
+import type { Coupon } from "@/schemas/resources/coupon.schema";
 
 // GET /api/coupons - List coupons (public active or owner/admin)
 // POST /api/coupons - Create coupon (seller/admin)
@@ -36,14 +38,17 @@ export async function GET(request: NextRequest) {
     }
 
     const snapshot = await query.limit(200).get();
-    let coupons = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    let coupons = snapshot.docs.map((d) => {
+      const data = d.data() as Coupon;
+      return mapCouponToUI({ ...data, id: d.id });
+    });
 
     return NextResponse.json({ success: true, data: coupons });
   } catch (error) {
     console.error("Error listing coupons:", error);
     return NextResponse.json(
       { success: false, error: "Failed to list coupons" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -54,14 +59,14 @@ export async function POST(request: NextRequest) {
     if (!user?.email) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
     }
     const role = user.role;
     if (!(role === "seller" || role === "admin")) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -72,7 +77,7 @@ export async function POST(request: NextRequest) {
     if (!shop_id || !code) {
       return NextResponse.json(
         { success: false, error: "shop_id/shopId and code required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -81,7 +86,7 @@ export async function POST(request: NextRequest) {
       if (!ownsShop) {
         return NextResponse.json(
           { success: false, error: "Cannot create coupon for this shop" },
-          { status: 403 },
+          { status: 403 }
         );
       }
     }
@@ -95,7 +100,7 @@ export async function POST(request: NextRequest) {
     if (!existing.empty) {
       return NextResponse.json(
         { success: false, error: "Coupon code already exists for this shop" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -115,15 +120,18 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     });
     const created = await docRef.get();
+    const createdData = { ...created.data(), id: created.id } as Coupon & {
+      id: string;
+    };
     return NextResponse.json(
-      { success: true, data: { id: created.id, ...created.data() } },
-      { status: 201 },
+      { success: true, data: mapCouponToUI(createdData) },
+      { status: 201 }
     );
   } catch (error) {
     console.error("Error creating coupon:", error);
     return NextResponse.json(
       { success: false, error: "Failed to create coupon" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

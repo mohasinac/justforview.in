@@ -3,6 +3,8 @@ import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "@/app/api/lib/session";
 import { getReturnsQuery, UserRole } from "@/app/api/lib/firebase/queries";
 import { Query } from "firebase-admin/firestore";
+import { mapReturnToUI } from "@/schemas/mappers/return.mapper";
+import type { Return } from "@/schemas/resources/return.schema";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,7 +16,7 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status") || undefined;
     const reason = searchParams.get("reason") || undefined;
     const requiresAdminIntervention = searchParams.get(
-      "requires_admin_intervention",
+      "requires_admin_intervention"
     );
     const startDate = searchParams.get("start_date") || undefined;
     const endDate = searchParams.get("end_date") || undefined;
@@ -37,13 +39,15 @@ export async function GET(req: NextRequest) {
     query = query.orderBy("created_at", "desc").limit(limit);
 
     const snap = await query.get();
-    const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const data = snap.docs.map((d) =>
+      mapReturnToUI({ id: d.id, ...d.data() } as Return)
+    );
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Returns list error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to load returns" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -54,7 +58,7 @@ export async function POST(req: NextRequest) {
     if (!user?.id)
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
 
     const body = await req.json();
@@ -63,7 +67,7 @@ export async function POST(req: NextRequest) {
     if (!orderId || !orderItemId || !reason || !shopId) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -84,15 +88,16 @@ export async function POST(req: NextRequest) {
 
     const ref = await Collections.returns().add(payload as any);
     const doc = await ref.get();
+    const createdReturn = { id: doc.id, ...doc.data() } as Return;
     return NextResponse.json(
-      { success: true, data: { id: doc.id, ...doc.data() } },
-      { status: 201 },
+      { success: true, data: mapReturnToUI(createdReturn) },
+      { status: 201 }
     );
   } catch (error) {
     console.error("Return create error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to initiate return" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

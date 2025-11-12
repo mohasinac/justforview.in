@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "../../lib/session";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { userOwnsShop } from "@/app/api/lib/firebase/queries";
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
+import type { Product } from "@/schemas/resources/product.schema";
 
 // GET /api/products/[slug] - Get single product by slug
 export async function GET(
@@ -22,22 +24,11 @@ export async function GET(
       );
     }
     const doc = snapshot.docs[0];
-    const data: any = doc.data();
+    const data = doc.data() as Product;
 
     return NextResponse.json({
       success: true,
-      data: {
-        id: doc.id,
-        ...data,
-        // Add camelCase aliases for snake_case fields
-        shopId: data.shop_id,
-        categoryId: data.category_id,
-        stockCount: data.stock_count,
-        isFeatured: data.is_featured,
-        isDeleted: data.is_deleted,
-        originalPrice: data.original_price,
-        reviewCount: data.review_count,
-      },
+      data: mapProductToUI({ ...data, id: doc.id }),
     });
   } catch (error) {
     console.error("Error fetching product:", error);
@@ -111,22 +102,11 @@ export async function PATCH(
 
     await Collections.products().doc(doc.id).update(updateData);
     const updatedDoc = await Collections.products().doc(doc.id).get();
-    const updatedData: any = updatedDoc.data();
+    const updatedData = updatedDoc.data() as Product;
 
     return NextResponse.json({
       success: true,
-      data: {
-        id: updatedDoc.id,
-        ...updatedData,
-        // Add camelCase aliases for snake_case fields
-        shopId: updatedData.shop_id,
-        categoryId: updatedData.category_id,
-        stockCount: updatedData.stock_count,
-        isFeatured: updatedData.is_featured,
-        isDeleted: updatedData.is_deleted,
-        originalPrice: updatedData.original_price,
-        reviewCount: updatedData.review_count,
-      },
+      data: mapProductToUI({ ...updatedData, id: updatedDoc.id }),
     });
   } catch (error) {
     console.error("Error updating product:", error);

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "../../lib/session";
 import { getFirestoreAdmin } from "../../lib/firebase/admin";
+import { mapAddressToUI } from "@/schemas/mappers/address.mapper";
+import type { Address } from "@/schemas/resources/address.schema";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,10 +19,10 @@ export async function GET(request: NextRequest) {
       .orderBy("createdAt", "desc")
       .get();
 
-    const addresses = addressesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const addresses = addressesSnapshot.docs.map((doc) => {
+      const data = doc.data() as Address;
+      return mapAddressToUI({ ...data, id: doc.id });
+    });
 
     return NextResponse.json({ addresses });
   } catch (error: any) {
@@ -41,25 +43,27 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
     const {
-      name,
-      phone,
-      addressLine1,
-      addressLine2,
+      recipientName,
+      recipientPhone,
+      line1,
+      line2,
       city,
       state,
-      postalCode,
+      pincode,
       country,
+      landmark,
+      label,
       isDefault,
     } = data;
 
     // Validation
     if (
-      !name ||
-      !phone ||
-      !addressLine1 ||
+      !recipientName ||
+      !recipientPhone ||
+      !line1 ||
       !city ||
       !state ||
-      !postalCode ||
+      !pincode ||
       !country
     ) {
       return NextResponse.json(
@@ -90,14 +94,16 @@ export async function POST(request: NextRequest) {
     const newAddress = {
       id: addressRef.id,
       userId: user.id,
-      name,
-      phone,
-      addressLine1,
-      addressLine2: addressLine2 || null,
+      recipientName,
+      recipientPhone,
+      line1,
+      line2: line2 || null,
       city,
       state,
-      postalCode,
+      pincode,
       country,
+      landmark: landmark || null,
+      label: label || "home",
       isDefault: isDefault || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -105,7 +111,14 @@ export async function POST(request: NextRequest) {
 
     await addressRef.set(newAddress);
 
-    return NextResponse.json({ address: newAddress }, { status: 201 });
+    return NextResponse.json(
+      {
+        address: mapAddressToUI(
+          newAddress as unknown as Address & { id: string }
+        ),
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error("Create address error:", error);
     return NextResponse.json(

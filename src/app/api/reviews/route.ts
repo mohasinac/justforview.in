@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
       if (totalReviews > 0) {
         const totalRating = allReviews.reduce(
           (sum: number, r: any) => sum + r.rating,
-          0,
+          0
         );
         const averageRating = totalRating / totalReviews;
 
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching reviews:", error);
     return NextResponse.json(
       { error: "Failed to fetch reviews" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     if (!product_id || !rating || !comment) {
       return NextResponse.json(
         { error: "Missing required fields: product_id, rating, comment" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     if (rating < 1 || rating > 5) {
       return NextResponse.json(
         { error: "Rating must be between 1 and 5" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     if (!existingReview.empty) {
       return NextResponse.json(
         { error: "You have already reviewed this product" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -167,17 +167,16 @@ export async function POST(req: NextRequest) {
 
     const docRef = await db.collection(COLLECTIONS.REVIEWS).add(reviewData);
     const createdDoc = await docRef.get();
-    const createdReview = { ...createdDoc.data(), id: docRef.id } as Review & { id: string };
+    const createdReview = { ...createdDoc.data(), id: docRef.id } as Review & {
+      id: string;
+    };
 
-    return NextResponse.json(
-      mapReviewToUI(createdReview),
-      { status: 201 },
-    );
+    return NextResponse.json(mapReviewToUI(createdReview), { status: 201 });
   } catch (error) {
     console.error("Error creating review:", error);
     return NextResponse.json(
       { error: "Failed to create review" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

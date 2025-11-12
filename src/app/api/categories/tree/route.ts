@@ -1,39 +1,23 @@
 import { NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
+import { mapCategoryToUI } from "@/schemas/mappers/category.mapper";
+import type { Category } from "@/schemas/resources/category.schema";
 
 // GET /api/categories/tree - Full category tree (public)
 export async function GET() {
   try {
     const snapshot = await Collections.categories().limit(1000).get();
-    const nodes = snapshot.docs.map((d) => {
-      const catData: any = d.data();
-      return {
-        id: d.id,
-        ...catData,
-        // Add camelCase aliases
-        parentId: catData.parent_id,
-        isFeatured: catData.is_featured,
-        showOnHomepage: catData.show_on_homepage,
-        isActive: catData.is_active,
-        productCount: catData.product_count || 0,
-        childCount: catData.child_count || 0,
-        hasChildren: catData.has_children || false,
-        sortOrder: catData.sort_order || 0,
-        metaTitle: catData.meta_title,
-        metaDescription: catData.meta_description,
-        commissionRate: catData.commission_rate || 0,
-        createdAt: catData.created_at,
-        updatedAt: catData.updated_at,
-      };
-    });
+    const nodes = snapshot.docs.map((d) =>
+      mapCategoryToUI({ ...d.data(), id: d.id } as Category)
+    );
     const byId: Record<string, any> = {};
     nodes.forEach((n) => {
       byId[n.id] = { ...n, children: [] };
     });
     const roots: any[] = [];
     nodes.forEach((n) => {
-      if (n.parent_id) {
-        const parent = byId[n.parent_id];
+      if (n.hierarchy.parentId) {
+        const parent = byId[n.hierarchy.parentId];
         if (parent) parent.children.push(byId[n.id]);
         else roots.push(byId[n.id]);
       } else {

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
+import { mapReviewToUI } from "@/schemas/mappers/review.mapper";
+import type { Review } from "@/schemas/resources/review.schema";
 
 /**
  * GET /api/shops/[slug]/reviews
@@ -7,7 +9,7 @@ import { Collections } from "@/app/api/lib/firebase/collections";
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ slug: string }> },
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params;
@@ -26,7 +28,7 @@ export async function GET(
     if (shopsSnapshot.empty) {
       return NextResponse.json(
         { success: false, error: "Shop not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -53,10 +55,9 @@ export async function GET(
     // Execute query
     const reviewsSnapshot = await query.get();
 
-    const reviews = reviewsSnapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const reviews = reviewsSnapshot.docs.map((doc: any) =>
+      mapReviewToUI({ id: doc.id, ...doc.data() } as Review)
+    );
 
     // Get total count
     const totalSnapshot = await Collections.reviews()
@@ -86,7 +87,7 @@ export async function GET(
         success: false,
         error: error.message || "Failed to fetch shop reviews",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

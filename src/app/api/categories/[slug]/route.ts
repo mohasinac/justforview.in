@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../../lib/session";
+import { mapCategoryToUI } from "@/schemas/mappers/category.mapper";
+import type { Category } from "@/schemas/resources/category.schema";
 
 // GET /api/categories/[slug] - Public category detail
 // PATCH /api/categories/[slug] - Admin update
@@ -22,27 +24,10 @@ export async function GET(
       );
     }
     const doc = snapshot.docs[0];
-    const data: any = doc.data();
+    const data = doc.data() as Category;
     return NextResponse.json({
       success: true,
-      data: {
-        id: doc.id,
-        ...data,
-        // Add camelCase aliases
-        parentId: data.parent_id,
-        isFeatured: data.is_featured,
-        showOnHomepage: data.show_on_homepage,
-        isActive: data.is_active,
-        productCount: data.product_count || 0,
-        childCount: data.child_count || 0,
-        hasChildren: data.has_children || false,
-        sortOrder: data.sort_order || 0,
-        metaTitle: data.meta_title,
-        metaDescription: data.meta_description,
-        commissionRate: data.commission_rate || 0,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      },
+      data: mapCategoryToUI({ ...data, id: doc.id }),
     });
   } catch (error) {
     console.error("Error fetching category:", error);
@@ -98,27 +83,10 @@ export async function PATCH(
 
     await Collections.categories().doc(doc.id).update(update);
     const updated = await Collections.categories().doc(doc.id).get();
-    const updatedData: any = updated.data();
+    const updatedData = updated.data() as Category;
     return NextResponse.json({
       success: true,
-      data: {
-        id: updated.id,
-        ...updatedData,
-        // Add camelCase aliases
-        parentId: updatedData.parent_id,
-        isFeatured: updatedData.is_featured,
-        showOnHomepage: updatedData.show_on_homepage,
-        isActive: updatedData.is_active,
-        productCount: updatedData.product_count || 0,
-        childCount: updatedData.child_count || 0,
-        hasChildren: updatedData.has_children || false,
-        sortOrder: updatedData.sort_order || 0,
-        metaTitle: updatedData.meta_title,
-        metaDescription: updatedData.meta_description,
-        commissionRate: updatedData.commission_rate || 0,
-        createdAt: updatedData.created_at,
-        updatedAt: updatedData.updated_at,
-      },
+      data: mapCategoryToUI({ ...updatedData, id: updated.id }),
     });
   } catch (error) {
     console.error("Error updating category:", error);

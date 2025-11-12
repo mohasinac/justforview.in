@@ -283,7 +283,9 @@ export async function POST(request: NextRequest) {
     const shopsRef = Collections.shops();
     const docRef = await shopsRef.add(shopData);
     const createdDoc = await docRef.get();
-    const createdShop = { ...createdDoc.data(), id: docRef.id } as Shop & { id: string };
+    const createdShop = { ...createdDoc.data(), id: docRef.id } as Shop & {
+      id: string;
+    };
 
     return NextResponse.json({
       success: true,

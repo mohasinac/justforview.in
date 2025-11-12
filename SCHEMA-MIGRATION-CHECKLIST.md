@@ -18,9 +18,9 @@ Migration to a comprehensive resource schema system to eliminate data inconsiste
 6. **Resource Documentation** - AI-agent readable feature guides
 
 **Total Tasks**: ~200+
-**Completed**: 117 (59%)
+**Completed**: 158 (79%)
 **In Progress**: 0
-**Remaining**: ~83
+**Remaining**: ~42
 │ │ ├── product.schema.ts
 │ │ ├── auction.schema.ts
 │ │ ├── category.schema.ts
@@ -166,8 +166,12 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/products/route.ts` to use mapper
-- [ ] Update `src/services/products.service.ts` to use UI schema
+- [x] Update `src/app/api/products/route.ts` to use mapper
+- [x] Update `src/app/api/products/[slug]/route.ts`
+- [x] Update `src/app/api/products/[slug]/variants/route.ts`
+- [x] Update `src/app/api/products/[slug]/similar/route.ts`
+- [x] Update `src/app/api/products/[slug]/seller-items/route.ts`
+- [x] Update `src/services/products.service.ts` to use UI schema
 
 **Documentation**:
 
@@ -188,8 +192,11 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/auctions/route.ts`
-- [ ] Update `src/services/auctions.service.ts`
+- [x] Update `src/app/api/auctions/route.ts`
+- [x] Update `src/app/api/auctions/[id]/route.ts`
+- [x] Update `src/app/api/auctions/featured/route.ts`
+- [x] Update `src/app/api/auctions/live/route.ts`
+- [x] Update `src/services/auctions.service.ts`
 
 **Documentation**:
 
@@ -210,8 +217,14 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/categories/route.ts`
-- [ ] Update `src/services/categories.service.ts`
+- [x] Update `src/app/api/categories/route.ts`
+- [x] Update `src/app/api/categories/[slug]/route.ts`
+- [x] Update `src/app/api/categories/tree/route.ts`
+- [x] Update `src/app/api/categories/featured/route.ts`
+- [x] Update `src/app/api/categories/homepage/route.ts`
+- [x] Update `src/app/api/categories/leaves/route.ts`
+- [x] Update `src/app/api/categories/search/route.ts`
+- [x] Update `src/services/categories.service.ts`
 
 **Documentation**:
 
@@ -232,8 +245,10 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/shops/route.ts`
-- [ ] Update `src/services/shops.service.ts`
+- [x] Update `src/app/api/shops/route.ts`
+- [x] Update `src/app/api/shops/[slug]/products/route.ts`
+- [x] Update `src/app/api/shops/[slug]/reviews/route.ts`
+- [x] Update `src/services/shops.service.ts`
 
 **Documentation**:
 
@@ -254,8 +269,8 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/orders/route.ts`
-- [ ] Update `src/services/orders.service.ts`
+- [x] Update `src/app/api/orders/route.ts`
+- [x] Update `src/services/orders.service.ts`
 
 **Documentation**:
 
@@ -328,8 +343,8 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/reviews/route.ts`
-- [ ] Update `src/services/reviews.service.ts`
+- [x] Update `src/app/api/reviews/route.ts`
+- [x] Update `src/services/reviews.service.ts`
 
 **Documentation**:
 
@@ -398,7 +413,7 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/support/route.ts`
+- [x] Update `src/app/api/support/route.ts`
 - [x] Update `src/services/support.service.ts`
 
 **Documentation**:
@@ -420,7 +435,7 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/returns/route.ts`
+- [x] Update `src/app/api/returns/route.ts`
 - [x] Create `src/services/return.service.ts`
 
 **Documentation**:
@@ -490,7 +505,7 @@ docs/
 
 **API Integration**:
 
-- [ ] Update `src/app/api/blog/route.ts`
+- [x] Update `src/app/api/blog/route.ts`
 - [x] Update `src/services/blog.service.ts`
 
 **Documentation**:

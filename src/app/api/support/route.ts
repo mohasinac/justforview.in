@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/api/lib/session";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
+import { mapSupportTicketToUI } from "@/schemas/mappers/support.mapper";
+import type { SupportTicket } from "@/schemas/resources/support.schema";
 
 /**
  * POST /api/support
@@ -16,7 +18,15 @@ export async function POST(request: NextRequest) {
 
     // Parse request
     const data = await request.json();
-    const { subject, category, priority, description, attachments, shopId, orderId } = data;
+    const {
+      subject,
+      category,
+      priority,
+      description,
+      attachments,
+      shopId,
+      orderId,
+    } = data;
 
     // Validation
     if (!subject || subject.trim().length < 3) {
@@ -34,7 +44,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!category) {
-      return NextResponse.json({ error: "Category is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Category is required" },
+        { status: 400 }
+      );
     }
 
     const validCategories = [
@@ -50,27 +63,29 @@ export async function POST(request: NextRequest) {
     }
 
     const validPriorities = ["low", "medium", "high", "urgent"];
-    const ticketPriority = priority && validPriorities.includes(priority) ? priority : "medium";
+    const ticketPriority =
+      priority && validPriorities.includes(priority) ? priority : "medium";
 
     // Database operation
     const db = getFirestoreAdmin();
     const ticketsRef = db.collection("support_tickets");
 
     const now = new Date();
-    const ticket = {
+    const ticket: Partial<SupportTicket> = {
       userId: user.id,
+      ticketNumber: `TICKET-${Date.now()}`,
       subject: subject.trim(),
       category,
       priority: ticketPriority,
       description: description.trim(),
       attachments: attachments || [],
-      shopId: shopId || null,
-      orderId: orderId || null,
+      orderId: orderId || undefined,
+      productId: undefined,
       status: "open",
-      assignedTo: null,
+      assignedTo: undefined,
       createdAt: now,
       updatedAt: now,
-      resolvedAt: null,
+      resolvedAt: undefined,
     };
 
     const docRef = await ticketsRef.add(ticket);
@@ -84,12 +99,13 @@ export async function POST(request: NextRequest) {
       priority: ticketPriority,
     });
 
+    const createdTicket: SupportTicket = {
+      ...(ticket as SupportTicket),
+      id: docRef.id,
+    };
     return NextResponse.json({
       success: true,
-      data: {
-        id: docRef.id,
-        ...ticket,
-      },
+      data: mapSupportTicketToUI(createdTicket),
     });
   } catch (error: any) {
     console.error("Error creating support ticket:", error);

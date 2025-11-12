@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
+import type { Product } from "@/schemas/resources/product.schema";
 
 /**
  * GET /api/shops/[slug]/products
@@ -7,7 +9,7 @@ import { Collections } from "@/app/api/lib/firebase/collections";
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ slug: string }> },
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params;
@@ -28,7 +30,7 @@ export async function GET(
     if (shopsSnapshot.empty) {
       return NextResponse.json(
         { success: false, error: "Shop not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -45,10 +47,10 @@ export async function GET(
       sortBy === "price"
         ? "price"
         : sortBy === "rating"
-          ? "averageRating"
-          : sortBy === "sales"
-            ? "soldCount"
-            : "createdAt";
+        ? "averageRating"
+        : sortBy === "sales"
+        ? "soldCount"
+        : "createdAt";
 
     query = query.orderBy(sortField, sortOrder as "asc" | "desc");
 
@@ -67,10 +69,9 @@ export async function GET(
     // Execute query
     const productsSnapshot = await query.get();
 
-    const products = productsSnapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const products = productsSnapshot.docs.map((doc: any) =>
+      mapProductToUI({ id: doc.id, ...doc.data() } as Product)
+    );
 
     // Get total count (simplified - in production use Firestore aggregation)
     const totalSnapshot = await Collections.products()
@@ -101,7 +102,7 @@ export async function GET(
         success: false,
         error: error.message || "Failed to fetch shop products",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

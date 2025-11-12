@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
+import type { Product } from "@/schemas/resources/product.schema";
 
 // GET /api/products/[slug]/variants - same leaf category
 export async function GET(
@@ -26,7 +28,9 @@ export async function GET(
         .where("category_id", "==", prod.category_id)
         .where("slug", "!=", slug)) as any;
       const sameLeafSnap = await sameLeaf.limit(20).get();
-      data = sameLeafSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+      data = sameLeafSnap.docs.map((d: any) =>
+        mapProductToUI({ id: d.id, ...d.data() } as Product)
+      );
     } catch (indexError: any) {
       // Fallback: get all products in category and filter in-memory
       console.log("Index not ready, using fallback query");
@@ -34,7 +38,7 @@ export async function GET(
         .where("category_id", "==", prod.category_id)
         .get();
       data = allInCategory.docs
-        .map((d: any) => ({ id: d.id, ...d.data() }))
+        .map((d: any) => mapProductToUI({ id: d.id, ...d.data() } as Product))
         .filter((p: any) => p.slug !== slug)
         .slice(0, 20);
     }

@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
+import type { Product } from "@/schemas/resources/product.schema";
 
 // GET /api/products/[slug]/similar - up to 10, diverse shops
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> },
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params;
     const limit = parseInt(
       new URL(request.url).searchParams.get("limit") || "10",
-      10,
+      10
     );
 
     const prodSnap = await Collections.products()
@@ -20,7 +22,7 @@ export async function GET(
     if (prodSnap.empty)
       return NextResponse.json(
         { success: false, error: "Product not found" },
-        { status: 404 },
+        { status: 404 }
       );
     const prod: any = { id: prodSnap.docs[0].id, ...prodSnap.docs[0].data() };
 
@@ -59,12 +61,15 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ success: true, data: results.slice(0, limit) });
+    return NextResponse.json({
+      success: true,
+      data: results.slice(0, limit).map((p) => mapProductToUI(p as Product)),
+    });
   } catch (error) {
     console.error("Similar products error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to load similar products" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
