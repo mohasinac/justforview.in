@@ -32,11 +32,9 @@ import {
   UnifiedFilterSidebar,
 } from "@/components/common/inline-edit";
 import { getAuctionBulkActions } from "@/constants/bulk-actions";
-import {
-  auctionsService,
-  type AuctionFilters,
-} from "@/services/auctions.service";
-import type { Auction, AuctionStatus } from "@/types";
+import { auctionsService } from "@/services/auctions.service";
+import type { AuctionUI } from "@/schemas/ui/auction.ui";
+import type { AuctionFilter } from "@/schemas/resources/auction.schema";
 import { AUCTION_FILTERS } from "@/constants/filters";
 import { useIsMobile } from "@/hooks/useMobile";
 import {
@@ -50,7 +48,7 @@ export default function AdminAuctionsPage() {
   const isMobile = useIsMobile();
   const [view, setView] = useState<"grid" | "table">("table");
   const [showFilters, setShowFilters] = useState(false);
-  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [auctions, setAuctions] = useState<AuctionUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,13 +88,11 @@ export default function AdminAuctionsPage() {
       setLoading(true);
       setError(null);
 
-      const filters: AuctionFilters = {
+      const filters: Partial<AuctionFilter> = {
         page: currentPage,
         limit,
         search: searchQuery || undefined,
         ...filterValues,
-        sortBy: "endTime",
-        sortOrder: "asc",
       };
 
       const response = await auctionsService.list(filters);
@@ -152,9 +148,9 @@ export default function AdminAuctionsPage() {
 
       // Map actions to status updates
       const actionMap: Record<string, any> = {
-        start: { status: "live" as AuctionStatus },
-        end: { status: "ended" as AuctionStatus },
-        cancel: { status: "cancelled" as AuctionStatus },
+        start: { status: "live" },
+        end: { status: "ended" },
+        cancel: { status: "cancelled" },
         feature: { isFeatured: true },
         unfeature: { isFeatured: false },
       };
@@ -213,12 +209,12 @@ export default function AdminAuctionsPage() {
     ];
     const rows = auctions.map((a) => [
       a.name,
-      a.status,
-      a.currentBid || a.startingBid,
-      a.reservePrice || "",
-      new Date(a.startTime).toISOString(),
-      new Date(a.endTime).toISOString(),
-      a.bidCount || 0,
+      a.status.value,
+      a.bid.current.raw,
+      a.bid.reserve?.raw || "",
+      a.startTime.raw.toISOString(),
+      a.endTime.raw.toISOString(),
+      a.bid.count,
       a.shopId,
       a.isFeatured ? "Yes" : "No",
     ]);
@@ -239,44 +235,7 @@ export default function AdminAuctionsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
-  const formatTimeLeft = (endTime: Date) => {
-    const end = new Date(endTime).getTime();
-    const now = Date.now();
-    const diff = end - now;
-
-    if (diff <= 0) return "Ended";
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
-  };
-
-  const getStatusColor = (status: AuctionStatus) => {
-    switch (status) {
-      case "live":
-        return "bg-green-100 text-green-800";
-      case "scheduled":
-        return "bg-blue-100 text-blue-800";
-      case "ended":
-        return "bg-gray-100 text-gray-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   if (!isAdmin) {
     return (
@@ -535,10 +494,10 @@ export default function AdminAuctionsPage() {
                         >
                           <td className="px-4 py-3">
                             <TableCheckbox
-                              checked={selectedIds.includes(auction.id!)}
+                              checked={selectedIds.includes(auction.id)}
                               onChange={(checked) => {
                                 if (checked) {
-                                  setSelectedIds([...selectedIds, auction.id!]);
+                                  setSelectedIds([...selectedIds, auction.id]);
                                 } else {
                                   setSelectedIds(
                                     selectedIds.filter(
@@ -551,16 +510,16 @@ export default function AdminAuctionsPage() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              {auction.images && auction.images[0] && (
+                              {auction.images[0] && (
                                 <img
-                                  src={auction.images[0]}
-                                  alt={auction.name}
+                                  src={auction.images[0].url}
+                                  alt={auction.images[0].alt}
                                   className="h-10 w-10 rounded object-cover"
                                 />
                               )}
                               <div>
                                 <Link
-                                  href={`/auctions/${auction.slug}`}
+                                  href={auction.url}
                                   className="font-medium text-gray-900 hover:text-primary"
                                 >
                                   {auction.name}
@@ -575,38 +534,30 @@ export default function AdminAuctionsPage() {
                           </td>
                           <td className="px-4 py-3">
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                auction.status
-                              )}`}
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${auction.status.className}`}
                             >
-                              {auction.status}
+                              {auction.status.label}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <div className="text-sm font-medium text-gray-900">
-                              {formatPrice(
-                                auction.currentBid || auction.startingBid
-                              )}
+                              {auction.bid.current.formatted}
                             </div>
-                            {auction.reservePrice && (
+                            {auction.bid.reserve && (
                               <div className="text-xs text-gray-500">
-                                Reserve: {formatPrice(auction.reservePrice)}
+                                Reserve: {auction.bid.reserve.formatted}
                               </div>
                             )}
                           </td>
                           <td className="px-4 py-3">
                             <div className="text-sm text-gray-900">
-                              {auction.status === "live"
-                                ? formatTimeLeft(auction.endTime)
-                                : auction.status === "scheduled"
-                                ? "Not started"
-                                : "Ended"}
+                              {auction.timeRemaining.display}
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1 text-sm text-gray-900">
                               <TrendingUp className="h-4 w-4 text-gray-400" />
-                              {auction.bidCount || 0}
+                              {auction.bid.count}
                             </div>
                           </td>
                           <td className="px-4 py-3">
@@ -626,7 +577,7 @@ export default function AdminAuctionsPage() {
                                 <Edit className="h-4 w-4" />
                               </Link>
                               <button
-                                onClick={() => setDeleteId(auction.id!)}
+                                onClick={() => setDeleteId(auction.id)}
                                 className="p-1 text-gray-400 hover:text-red-600"
                                 title="Delete"
                               >
@@ -659,10 +610,10 @@ export default function AdminAuctionsPage() {
                     className="rounded-lg border border-gray-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
                   >
                     <div className="relative">
-                      {auction.images && auction.images[0] ? (
+                      {auction.images[0] ? (
                         <img
-                          src={auction.images[0]}
-                          alt={auction.name}
+                          src={auction.images[0].url}
+                          alt={auction.images[0].alt}
                           className="w-full h-48 object-cover"
                         />
                       ) : (
@@ -672,10 +623,10 @@ export default function AdminAuctionsPage() {
                       )}
                       <div className="absolute top-2 right-2">
                         <TableCheckbox
-                          checked={selectedIds.includes(auction.id!)}
+                          checked={selectedIds.includes(auction.id)}
                           onChange={(checked) => {
                             if (checked) {
-                              setSelectedIds([...selectedIds, auction.id!]);
+                              setSelectedIds([...selectedIds, auction.id]);
                             } else {
                               setSelectedIds(
                                 selectedIds.filter((id) => id !== auction.id)
@@ -693,18 +644,16 @@ export default function AdminAuctionsPage() {
                       )}
                       <div className="absolute bottom-2 left-2">
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(
-                            auction.status
-                          )}`}
+                          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${auction.status.className}`}
                         >
-                          {auction.status}
+                          {auction.status.label}
                         </span>
                       </div>
                     </div>
 
                     <div className="p-4">
                       <Link
-                        href={`/auctions/${auction.slug}`}
+                        href={auction.url}
                         className="font-medium text-gray-900 hover:text-primary line-clamp-1"
                       >
                         {auction.name}
@@ -714,17 +663,15 @@ export default function AdminAuctionsPage() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Current Bid</span>
                           <span className="font-bold text-gray-900">
-                            {formatPrice(
-                              auction.currentBid || auction.startingBid
-                            )}
+                            {auction.bid.current.formatted}
                           </span>
                         </div>
 
-                        {auction.status === "live" && (
+                        {auction.isLive && (
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Time Left</span>
                             <span className="font-medium text-primary">
-                              {formatTimeLeft(auction.endTime)}
+                              {auction.timeRemaining.shortDisplay}
                             </span>
                           </div>
                         )}
@@ -732,14 +679,14 @@ export default function AdminAuctionsPage() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Bids</span>
                           <span className="font-medium text-gray-900">
-                            {auction.bidCount || 0}
+                            {auction.bid.count}
                           </span>
                         </div>
                       </div>
 
                       <div className="mt-4 flex items-center gap-2">
                         <Link
-                          href={`/auctions/${auction.slug}`}
+                          href={auction.url}
                           className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                           <Eye className="h-4 w-4" />

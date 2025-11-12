@@ -10,16 +10,35 @@ import type {
   AuctionFilter,
 } from "@/schemas/resources/auction.schema";
 
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
 class AuctionsService {
-  async list(filters?: Partial<AuctionFilter>): Promise<AuctionUI[]> {
-    const queryParams = filters
-      ? `?${new URLSearchParams(filters as any).toString()}`
-      : "";
-    const response = await apiService.get<{
-      success: boolean;
-      data: AuctionUI[];
-    }>(`${AUCTION_ENDPOINTS.LIST}${queryParams}`);
-    return response.data;
+  async list(filters?: Partial<AuctionFilter>): Promise<PaginatedResponse<AuctionUI>> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            value.forEach((v) => params.append(key, String(v)));
+          } else {
+            params.append(key, String(value));
+          }
+        }
+      });
+    }
+    const qs = params.toString();
+    const endpoint = qs ? `${AUCTION_ENDPOINTS.LIST}?${qs}` : AUCTION_ENDPOINTS.LIST;
+    return apiService.get<PaginatedResponse<AuctionUI>>(endpoint);
   }
 
   async getById(id: string): Promise<AuctionUI> {

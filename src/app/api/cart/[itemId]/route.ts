@@ -10,7 +10,7 @@ const UpdateCartItemSchema = z.object({
 // PATCH /api/cart/[itemId] - Update cart item quantity
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ itemId: string }> },
+  { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
     const { itemId } = await params;
@@ -19,7 +19,7 @@ export async function PATCH(
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -31,7 +31,7 @@ export async function PATCH(
     if (!validation.success) {
       return NextResponse.json(
         { success: false, error: validation.error.issues[0].message },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -43,7 +43,7 @@ export async function PATCH(
     if (!itemDoc.exists) {
       return NextResponse.json(
         { success: false, error: "Cart item not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -53,7 +53,7 @@ export async function PATCH(
     if (itemData.user_id !== user.id) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -66,7 +66,7 @@ export async function PATCH(
     if (!product) {
       return NextResponse.json(
         { success: false, error: "Product not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -76,7 +76,7 @@ export async function PATCH(
           success: false,
           error: `Only ${product.stock_count} items available`,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -96,7 +96,7 @@ export async function PATCH(
     console.error("Error updating cart item:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update cart item" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -104,7 +104,7 @@ export async function PATCH(
 // DELETE /api/cart/[itemId] - Remove cart item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ itemId: string }> },
+  { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
     const user = await getCurrentUser(request);
@@ -112,7 +112,7 @@ export async function DELETE(
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -123,7 +123,7 @@ export async function DELETE(
     if (!itemDoc.exists) {
       return NextResponse.json(
         { success: false, error: "Cart item not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -133,7 +133,7 @@ export async function DELETE(
     if (itemData.user_id !== user.id) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -148,7 +148,7 @@ export async function DELETE(
     console.error("Error removing cart item:", error);
     return NextResponse.json(
       { success: false, error: "Failed to remove cart item" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

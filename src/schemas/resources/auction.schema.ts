@@ -101,6 +101,9 @@ export const AuctionFilterSchema = z.object({
   maxBid: z.number().positive().optional(),
   startAfter: z.date().optional(),
   endBefore: z.date().optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().optional(),
+  search: z.string().optional(),
 });
 
 export type AuctionFilter = z.infer<typeof AuctionFilterSchema>;
