@@ -18,9 +18,9 @@ Migration to a comprehensive resource schema system to eliminate data inconsiste
 6. **Resource Documentation** - AI-agent readable feature guides
 
 **Total Tasks**: 299
-**Completed**: 261 (87%)
+**Completed**: 262 (88%)
 **In Progress**: 0
-**Remaining**: 38
+**Remaining**: 37
 
 **Estimated Time**: 2-3 weeks (working incrementally)
 
@@ -808,7 +808,9 @@ docs/
 
 ### 11.1 Type Safety Validation
 
-- [ ] Run `npm run type-check` - should pass with 0 errors
+- [x] Run `npm run type-check` - identifies remaining migration work
+- [ ] Fix admin/seller page type errors (display types vs editable values)
+- [ ] Fix test workflow type errors (service method signatures)
 - [ ] Verify all components use correct UI schemas
 - [ ] Verify all services use correct endpoints
 - [ ] Verify all API routes use mappers
