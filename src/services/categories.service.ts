@@ -86,10 +86,7 @@ class CategoriesService {
    * Update category (admin)
    */
   async update(slug: string, data: any): Promise<CategoryUI> {
-    return apiService.patch<CategoryUI>(
-      `/api/admin/categories/${slug}`,
-      data
-    );
+    return apiService.patch<CategoryUI>(`/api/admin/categories/${slug}`, data);
   }
 
   /**
