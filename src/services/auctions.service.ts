@@ -23,7 +23,9 @@ interface PaginatedResponse<T> {
 }
 
 class AuctionsService {
-  async list(filters?: Partial<AuctionFilter>): Promise<PaginatedResponse<AuctionUI>> {
+  async list(
+    filters?: Partial<AuctionFilter>
+  ): Promise<PaginatedResponse<AuctionUI>> {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -37,7 +39,9 @@ class AuctionsService {
       });
     }
     const qs = params.toString();
-    const endpoint = qs ? `${AUCTION_ENDPOINTS.LIST}?${qs}` : AUCTION_ENDPOINTS.LIST;
+    const endpoint = qs
+      ? `${AUCTION_ENDPOINTS.LIST}?${qs}`
+      : AUCTION_ENDPOINTS.LIST;
     return apiService.get<PaginatedResponse<AuctionUI>>(endpoint);
   }
 

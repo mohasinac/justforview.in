@@ -235,8 +235,6 @@ export default function AdminAuctionsPage() {
     URL.revokeObjectURL(url);
   };
 
-
-
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
