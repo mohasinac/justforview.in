@@ -604,7 +604,7 @@ docs/
 
 **Auction Pages**:
 
-- [ ] `src/app/auctions/page.tsx`
+- [x] `src/app/auctions/page.tsx`
 - [ ] `src/app/auctions/[slug]/page.tsx`
 - [ ] `src/app/seller/auctions/page.tsx`
 - [ ] `src/app/admin/auctions/page.tsx`
@@ -612,13 +612,13 @@ docs/
 **Category Pages**:
 
 - [x] `src/app/categories/page.tsx`
-- [ ] `src/app/categories/[slug]/page.tsx`
+- [x] `src/app/categories/[slug]/page.tsx`
 - [ ] `src/app/admin/categories/page.tsx`
 
 **Shop Pages**:
 
 - [x] `src/app/shops/page.tsx`
-- [ ] `src/app/shops/[slug]/page.tsx`
+- [x] `src/app/shops/[slug]/page.tsx`
 - [ ] `src/app/seller/shop/page.tsx`
 - [ ] `src/app/admin/shops/page.tsx`
 
@@ -852,9 +852,9 @@ docs/
 ## Progress Tracking
 
 **Total Tasks**: 299
-**Completed**: 189 (63%)
+**Completed**: 190 (64%)
 **In Progress**: 3
-**Remaining**: 107
+**Remaining**: 106
 
 **Estimated Time**: 2-3 weeks (working incrementally)
 

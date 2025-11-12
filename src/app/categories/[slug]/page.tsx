@@ -80,13 +80,14 @@ export default function CategoryDetailPage({ params }: PageProps) {
       filtered = filtered.filter((cat) =>
         cat.name.toLowerCase().includes(query)
       );
-    }      filtered.sort((a, b) => {
-        if (subcategorySort === "alphabetical") {
-          return a.name.localeCompare(b.name);
-        } else {
-          return b.stats.productCount - a.stats.productCount;
-        }
-      });
+    }
+    filtered.sort((a, b) => {
+      if (subcategorySort === "alphabetical") {
+        return a.name.localeCompare(b.name);
+      } else {
+        return b.stats.productCount - a.stats.productCount;
+      }
+    });
 
     setFilteredSubcategories(filtered);
   }, [subcategories, subcategorySearch, subcategorySort]);
@@ -278,7 +279,11 @@ export default function CategoryDetailPage({ params }: PageProps) {
 
       <div className="max-w-7xl mx-auto px-4">
         {/* Category Header */}
-        <div className={`relative ${category.media.banner ? "-mt-16" : "pt-8"} mb-8`}>
+        <div
+          className={`relative ${
+            category.media.banner ? "-mt-16" : "pt-8"
+          } mb-8`}
+        >
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center gap-6">
               {/* Profile Image */}
