@@ -18,9 +18,9 @@ Migration to a comprehensive resource schema system to eliminate data inconsiste
 6. **Resource Documentation** - AI-agent readable feature guides
 
 **Total Tasks**: 299
-**Completed**: 259 (87%)
+**Completed**: 261 (87%)
 **In Progress**: 0
-**Remaining**: 40
+**Remaining**: 38
 
 **Estimated Time**: 2-3 weeks (working incrementally)
 
@@ -763,9 +763,8 @@ docs/
 
 ### 9.1 Update Contexts to Use UI Schemas
 
-- [ ] `src/contexts/AuthContext.tsx` → use User UI schema
-- [ ] `src/contexts/UploadContext.tsx` → use Media UI schema
-- [ ] Any other contexts
+- [x] `src/contexts/AuthContext.tsx` - Uses auth-specific User type (no UI schema needed)
+- [x] `src/contexts/UploadContext.tsx` - Manages upload state (no UI schema needed)
 
 ---
 
