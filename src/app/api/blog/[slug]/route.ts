@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
+import { z } from "zod";
 
 const COLLECTION = "blog_posts";
+
+const UpdateBlogPostSchema = z.object({
+  title: z.string().min(1).optional(),
+  excerpt: z.string().optional(),
+  content: z.string().optional(),
+  featuredImage: z.string().url().optional(),
+  category: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  showOnHomepage: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
+});
 
 // GET /api/blog/[slug] - Get single blog post by slug
 export async function GET(
@@ -56,6 +69,15 @@ export async function PATCH(
     const { slug } = await params;
     const body = await req.json();
 
+    // Validate request body against the schema
+    const validation = UpdateBlogPostSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error.issues[0].message },
+        { status: 400 },
+      );
+    }
+
     const snapshot = await db
       .collection(COLLECTION)
       .where("slug", "==", slug)
@@ -72,29 +94,11 @@ export async function PATCH(
     const doc = snapshot.docs[0];
     const updates: any = {
       updatedAt: new Date().toISOString(),
+      ...validation.data,
     };
 
-    // Allow updating specific fields
-    const allowedFields = [
-      "title",
-      "excerpt",
-      "content",
-      "featuredImage",
-      "category",
-      "tags",
-      "status",
-      "showOnHomepage",
-      "isFeatured",
-    ];
-
-    allowedFields.forEach((field) => {
-      if (body[field] !== undefined) {
-        updates[field] = body[field];
-      }
-    });
-
     // Update publishedAt if changing to published
-    if (body.status === "published" && doc.data().status !== "published") {
+    if (validation.data.status === "published" && doc.data().status !== "published") {
       updates.publishedAt = new Date().toISOString();
     }
 

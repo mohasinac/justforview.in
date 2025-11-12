@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../../lib/session";
+import { z } from "zod";
+
+const UpdateCartItemSchema = z.object({
+  quantity: z.number().int().min(0, "Quantity must be 0 or greater"),
+});
 
 // PATCH /api/cart/[itemId] - Update cart item quantity
 export async function PATCH(
@@ -19,14 +24,18 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { quantity } = body;
 
-    if (quantity === undefined || quantity < 0) {
+    // Validate request body
+    const validation = UpdateCartItemSchema.safeParse(body);
+
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: "Invalid quantity" },
+        { success: false, error: validation.error.issues[0].message },
         { status: 400 },
       );
     }
+
+    const { quantity } = validation.data;
 
     // Get cart item
     const itemDoc = await Collections.cart().doc(itemId).get();

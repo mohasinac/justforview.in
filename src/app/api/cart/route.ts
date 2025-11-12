@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../lib/session";
 import { COLLECTIONS } from "@/constants/database";
+import { z } from "zod";
+
+const AddToCartSchema = z.object({
+  productId: z.string().min(1, "Product ID is required"),
+  quantity: z
+    .number()
+    .int()
+    .min(1, "Quantity must be at least 1")
+    .default(1),
+  variant: z.string().optional(),
+});
 
 // GET /api/cart - Get user cart with summary
 export async function GET(request: NextRequest) {
@@ -104,14 +115,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { productId, quantity = 1, variant } = body;
+    const validation = AddToCartSchema.safeParse(body);
 
-    if (!productId) {
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: "Product ID is required" },
+        { success: false, error: validation.error.issues[0].message },
         { status: 400 },
       );
     }
+
+    const { productId, quantity, variant } = validation.data;
 
     // Check if product exists and has stock
     const productDoc = await Collections.products().doc(productId).get();
