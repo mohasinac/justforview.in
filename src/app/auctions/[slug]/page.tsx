@@ -17,7 +17,8 @@ import {
 import Link from "next/link";
 import { auctionsService } from "@/services/auctions.service";
 import { shopsService } from "@/services/shops.service";
-import type { Auction, Bid, Shop } from "@/types";
+import type { AuctionUI } from "@/schemas/ui/auction.ui";
+import type { ShopUI } from "@/schemas/ui/shop.ui";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { CardGrid } from "@/components/cards/CardGrid";
@@ -28,11 +29,11 @@ export default function AuctionDetailPage() {
   const { user } = useAuth();
   const slug = params.slug as string;
 
-  const [auction, setAuction] = useState<Auction | null>(null);
-  const [bids, setBids] = useState<Bid[]>([]);
-  const [shop, setShop] = useState<Shop | null>(null);
-  const [similarAuctions, setSimilarAuctions] = useState<Auction[]>([]);
-  const [shopAuctions, setShopAuctions] = useState<Auction[]>([]);
+  const [auction, setAuction] = useState<AuctionUI | null>(null);
+  const [bids, setBids] = useState<any[]>([]);
+  const [shop, setShop] = useState<ShopUI | null>(null);
+  const [similarAuctions, setSimilarAuctions] = useState<AuctionUI[]>([]);
+  const [shopAuctions, setShopAuctions] = useState<AuctionUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [bidAmount, setBidAmount] = useState("");
   const [isPlacingBid, setIsPlacingBid] = useState(false);

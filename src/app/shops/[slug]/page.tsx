@@ -624,7 +624,9 @@ export default function ShopPage({ params }: ShopPageProps) {
                               )}
                               {/* Status Badge */}
                               <div className="absolute top-2 right-2">
-                                <span className={`px-2 py-1 rounded text-xs font-semibold ${auction.status.className}`}>
+                                <span
+                                  className={`px-2 py-1 rounded text-xs font-semibold ${auction.status.className}`}
+                                >
                                   {auction.status.label}
                                 </span>
                               </div>
@@ -654,12 +656,12 @@ export default function ShopPage({ params }: ShopPageProps) {
                                 </div>
 
                                 {auction.isLive && (
-                                    <div className="pt-2 border-t border-gray-200">
-                                      <span className="text-xs text-red-600 font-medium">
-                                        {auction.timeRemaining.display}
-                                      </span>
-                                    </div>
-                                  )}
+                                  <div className="pt-2 border-t border-gray-200">
+                                    <span className="text-xs text-red-600 font-medium">
+                                      {auction.timeRemaining.display}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </Link>
@@ -682,7 +684,9 @@ export default function ShopPage({ params }: ShopPageProps) {
                                   className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />
                                 <div className="absolute top-2 right-2">
-                                  <span className={`px-2 py-1 rounded text-xs font-semibold ${auction.status.className}`}>
+                                  <span
+                                    className={`px-2 py-1 rounded text-xs font-semibold ${auction.status.className}`}
+                                  >
                                     {auction.status.label}
                                   </span>
                                 </div>
@@ -714,22 +718,20 @@ export default function ShopPage({ params }: ShopPageProps) {
                                     </p>
                                   </div>
                                   {auction.isLive && (
-                                      <div>
-                                        <span className="text-xs text-gray-600">
-                                          Time Left
-                                        </span>
-                                        <p className="text-sm text-red-600 font-medium">
-                                          {auction.timeRemaining.display}
-                                        </p>
-                                      </div>
-                                    )}
+                                    <div>
+                                      <span className="text-xs text-gray-600">
+                                        Time Left
+                                      </span>
+                                      <p className="text-sm text-red-600 font-medium">
+                                        {auction.timeRemaining.display}
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 
                               <button className="mt-4 sm:mt-0 sm:self-end rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors">
-                                {auction.isLive
-                                  ? "Place Bid"
-                                  : "View Details"}
+                                {auction.isLive ? "Place Bid" : "View Details"}
                               </button>
                             </div>
                           </Link>

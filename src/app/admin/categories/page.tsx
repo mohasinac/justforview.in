@@ -34,27 +34,13 @@ import {
   toInlineFields,
 } from "@/constants/form-fields";
 import { validateForm } from "@/lib/form-validation";
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  parent_id: string | null;
-  description?: string;
-  image?: string;
-  is_featured: boolean;
-  show_on_homepage: boolean;
-  is_active: boolean;
-  sort_order?: number;
-  created_at: string;
-  updated_at: string;
-}
+import type { CategoryUI } from "@/schemas/ui/category.ui";
 
 export default function CategoriesPage() {
   const { user, isAdmin } = useAuth();
   const [view, setView] = useState<"grid" | "table">("table");
   const [showFilters, setShowFilters] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");

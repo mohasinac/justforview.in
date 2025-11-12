@@ -275,7 +275,8 @@ function AuctionsContent() {
                     {
                       auctions.filter((a) => {
                         return (
-                          a.isLive && a.timeRemaining.total < 24 * 60 * 60 * 1000
+                          a.isLive &&
+                          a.timeRemaining.total < 24 * 60 * 60 * 1000
                         );
                       }).length
                     }
