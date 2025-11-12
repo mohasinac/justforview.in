@@ -30,7 +30,7 @@ export function useCart() {
         // Calculate guest cart summary
         const subtotal = guestItems.reduce(
           (sum, item) => sum + item.price * item.quantity,
-          0,
+          0
         );
         const shipping = subtotal > 5000 ? 0 : 100;
         const tax = subtotal * 0.18;
@@ -66,7 +66,7 @@ export function useCart() {
         image: string;
         shopId: string;
         shopName: string;
-      },
+      }
     ) => {
       try {
         if (user) {
@@ -93,7 +93,7 @@ export function useCart() {
         throw err;
       }
     },
-    [user, loadCart],
+    [user, loadCart]
   );
 
   // Update item quantity
@@ -114,7 +114,7 @@ export function useCart() {
         throw err;
       }
     },
-    [user, loadCart],
+    [user, loadCart]
   );
 
   // Remove item
@@ -135,7 +135,7 @@ export function useCart() {
         throw err;
       }
     },
-    [user, loadCart],
+    [user, loadCart]
   );
 
   // Clear cart
@@ -184,7 +184,7 @@ export function useCart() {
         throw err;
       }
     },
-    [user, cart],
+    [user, cart]
   );
 
   // Remove coupon

@@ -3,7 +3,7 @@
  * Centralized API endpoints for consistent route management across the application
  *
  * @deprecated This file is deprecated in favor of resource-specific endpoint files.
- * 
+ *
  * Migration Guide:
  * - Use endpoint constants from `@/constants/endpoints/*` instead
  * - Examples:
@@ -11,7 +11,7 @@
  *   - AUCTION_ROUTES → Use AUCTION_ENDPOINTS from `@/constants/endpoints/auction.endpoints`
  *   - SHOP_ROUTES → Use SHOP_ENDPOINTS from `@/constants/endpoints/shop.endpoints`
  *   - ORDER_ROUTES → Use ORDER_ENDPOINTS from `@/constants/endpoints/order.endpoints`
- * 
+ *
  * This file is kept for backward compatibility but will be removed in a future version.
  * Please update your imports to use the new resource-specific endpoint files.
  *

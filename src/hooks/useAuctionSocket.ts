@@ -211,7 +211,7 @@ export function useAuctionSocket(auctionId: string | null) {
         setAutoBidActive(true);
       }
     },
-    [socket, connected, auctionId],
+    [socket, connected, auctionId]
   );
 
   // Cancel auto-bid
@@ -222,7 +222,7 @@ export function useAuctionSocket(auctionId: string | null) {
         setAutoBidActive(false);
       }
     },
-    [socket, connected, auctionId],
+    [socket, connected, auctionId]
   );
 
   // Notify server of new bid (after API call)
@@ -232,7 +232,7 @@ export function useAuctionSocket(auctionId: string | null) {
         socket.emit("bid-placed", { auctionId, userId, amount });
       }
     },
-    [socket, connected, auctionId],
+    [socket, connected, auctionId]
   );
 
   return {

@@ -15,6 +15,9 @@ import type {
   BlogPostFilter,
 } from "@/schemas/resources/blog-post.schema";
 
+export type BlogFilters = Partial<BlogPostFilter>;
+export type { BlogPostUI as BlogPost };
+
 /**
  * Public Blog Operations
  */
@@ -285,4 +288,13 @@ export const adminBlogService = {
       : "";
     return apiService.get(`${ADMIN_BLOG_POST_ENDPOINTS.export}${queryParams}`);
   },
+};
+
+// Export combined service with admin methods
+export const combinedBlogService = {
+  ...blogService,
+  getById: adminBlogService.getById,
+  create: adminBlogService.create,
+  update: adminBlogService.update,
+  delete: adminBlogService.delete,
 };

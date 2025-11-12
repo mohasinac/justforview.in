@@ -2,18 +2,18 @@
  * Shared Type Definitions
  *
  * @deprecated This file is deprecated in favor of the new schema system.
- * 
+ *
  * Migration Guide:
  * - Use UI schemas from `@/schemas/ui/*` for frontend display
  * - Use resource schemas from `@/schemas/resources/*` for backend validation
  * - Use mappers from `@/schemas/mappers/*` for data transformation
- * 
+ *
  * Examples:
  * - `Product` → Use `ProductUI` from `@/schemas/ui/product.ui`
  * - `Auction` → Use `AuctionUI` from `@/schemas/ui/auction.ui`
  * - `Shop` → Use `ShopUI` from `@/schemas/ui/shop.ui`
  * - `Order` → Use `OrderUI` from `@/schemas/ui/order.ui`
- * 
+ *
  * See docs/project/02-SERVICE-LAYER-GUIDE.md for more information.
  */
 
