@@ -61,6 +61,44 @@ class OrdersService {
   async getSellerOrders(): Promise<OrderUI[]> {
     return apiService.get<OrderUI[]>("/api/seller/orders");
   }
+
+  async updateStatus(
+    id: string,
+    data: { status: string; note?: string }
+  ): Promise<OrderUI> {
+    return apiService.patch<OrderUI>(ORDER_ENDPOINTS.byId(id), data);
+  }
+
+  async createShipment(
+    id: string,
+    data: {
+      carrier: string;
+      trackingNumber: string;
+      estimatedDelivery?: Date;
+    }
+  ): Promise<OrderUI> {
+    return apiService.post<OrderUI>(`${ORDER_ENDPOINTS.byId(id)}/shipment`, data);
+  }
+
+  async track(id: string): Promise<any> {
+    return apiService.get<any>(`${ORDER_ENDPOINTS.byId(id)}/tracking`);
+  }
+
+  async getStats(): Promise<any> {
+    return apiService.get<any>("/api/admin/orders/stats");
+  }
+
+  async downloadInvoice(id: string): Promise<Blob> {
+    return apiService.get<Blob>(`${ORDER_ENDPOINTS.byId(id)}/invoice`);
+  }
 }
 
 export const ordersService = new OrdersService();
+
+// Export types for external use
+export type { OrderFilter, CreateOrder, UpdateOrder } from "@/schemas/resources/order.schema";
+export type OrderFilters = Partial<OrderFilter>;
+export type CreateOrderData = CreateOrder;
+export type UpdateOrderStatusData = { status: string; note?: string };
+export type CreateShipmentData = { carrier: string; trackingNumber: string; estimatedDelivery?: Date };
+export type CancelOrderData = { reason?: string };

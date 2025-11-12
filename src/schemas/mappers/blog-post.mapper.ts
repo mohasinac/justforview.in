@@ -243,6 +243,12 @@ export function mapBlogPostToUI(post: BlogPost): BlogPostUI {
     stats: getEngagementStats(post),
     readingTime: post.readingTime,
     readingTimeLabel: getReadingTimeLabel(post.readingTime),
+    
+    // Backward compatibility
+    views: post.viewCount,
+    likes: post.likeCount,
+    showOnHomepage: post.showOnHomepage,
+    
     isFeatured: post.isFeatured,
     allowComments: post.allowComments,
     relatedPostIds: post.relatedPostIds,

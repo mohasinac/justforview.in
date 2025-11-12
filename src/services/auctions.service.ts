@@ -101,3 +101,10 @@ class AuctionsService {
 }
 
 export const auctionsService = new AuctionsService();
+
+// Export types for external use
+export type { AuctionFilter, CreateAuction, UpdateAuction } from "@/schemas/resources/auction.schema";
+export type AuctionFilters = Partial<AuctionFilter>;
+export type CreateAuctionData = CreateAuction;
+export type UpdateAuctionData = Partial<UpdateAuction>;
+export type PlaceBidData = { bidAmount: number; maxAutoBid?: number };

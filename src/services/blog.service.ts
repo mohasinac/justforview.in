@@ -293,8 +293,8 @@ export const adminBlogService = {
 // Export combined service with admin methods
 export const combinedBlogService = {
   ...blogService,
-  getById: adminBlogService.getById,
-  create: adminBlogService.create,
-  update: adminBlogService.update,
-  delete: adminBlogService.delete,
+  ...adminBlogService,
 };
+
+// Default export for compatibility
+export default combinedBlogService;

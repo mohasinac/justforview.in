@@ -96,6 +96,64 @@ export const supportService = {
   async close(id: string): Promise<SupportTicketUI> {
     return apiService.post<SupportTicketUI>(SUPPORT_ENDPOINTS.close(id), {});
   },
+
+  /**
+   * Create ticket (legacy alias)
+   */
+  async createTicket(data: CreateSupportTicket): Promise<SupportTicketUI> {
+    return this.create(data);
+  },
+
+  /**
+   * Get ticket (legacy alias)
+   */
+  async getTicket(id: string): Promise<SupportTicketUI> {
+    return this.getById(id);
+  },
+
+  /**
+   * Reply to ticket (legacy alias)
+   */
+  async replyToTicket(id: string, data: AddMessage): Promise<SupportTicketUI> {
+    return this.addMessage(id, data);
+  },
+
+  /**
+   * Get ticket messages
+   */
+  async getMessages(id: string): Promise<any[]> {
+    return apiService.get<any[]>(`${SUPPORT_ENDPOINTS.byId(id)}/messages`);
+  },
+
+  /**
+   * Assign ticket
+   */
+  async assignTicket(
+    id: string,
+    data: { assignedTo: string }
+  ): Promise<SupportTicketUI> {
+    return apiService.patch<SupportTicketUI>(
+      `${SUPPORT_ENDPOINTS.byId(id)}/assign`,
+      data
+    );
+  },
+
+  /**
+   * Update ticket status
+   */
+  async updateTicket(
+    id: string,
+    data: Partial<UpdateSupportTicket>
+  ): Promise<SupportTicketUI> {
+    return this.update(id, data);
+  },
+
+  /**
+   * Close ticket (legacy alias)
+   */
+  async closeTicket(id: string): Promise<SupportTicketUI> {
+    return this.close(id);
+  },
 };
 
 /**
@@ -227,3 +285,11 @@ export const adminSupportService = {
     return apiService.get(`${ADMIN_SUPPORT_ENDPOINTS.export}${queryParams}`);
   },
 };
+
+// Export types for external use
+export type { TicketFilters };
+export type CreateTicketData = CreateSupportTicket;
+export type UpdateTicketData = Partial<UpdateSupportTicket>;
+export type ReplyToTicketData = AddMessage;
+export type AssignTicketData = { assignedTo: string };
+export type EscalateTicketData = { priority: string; reason?: string };

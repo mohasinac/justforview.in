@@ -87,6 +87,7 @@ export const BlogPostSchema = z.object({
 
   // Flags
   isFeatured: z.boolean().default(false),
+  showOnHomepage: z.boolean().default(false),
   allowComments: z.boolean().default(true),
 
   // Related

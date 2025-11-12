@@ -73,6 +73,31 @@ class ShopsService {
       `${SHOP_ENDPOINTS.LIST}?search=${encodeURIComponent(query)}`
     );
   }
+
+  async getShopProducts(
+    shopId: string,
+    params?: { page?: number; limit?: number }
+  ): Promise<any> {
+    const qs = params ? new URLSearchParams(params as any).toString() : "";
+    const endpoint = qs
+      ? `${SHOP_ENDPOINTS.BY_ID(shopId)}/products?${qs}`
+      : `${SHOP_ENDPOINTS.BY_ID(shopId)}/products`;
+    return apiService.get<any>(endpoint);
+  }
+
+  async getStats(shopId: string): Promise<any> {
+    return apiService.get<any>(`${SHOP_ENDPOINTS.BY_ID(shopId)}/stats`);
+  }
 }
 
 export const shopsService = new ShopsService();
+
+// Export types for external use
+export type { ShopFilter, CreateShop, UpdateShop } from "@/schemas/resources/shop.schema";
+export type ShopFilters = Partial<ShopFilter>;
+export type CreateShopData = CreateShop;
+export type UpdateShopData = Partial<UpdateShop>;
+export type ShopVerificationData = { isVerified: boolean; reason?: string };
+export type ShopFeatureData = { isFeatured: boolean };
+export type ShopBanData = { isBanned: boolean; reason?: string };
+export type ShopPaymentData = any;

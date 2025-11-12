@@ -98,6 +98,14 @@ export interface CategoryUI {
   showOnHomepage: boolean;
   isActive: boolean;
 
+  // Backward compatibility for admin pages
+  parentId?: string | null; // alias for hierarchy.parentId
+  image?: string; // alias for media.image
+  is_active: boolean; // snake_case alias for isActive
+  is_featured: boolean; // snake_case alias for isFeatured
+  show_on_homepage: boolean; // snake_case alias for showOnHomepage
+  parent_id?: string | null; // snake_case alias for parentId
+
   // SEO
   metaTitle: string;
   metaDescription: string;

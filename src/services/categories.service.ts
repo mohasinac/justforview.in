@@ -98,4 +98,10 @@ class CategoriesService {
 }
 
 export const categoriesService = new CategoriesService();
+
+// Export types for external use
+export type { CategoryFilter } from "@/schemas/resources/category.schema";
 export type CategoryFilters = Partial<CategoryFilter>;
+export type CreateCategoryData = any;
+export type UpdateCategoryData = any;
+export type CategoryTree = CategoryUI;

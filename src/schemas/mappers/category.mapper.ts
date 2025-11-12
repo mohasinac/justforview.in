@@ -186,6 +186,14 @@ export const mapCategoryToUI = (category: Category): CategoryUI => {
     showOnHomepage: category.showOnHomepage,
     isActive: category.isActive,
 
+    // Backward compatibility
+    parentId: category.parentId,
+    image: category.image,
+    is_active: category.isActive,
+    is_featured: category.isFeatured,
+    show_on_homepage: category.showOnHomepage,
+    parent_id: category.parentId,
+
     // SEO
     metaTitle: category.metaTitle || category.name,
     metaDescription: category.metaDescription || category.description || "",

@@ -99,6 +99,11 @@ export interface BlogPostUI {
   readingTime: number;
   readingTimeLabel: string;
 
+  // Backward compatibility for admin pages
+  views: number; // alias for stats.viewCount
+  likes: number; // alias for stats.likeCount
+  showOnHomepage?: boolean; // flag for homepage display
+
   // Flags
   isFeatured: boolean;
   allowComments: boolean;
