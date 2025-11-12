@@ -35,7 +35,9 @@ export const supportService = {
   /**
    * Get user tickets
    */
-  async list(filters?: TicketFilters): Promise<PaginatedResponse<SupportTicketUI>> {
+  async list(
+    filters?: TicketFilters
+  ): Promise<PaginatedResponse<SupportTicketUI>> {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -45,7 +47,9 @@ export const supportService = {
       });
     }
     const qs = params.toString();
-    const endpoint = qs ? `${SUPPORT_ENDPOINTS.list}?${qs}` : SUPPORT_ENDPOINTS.list;
+    const endpoint = qs
+      ? `${SUPPORT_ENDPOINTS.list}?${qs}`
+      : SUPPORT_ENDPOINTS.list;
     return apiService.get<PaginatedResponse<SupportTicketUI>>(endpoint);
   },
 
@@ -101,7 +105,9 @@ export const adminSupportService = {
   /**
    * Get all tickets (admin)
    */
-  async list(filters?: TicketFilters): Promise<PaginatedResponse<SupportTicketUI>> {
+  async list(
+    filters?: TicketFilters
+  ): Promise<PaginatedResponse<SupportTicketUI>> {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -111,7 +117,9 @@ export const adminSupportService = {
       });
     }
     const qs = params.toString();
-    const endpoint = qs ? `${ADMIN_SUPPORT_ENDPOINTS.list}?${qs}` : ADMIN_SUPPORT_ENDPOINTS.list;
+    const endpoint = qs
+      ? `${ADMIN_SUPPORT_ENDPOINTS.list}?${qs}`
+      : ADMIN_SUPPORT_ENDPOINTS.list;
     return apiService.get<PaginatedResponse<SupportTicketUI>>(endpoint);
   },
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { cartService, CartSummary } from "@/services/cart.service";
 import { useAuth } from "@/contexts/AuthContext";
-import type { CartItem } from "@/types";
+import type { CartItemUI } from "@/schemas/ui/cart.ui";
 
 export function useCart() {
   const { user } = useAuth();

@@ -11,18 +11,20 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { io, Socket } from "socket.io-client";
+import type { AuctionUI, PriceDisplay } from "@/schemas/ui/auction.ui";
+
+interface BidHistoryItem {
+  id: string;
+  userId: string;
+  userName?: string;
+  amount: PriceDisplay;
+  timestamp: string;
+  isWinning: boolean;
+}
 
 interface AuctionState {
-  auction: {
-    id: string;
-    name: string;
-    current_bid: number;
-    bid_count: number;
-    status: string;
-    end_time: string;
-    reserve_price?: number;
-  };
-  bids: any[];
+  auction: AuctionUI;
+  bids: BidHistoryItem[];
   watcherCount: number;
   timestamp: string;
 }
@@ -90,7 +92,7 @@ export function useAuctionSocket(auctionId: string | null) {
       setConnected(false);
     });
 
-    newSocket.on("connect_error", (error) => {
+    newSocket.on("connect_error", (error: Error) => {
       console.error("[Socket] Connection error:", error);
     });
 
@@ -113,16 +115,28 @@ export function useAuctionSocket(auctionId: string | null) {
           ...prev,
           auction: {
             ...prev.auction,
-            current_bid: bid.currentBid,
-            bid_count: bid.bidCount,
+            bid: {
+              ...prev.auction.bid,
+              current: {
+                raw: bid.currentBid,
+                formatted: `₹${bid.currentBid.toLocaleString()}`,
+                currency: "INR",
+              },
+              count: bid.bidCount,
+              countLabel: `${bid.bidCount} bid${bid.bidCount !== 1 ? "s" : ""}`,
+            },
           },
           bids: [
             {
               id: bid.bidId,
-              user_id: bid.userId,
-              amount: bid.amount,
-              created_at: bid.timestamp,
-              is_winning: bid.isWinning,
+              userId: bid.userId,
+              amount: {
+                raw: bid.amount,
+                formatted: `₹${bid.amount.toLocaleString()}`,
+                currency: "INR",
+              },
+              timestamp: bid.timestamp,
+              isWinning: bid.isWinning,
             },
             ...prev.bids.slice(0, 9),
           ],
@@ -151,7 +165,12 @@ export function useAuctionSocket(auctionId: string | null) {
           ...prev,
           auction: {
             ...prev.auction,
-            status: data.status,
+            status: {
+              value: data.status,
+              label: data.status,
+              color: data.status === "live" ? "green" : "gray",
+              className: `status-${data.status}`,
+            },
           },
         };
       });

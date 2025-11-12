@@ -1,7 +1,20 @@
 /**
  * Shared Type Definitions
  *
- * Common types used throughout the application
+ * @deprecated This file is deprecated in favor of the new schema system.
+ * 
+ * Migration Guide:
+ * - Use UI schemas from `@/schemas/ui/*` for frontend display
+ * - Use resource schemas from `@/schemas/resources/*` for backend validation
+ * - Use mappers from `@/schemas/mappers/*` for data transformation
+ * 
+ * Examples:
+ * - `Product` → Use `ProductUI` from `@/schemas/ui/product.ui`
+ * - `Auction` → Use `AuctionUI` from `@/schemas/ui/auction.ui`
+ * - `Shop` → Use `ShopUI` from `@/schemas/ui/shop.ui`
+ * - `Order` → Use `OrderUI` from `@/schemas/ui/order.ui`
+ * 
+ * See docs/project/02-SERVICE-LAYER-GUIDE.md for more information.
  */
 
 /**
@@ -11,6 +24,7 @@ export type UserRole = "guest" | "user" | "seller" | "admin";
 
 /**
  * User Interface
+ * @deprecated Use UserUI from @/schemas/ui/user.ui
  */
 export interface User {
   id: string;
@@ -27,6 +41,7 @@ export interface User {
 
 /**
  * Shop Interface
+ * @deprecated Use ShopUI from @/schemas/ui/shop.ui
  */
 export interface Shop {
   id: string;
@@ -139,6 +154,7 @@ export interface ProductDimensions {
 
 /**
  * Product Interface
+ * @deprecated Use ProductUI from @/schemas/ui/product.ui
  */
 export interface Product {
   id: string;
@@ -213,6 +229,7 @@ export interface Product {
 
 /**
  * Category Interface
+ * @deprecated Use CategoryUI from @/schemas/ui/category.ui
  */
 export interface Category {
   id: string;
@@ -293,6 +310,7 @@ export interface BogoConfig {
 
 /**
  * Coupon Interface
+ * @deprecated Use CouponUI from @/schemas/ui/coupon.ui
  */
 export interface Coupon {
   id: string;
@@ -394,6 +412,7 @@ export interface OrderItem {
 
 /**
  * Order Interface
+ * @deprecated Use OrderUI from @/schemas/ui/order.ui
  */
 export interface Order {
   id: string;
@@ -461,6 +480,7 @@ export interface Order {
 
 /**
  * Review Interface
+ * @deprecated Use ReviewUI from @/schemas/ui/review.ui
  */
 export interface Review {
   id: string;
@@ -508,6 +528,7 @@ export type AuctionStatus =
 
 /**
  * Auction Interface
+ * @deprecated Use AuctionUI from @/schemas/ui/auction.ui
  */
 export interface Auction {
   id: string;
@@ -569,6 +590,7 @@ export type BlogPostStatus = "draft" | "published" | "archived";
 
 /**
  * Blog Post Interface
+ * @deprecated Use BlogPostUI from @/schemas/ui/blog-post.ui
  */
 export interface BlogPost {
   id: string;
@@ -632,6 +654,7 @@ export interface Address {
 
 /**
  * Cart Item Interface
+ * @deprecated Use CartItemUI from @/schemas/ui/cart.ui
  */
 export interface CartItem {
   id: string;
@@ -677,6 +700,7 @@ export type ReturnReason =
 
 /**
  * Return Interface
+ * @deprecated Use ReturnUI from @/schemas/ui/return.ui
  */
 export interface Return {
   id: string;
@@ -735,6 +759,7 @@ export type SupportTicketPriority = "low" | "medium" | "high" | "urgent";
 
 /**
  * Support Ticket Interface
+ * @deprecated Use SupportTicketUI from @/schemas/ui/support.ui
  */
 export interface SupportTicket {
   id: string;
