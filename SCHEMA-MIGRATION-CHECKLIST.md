@@ -154,20 +154,18 @@ docs/
 
 ### Priority Resources (Complete These First)
 
-#### 2.1 Product Resource 🚧
+#### 2.1 Product Resource ✅
 
 **Backend**:
 
-- [ ] `src/schemas/resources/product.schema.ts` - Database schema with Zod validation
-- [ ] `src/types/entities/product.types.ts` - Product entity types
-- [ ] `src/constants/endpoints/product.endpoints.ts` - Product API endpoints
-- [ ] `src/constants/fields/product.fields.ts` - Product field definitions
+- [x] `src/schemas/resources/product.schema.ts`
+- [x] `src/constants/endpoints/product.endpoints.ts`
+- [x] `src/constants/fields/product.fields.ts`
 
 **Frontend**:
 
-- [ ] `src/schemas/ui/product.ui.ts` - Product UI schema
-- [ ] `src/types/ui/product.ui.types.ts` - Product UI types
-- [ ] `src/schemas/mappers/product.mapper.ts` - Product BE→UI mapper
+- [x] `src/schemas/ui/product.ui.ts`
+- [x] `src/schemas/mappers/product.mapper.ts`
 
 **API Integration**:
 
@@ -176,22 +174,20 @@ docs/
 
 **Documentation**:
 
-- [ ] `docs/resources/product.md` - Complete product resource guide
+- [ ] `docs/resources/product.md`
 
-#### 2.2 Auction Resource 🚧
+#### 2.2 Auction Resource ✅
 
 **Backend**:
 
-- [ ] `src/schemas/resources/auction.schema.ts`
-- [ ] `src/types/entities/auction.types.ts`
-- [ ] `src/constants/endpoints/auction.endpoints.ts`
-- [ ] `src/constants/fields/auction.fields.ts`
+- [x] `src/schemas/resources/auction.schema.ts`
+- [x] `src/constants/endpoints/auction.endpoints.ts`
+- [x] `src/constants/fields/auction.fields.ts`
 
 **Frontend**:
 
-- [ ] `src/schemas/ui/auction.ui.ts`
-- [ ] `src/types/ui/auction.ui.types.ts`
-- [ ] `src/schemas/mappers/auction.mapper.ts`
+- [x] `src/schemas/ui/auction.ui.ts`
+- [x] `src/schemas/mappers/auction.mapper.ts`
 
 **API Integration**:
 
@@ -202,20 +198,18 @@ docs/
 
 - [ ] `docs/resources/auction.md`
 
-#### 2.3 Category Resource 🚧
+#### 2.3 Category Resource ✅
 
 **Backend**:
 
-- [ ] `src/schemas/resources/category.schema.ts`
-- [ ] `src/types/entities/category.types.ts`
-- [ ] `src/constants/endpoints/category.endpoints.ts`
-- [ ] `src/constants/fields/category.fields.ts`
+- [x] `src/schemas/resources/category.schema.ts`
+- [x] `src/constants/endpoints/category.endpoints.ts`
+- [x] `src/constants/fields/category.fields.ts`
 
 **Frontend**:
 
-- [ ] `src/schemas/ui/category.ui.ts`
-- [ ] `src/types/ui/category.ui.types.ts`
-- [ ] `src/schemas/mappers/category.mapper.ts`
+- [x] `src/schemas/ui/category.ui.ts`
+- [x] `src/schemas/mappers/category.mapper.ts`
 
 **API Integration**:
 
@@ -226,20 +220,18 @@ docs/
 
 - [ ] `docs/resources/category.md`
 
-#### 2.4 Shop Resource 🚧
+#### 2.4 Shop Resource ✅
 
 **Backend**:
 
-- [ ] `src/schemas/resources/shop.schema.ts`
-- [ ] `src/types/entities/shop.types.ts`
-- [ ] `src/constants/endpoints/shop.endpoints.ts`
-- [ ] `src/constants/fields/shop.fields.ts`
+- [x] `src/schemas/resources/shop.schema.ts`
+- [x] `src/constants/endpoints/shop.endpoints.ts`
+- [x] `src/constants/fields/shop.fields.ts`
 
 **Frontend**:
 
-- [ ] `src/schemas/ui/shop.ui.ts`
-- [ ] `src/types/ui/shop.ui.types.ts`
-- [ ] `src/schemas/mappers/shop.mapper.ts`
+- [x] `src/schemas/ui/shop.ui.ts`
+- [x] `src/schemas/mappers/shop.mapper.ts`
 
 **API Integration**:
 
@@ -250,20 +242,18 @@ docs/
 
 - [ ] `docs/resources/shop.md`
 
-#### 2.5 Order Resource 🚧
+#### 2.5 Order Resource ✅
 
 **Backend**:
 
-- [ ] `src/schemas/resources/order.schema.ts`
-- [ ] `src/types/entities/order.types.ts`
-- [ ] `src/constants/endpoints/order.endpoints.ts`
-- [ ] `src/constants/fields/order.fields.ts`
+- [x] `src/schemas/resources/order.schema.ts`
+- [x] `src/constants/endpoints/order.endpoints.ts`
+- [x] `src/constants/fields/order.fields.ts`
 
 **Frontend**:
 
-- [ ] `src/schemas/ui/order.ui.ts`
-- [ ] `src/types/ui/order.ui.types.ts`
-- [ ] `src/schemas/mappers/order.mapper.ts`
+- [x] `src/schemas/ui/order.ui.ts`
+- [x] `src/schemas/mappers/order.mapper.ts`
 
 **API Integration**:
 
@@ -280,12 +270,27 @@ docs/
 
 ### User & Auth Resources
 
-#### 3.1 User Resource
+#### 3.1 User Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
+
+- [x] `src/schemas/resources/user.schema.ts`
+- [x] `src/constants/endpoints/user.endpoints.ts`
+- [x] `src/constants/fields/user.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/user.ui.ts`
+- [x] `src/schemas/mappers/user.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/user/route.ts`
+- [ ] Update `src/services/users.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/user.md`
 
 #### 3.2 Address Resource
 
@@ -296,21 +301,51 @@ docs/
 
 ### Review & Rating Resources
 
-#### 3.3 Review Resource
+#### 3.3 Review Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
+
+- [x] `src/schemas/resources/review.schema.ts`
+- [x] `src/constants/endpoints/review.endpoints.ts`
+- [x] `src/constants/fields/review.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/review.ui.ts`
+- [x] `src/schemas/mappers/review.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/reviews/route.ts`
+- [ ] Update `src/services/reviews.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/review.md`
 
 ### Marketing Resources
 
-#### 3.4 Coupon Resource
+#### 3.4 Coupon Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
+
+- [x] `src/schemas/resources/coupon.schema.ts`
+- [x] `src/constants/endpoints/coupon.endpoints.ts`
+- [x] `src/constants/fields/coupon.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/coupon.ui.ts`
+- [x] `src/schemas/mappers/coupon.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/coupons/route.ts`
+- [ ] Update `src/services/coupons.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/coupon.md`
 
 #### 3.5 Hero Slide Resource
 
@@ -682,9 +717,9 @@ docs/
 ## Progress Tracking
 
 **Total Tasks**: ~200+  
-**Completed**: 12 (6%)  
+**Completed**: 52 (26%)  
 **In Progress**: 0  
-**Remaining**: ~188
+**Remaining**: ~148
 
 **Estimated Time**: 3-4 weeks (working incrementally)
 
@@ -704,13 +739,20 @@ docs/
 ## Next Steps (Immediate)
 
 1. ✅ Complete foundation setup (directories, base files)
-2. 🚧 Implement Product resource (highest priority)
-3. 🚧 Implement Auction resource
-4. 🚧 Implement Category resource
-5. Continue with other core resources
+2. ✅ Implement Product resource
+3. ✅ Implement Auction resource
+4. ✅ Implement Category resource
+5. ✅ Implement Shop resource
+6. ✅ Implement Order resource
+7. ✅ Implement Review resource
+8. ✅ Implement User resource
+9. ✅ Implement Coupon resource
+10. 🚧 Implement Address resource
+11. 🚧 Implement Support Ticket resource
+12. Continue with remaining Phase 3 resources
 
 ---
 
 **Last Updated**: November 12, 2025  
 **Maintainer**: Development Team  
-**Status**: Foundation Complete ✅ | Starting Core Resources 🚧
+**Status**: Phase 2 Complete ✅ | Phase 3 In Progress 🚧 | 8 Resources Complete
