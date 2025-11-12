@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../lib/session";
+import { mapCategoryToUI } from "@/schemas/mappers/category.mapper";
+import type { Category } from "@/schemas/resources/category.schema";
 
 // GET /api/categories - List categories (public)
 // POST /api/categories - Create category (admin only)
@@ -29,25 +31,8 @@ export async function GET(request: NextRequest) {
 
     const snapshot = await query.limit(200).get();
     const categories = snapshot.docs.map((d) => {
-      const data: any = d.data();
-      return {
-        id: d.id,
-        ...data,
-        // Add camelCase aliases for frontend compatibility
-        parentId: data.parent_id,
-        isFeatured: data.is_featured,
-        showOnHomepage: data.show_on_homepage,
-        isActive: data.is_active,
-        productCount: data.product_count || 0,
-        childCount: data.child_count || 0,
-        hasChildren: data.has_children || false,
-        sortOrder: data.sort_order || 0,
-        metaTitle: data.meta_title,
-        metaDescription: data.meta_description,
-        commissionRate: data.commission_rate || 0,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
+      const data = d.data() as Category;
+      return mapCategoryToUI({ ...data, id: d.id });
     });
 
     return NextResponse.json({ success: true, data: categories });
@@ -109,28 +94,11 @@ export async function POST(request: NextRequest) {
     });
 
     const created = await docRef.get();
-    const createdData: any = created.data();
+    const createdData = { ...created.data(), id: created.id } as Category & { id: string };
     return NextResponse.json(
       {
         success: true,
-        data: {
-          id: created.id,
-          ...createdData,
-          // Add camelCase aliases
-          parentId: createdData.parent_id,
-          isFeatured: createdData.is_featured,
-          showOnHomepage: createdData.show_on_homepage,
-          isActive: createdData.is_active,
-          productCount: createdData.product_count || 0,
-          childCount: createdData.child_count || 0,
-          hasChildren: createdData.has_children || false,
-          sortOrder: createdData.sort_order || 0,
-          metaTitle: createdData.meta_title,
-          metaDescription: createdData.meta_description,
-          commissionRate: createdData.commission_rate || 0,
-          createdAt: createdData.created_at,
-          updatedAt: createdData.updated_at,
-        },
+        data: mapCategoryToUI(createdData),
       },
       { status: 201 }
     );

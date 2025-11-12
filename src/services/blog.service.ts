@@ -1,187 +1,288 @@
+/**
+ * Blog Service
+ * Handles all blog-related API calls
+ */
+
 import { apiService } from "./api.service";
-import type { PaginatedResponse } from "@/types";
+import {
+  BLOG_POST_ENDPOINTS,
+  ADMIN_BLOG_POST_ENDPOINTS,
+} from "@/constants/endpoints/blog-post.endpoints";
+import type { BlogPostUI } from "@/schemas/ui/blog-post.ui";
+import type {
+  CreateBlogPost,
+  UpdateBlogPost,
+  BlogPostFilter,
+} from "@/schemas/resources/blog-post.schema";
 
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  featuredImage?: string;
-  author: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-  category: string;
-  tags: string[];
-  status: "draft" | "published" | "archived";
-  isFeatured: boolean;
-  showOnHomepage: boolean;
-  publishedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  views: number;
-  likes: number;
-}
-
-interface BlogFilters {
-  category?: string;
-  tag?: string;
-  author?: string;
-  status?: "draft" | "published" | "archived";
-  search?: string;
-  isFeatured?: boolean;
-  showOnHomepage?: boolean;
-  page?: number;
-  limit?: number;
-  sortBy?: "publishedAt" | "views" | "likes" | "createdAt";
-  sortOrder?: "asc" | "desc";
-}
-
-interface CreateBlogPostData {
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  featuredImage?: string;
-  category: string;
-  tags?: string[];
-  status: "draft" | "published";
-  isFeatured?: boolean;
-  showOnHomepage?: boolean;
-  publishedAt?: Date;
-}
-
-interface UpdateBlogPostData extends Partial<Omit<CreateBlogPostData, "status">> {
-  status?: "draft" | "published" | "archived";
-}
-
-class BlogService {
-  // List blog posts (role-filtered)
-  async list(filters?: BlogFilters): Promise<PaginatedResponse<BlogPost>> {
-    const params = new URLSearchParams();
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (Array.isArray(value)) {
-            value.forEach((v) => params.append(key, v.toString()));
-          } else {
-            params.append(key, value.toString());
-          }
-        }
-      });
-    }
-
-    const queryString = params.toString();
-    const endpoint = queryString ? `/blog?${queryString}` : "/blog";
-
-    return apiService.get<PaginatedResponse<BlogPost>>(endpoint);
-  }
-
-  // Get blog post by ID
-  async getById(id: string): Promise<BlogPost> {
-    return apiService.get<BlogPost>(`/blog/${id}`);
-  }
-
-  // Get blog post by slug
-  async getBySlug(slug: string): Promise<BlogPost> {
-    return apiService.get<BlogPost>(`/blog/slug/${slug}`);
-  }
-
-  // Create blog post (admin)
-  async create(data: CreateBlogPostData): Promise<BlogPost> {
-    return apiService.post<BlogPost>("/blog", data);
-  }
-
-  // Update blog post (author/admin)
-  async update(id: string, data: UpdateBlogPostData): Promise<BlogPost> {
-    return apiService.patch<BlogPost>(`/blog/${id}`, data);
-  }
-
-  // Delete blog post (author/admin)
-  async delete(id: string): Promise<{ message: string }> {
-    return apiService.delete<{ message: string }>(`/blog/${id}`);
-  }
-
-  // Get featured blog posts
-  async getFeatured(): Promise<BlogPost[]> {
-    const response = await this.list({
-      isFeatured: true,
-      status: "published",
-      limit: 100,
-    });
-    return Array.isArray(response) ? response : (response as any).data || [];
-  }
-
-  // Get homepage blog posts
-  async getHomepage(): Promise<BlogPost[]> {
-    const response = await this.list({
-      showOnHomepage: true,
-      status: "published",
-      limit: 20,
-    });
-    return Array.isArray(response) ? response : (response as any).data || [];
-  }
-
-  // Like/unlike blog post
-  async toggleLike(id: string): Promise<{ liked: boolean; likes: number }> {
-    return apiService.post<{ liked: boolean; likes: number }>(
-      `/blog/${id}/like`,
-      {},
+/**
+ * Public Blog Operations
+ */
+export const blogService = {
+  /**
+   * Get blog posts
+   */
+  async list(filters?: Partial<BlogPostFilter>): Promise<BlogPostUI[]> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get<BlogPostUI[]>(
+      `${BLOG_POST_ENDPOINTS.list}${queryParams}`
     );
-  }
+  },
 
-  // Get related posts
-  async getRelated(id: string, limit?: number): Promise<BlogPost[]> {
-    const params = new URLSearchParams();
-    if (limit) params.append("limit", limit.toString());
+  /**
+   * Get blog post by slug
+   */
+  async getBySlug(slug: string): Promise<BlogPostUI> {
+    return apiService.get<BlogPostUI>(BLOG_POST_ENDPOINTS.bySlug(slug));
+  },
 
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/blog/${id}/related?${queryString}`
-      : `/blog/${id}/related`;
+  /**
+   * Get posts by category
+   */
+  async getByCategory(category: string): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(
+      BLOG_POST_ENDPOINTS.byCategory(category)
+    );
+  },
 
-    return apiService.get<BlogPost[]>(endpoint);
-  }
+  /**
+   * Get posts by tag
+   */
+  async getByTag(tag: string): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(BLOG_POST_ENDPOINTS.byTag(tag));
+  },
 
-  // Get posts by category
-  async getByCategory(
-    category: string,
-    page?: number,
-    limit?: number,
-  ): Promise<PaginatedResponse<BlogPost>> {
-    return this.list({ category, status: "published", page, limit });
-  }
+  /**
+   * Get posts by author
+   */
+  async getByAuthor(authorId: string): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(BLOG_POST_ENDPOINTS.byAuthor(authorId));
+  },
 
-  // Get posts by tag
-  async getByTag(
-    tag: string,
-    page?: number,
-    limit?: number,
-  ): Promise<PaginatedResponse<BlogPost>> {
-    return this.list({ tag, status: "published", page, limit });
-  }
+  /**
+   * Get featured posts
+   */
+  async getFeatured(): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(BLOG_POST_ENDPOINTS.featured);
+  },
 
-  // Get posts by author
-  async getByAuthor(
-    authorId: string,
-    page?: number,
-    limit?: number,
-  ): Promise<PaginatedResponse<BlogPost>> {
-    return this.list({ author: authorId, status: "published", page, limit });
-  }
+  /**
+   * Get popular posts
+   */
+  async getPopular(): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(BLOG_POST_ENDPOINTS.popular);
+  },
 
-  // Search posts
-  async search(
-    query: string,
-    page?: number,
-    limit?: number,
-  ): Promise<PaginatedResponse<BlogPost>> {
-    return this.list({ search: query, status: "published", page, limit });
-  }
-}
+  /**
+   * Get trending posts
+   */
+  async getTrending(): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(BLOG_POST_ENDPOINTS.trending);
+  },
 
-export const blogService = new BlogService();
-export type { BlogFilters, CreateBlogPostData, UpdateBlogPostData };
+  /**
+   * Get related posts
+   */
+  async getRelated(id: string): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(BLOG_POST_ENDPOINTS.related(id));
+  },
+
+  /**
+   * Increment view count
+   */
+  async incrementView(id: string): Promise<void> {
+    return apiService.post(BLOG_POST_ENDPOINTS.incrementView(id), {});
+  },
+
+  /**
+   * Like post
+   */
+  async like(id: string): Promise<void> {
+    return apiService.post(BLOG_POST_ENDPOINTS.like(id), {});
+  },
+
+  /**
+   * Unlike post
+   */
+  async unlike(id: string): Promise<void> {
+    return apiService.post(BLOG_POST_ENDPOINTS.unlike(id), {});
+  },
+
+  /**
+   * Search posts
+   */
+  async search(query: string): Promise<BlogPostUI[]> {
+    return apiService.get<BlogPostUI[]>(
+      `${BLOG_POST_ENDPOINTS.search}?q=${query}`
+    );
+  },
+};
+
+/**
+ * Admin Blog Operations
+ */
+export const adminBlogService = {
+  /**
+   * Get all posts (admin)
+   */
+  async list(filters?: Partial<BlogPostFilter>): Promise<BlogPostUI[]> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get<BlogPostUI[]>(
+      `${ADMIN_BLOG_POST_ENDPOINTS.list}${queryParams}`
+    );
+  },
+
+  /**
+   * Get post by ID (admin)
+   */
+  async getById(id: string): Promise<BlogPostUI> {
+    return apiService.get<BlogPostUI>(ADMIN_BLOG_POST_ENDPOINTS.byId(id));
+  },
+
+  /**
+   * Create post
+   */
+  async create(data: CreateBlogPost): Promise<BlogPostUI> {
+    return apiService.post<BlogPostUI>(ADMIN_BLOG_POST_ENDPOINTS.create, data);
+  },
+
+  /**
+   * Update post
+   */
+  async update(id: string, data: Partial<UpdateBlogPost>): Promise<BlogPostUI> {
+    return apiService.patch<BlogPostUI>(
+      ADMIN_BLOG_POST_ENDPOINTS.update(id),
+      data
+    );
+  },
+
+  /**
+   * Delete post
+   */
+  async delete(id: string): Promise<void> {
+    return apiService.delete(ADMIN_BLOG_POST_ENDPOINTS.delete(id));
+  },
+
+  /**
+   * Publish post
+   */
+  async publish(id: string): Promise<BlogPostUI> {
+    return apiService.post<BlogPostUI>(
+      ADMIN_BLOG_POST_ENDPOINTS.publish(id),
+      {}
+    );
+  },
+
+  /**
+   * Unpublish post
+   */
+  async unpublish(id: string): Promise<BlogPostUI> {
+    return apiService.post<BlogPostUI>(
+      ADMIN_BLOG_POST_ENDPOINTS.unpublish(id),
+      {}
+    );
+  },
+
+  /**
+   * Archive post
+   */
+  async archive(id: string): Promise<BlogPostUI> {
+    return apiService.post<BlogPostUI>(
+      ADMIN_BLOG_POST_ENDPOINTS.archive(id),
+      {}
+    );
+  },
+
+  /**
+   * Schedule post
+   */
+  async schedule(id: string, scheduledFor: Date): Promise<BlogPostUI> {
+    return apiService.post<BlogPostUI>(ADMIN_BLOG_POST_ENDPOINTS.schedule(id), {
+      scheduledFor,
+    });
+  },
+
+  /**
+   * Feature post
+   */
+  async feature(id: string): Promise<BlogPostUI> {
+    return apiService.post<BlogPostUI>(
+      ADMIN_BLOG_POST_ENDPOINTS.feature(id),
+      {}
+    );
+  },
+
+  /**
+   * Unfeature post
+   */
+  async unfeature(id: string): Promise<BlogPostUI> {
+    return apiService.post<BlogPostUI>(
+      ADMIN_BLOG_POST_ENDPOINTS.unfeature(id),
+      {}
+    );
+  },
+
+  /**
+   * Bulk publish
+   */
+  async bulkPublish(postIds: string[]): Promise<void> {
+    return apiService.post(ADMIN_BLOG_POST_ENDPOINTS.bulkPublish, { postIds });
+  },
+
+  /**
+   * Bulk archive
+   */
+  async bulkArchive(postIds: string[]): Promise<void> {
+    return apiService.post(ADMIN_BLOG_POST_ENDPOINTS.bulkArchive, { postIds });
+  },
+
+  /**
+   * Bulk delete
+   */
+  async bulkDelete(postIds: string[]): Promise<void> {
+    return apiService.post(ADMIN_BLOG_POST_ENDPOINTS.bulkDelete, { postIds });
+  },
+
+  /**
+   * Bulk feature
+   */
+  async bulkFeature(postIds: string[]): Promise<void> {
+    return apiService.post(ADMIN_BLOG_POST_ENDPOINTS.bulkFeature, { postIds });
+  },
+
+  /**
+   * Get statistics
+   */
+  async stats(): Promise<any> {
+    return apiService.get(ADMIN_BLOG_POST_ENDPOINTS.stats);
+  },
+
+  /**
+   * Get analytics
+   */
+  async analytics(filters?: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<any> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get(
+      `${ADMIN_BLOG_POST_ENDPOINTS.analytics}${queryParams}`
+    );
+  },
+
+  /**
+   * Export posts
+   */
+  async export(filters?: Partial<BlogPostFilter>): Promise<any> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get(`${ADMIN_BLOG_POST_ENDPOINTS.export}${queryParams}`);
+  },
+};

@@ -1,17 +1,25 @@
+/**
+ * Support Service
+ * Handles all support ticket-related API calls
+ */
+
 import { apiService } from "./api.service";
+import {
+  SUPPORT_ENDPOINTS,
+  ADMIN_SUPPORT_ENDPOINTS,
+} from "@/constants/endpoints/support.endpoints";
+import type { SupportTicketUI } from "@/schemas/ui/support.ui";
 import type {
-  SupportTicket,
-  SupportTicketMessage,
-  SupportTicketStatus,
-  SupportTicketCategory,
-  SupportTicketPriority,
-  PaginatedResponse,
-} from "@/types";
+  CreateSupportTicket,
+  UpdateSupportTicket,
+  AddMessage,
+} from "@/schemas/resources/support.schema";
+import type { PaginatedResponse } from "@/types";
 
 interface TicketFilters {
-  status?: SupportTicketStatus;
-  category?: SupportTicketCategory;
-  priority?: SupportTicketPriority;
+  status?: string;
+  category?: string;
+  priority?: string;
   shopId?: string;
   orderId?: string;
   assignedTo?: string;
@@ -20,236 +28,184 @@ interface TicketFilters {
   limit?: number;
 }
 
-interface CreateTicketData {
-  category: SupportTicketCategory;
-  priority?: SupportTicketPriority;
-  subject: string;
-  description: string;
-  attachments?: string[];
-  shopId?: string;
-  orderId?: string;
-}
-
-interface UpdateTicketData {
-  status?: SupportTicketStatus;
-  priority?: SupportTicketPriority;
-  subject?: string;
-}
-
-interface ReplyToTicketData {
-  message: string;
-  attachments?: string[];
-  isInternal?: boolean;
-}
-
-interface AssignTicketData {
-  assignedTo: string;
-  notes?: string;
-}
-
-interface EscalateTicketData {
-  reason: string;
-  notes?: string;
-}
-
-class SupportService {
-  // List tickets (role-filtered)
-  async listTickets(
-    filters?: TicketFilters,
-  ): Promise<PaginatedResponse<SupportTicket>> {
-    const params = new URLSearchParams();
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
-    }
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/support/tickets?${queryString}`
-      : "/support/tickets";
-
-    return apiService.get<PaginatedResponse<SupportTicket>>(endpoint);
-  }
-
-  // Get ticket by ID
-  async getTicket(id: string): Promise<SupportTicket> {
-    return apiService.get<SupportTicket>(`/support/tickets/${id}`);
-  }
-
-  // Create ticket
-  async createTicket(data: CreateTicketData): Promise<SupportTicket> {
-    return apiService.post<SupportTicket>("/support/tickets", data);
-  }
-
-  // Update ticket
-  async updateTicket(
-    id: string,
-    data: UpdateTicketData,
-  ): Promise<SupportTicket> {
-    return apiService.patch<SupportTicket>(`/support/tickets/${id}`, data);
-  }
-
-  // Close ticket
-  async closeTicket(id: string): Promise<SupportTicket> {
-    return apiService.post<SupportTicket>(`/support/tickets/${id}/close`, {});
-  }
-
-  // Get ticket messages
-  async getMessages(
-    ticketId: string,
-    page?: number,
-    limit?: number,
-  ): Promise<PaginatedResponse<SupportTicketMessage>> {
-    const params = new URLSearchParams();
-    if (page) params.append("page", page.toString());
-    if (limit) params.append("limit", limit.toString());
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/support/tickets/${ticketId}/messages?${queryString}`
-      : `/support/tickets/${ticketId}/messages`;
-
-    return apiService.get<PaginatedResponse<SupportTicketMessage>>(endpoint);
-  }
-
-  // Reply to ticket
-  async replyToTicket(
-    ticketId: string,
-    data: ReplyToTicketData,
-  ): Promise<SupportTicketMessage> {
-    return apiService.post<SupportTicketMessage>(
-      `/support/tickets/${ticketId}/messages`,
-      data,
+/**
+ * User Support Operations
+ */
+export const supportService = {
+  /**
+   * Get user tickets
+   */
+  async list(filters?: TicketFilters): Promise<SupportTicketUI[]> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get<SupportTicketUI[]>(
+      `${SUPPORT_ENDPOINTS.list}${queryParams}`
     );
-  }
+  },
 
-  // Assign ticket (admin only)
-  async assignTicket(
+  /**
+   * Get ticket by ID
+   */
+  async getById(id: string): Promise<SupportTicketUI> {
+    return apiService.get<SupportTicketUI>(SUPPORT_ENDPOINTS.byId(id));
+  },
+
+  /**
+   * Create new ticket
+   */
+  async create(data: CreateSupportTicket): Promise<SupportTicketUI> {
+    return apiService.post<SupportTicketUI>(SUPPORT_ENDPOINTS.create, data);
+  },
+
+  /**
+   * Update ticket
+   */
+  async update(
     id: string,
-    data: AssignTicketData,
-  ): Promise<SupportTicket> {
-    return apiService.post<SupportTicket>(
-      `/support/tickets/${id}/assign`,
-      data,
+    data: Partial<UpdateSupportTicket>
+  ): Promise<SupportTicketUI> {
+    return apiService.patch<SupportTicketUI>(
+      SUPPORT_ENDPOINTS.update(id),
+      data
     );
-  }
+  },
 
-  // Escalate ticket (seller/admin)
-  async escalateTicket(
-    id: string,
-    data: EscalateTicketData,
-  ): Promise<SupportTicket> {
-    return apiService.post<SupportTicket>(
-      `/support/tickets/${id}/escalate`,
-      data,
+  /**
+   * Add message to ticket
+   */
+  async addMessage(id: string, data: AddMessage): Promise<SupportTicketUI> {
+    return apiService.post<SupportTicketUI>(
+      SUPPORT_ENDPOINTS.addMessage(id),
+      data
     );
-  }
+  },
 
-  // Upload attachment
-  async uploadAttachment(file: File): Promise<{ url: string }> {
-    const formData = new FormData();
-    formData.append("file", file);
+  /**
+   * Close ticket
+   */
+  async close(id: string): Promise<SupportTicketUI> {
+    return apiService.post<SupportTicketUI>(SUPPORT_ENDPOINTS.close(id), {});
+  },
+};
 
-    const response = await fetch("/api/support/attachments", {
-      method: "POST",
-      body: formData,
+/**
+ * Admin Support Operations
+ */
+export const adminSupportService = {
+  /**
+   * Get all tickets (admin)
+   */
+  async list(filters?: TicketFilters): Promise<SupportTicketUI[]> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get<SupportTicketUI[]>(
+      `${ADMIN_SUPPORT_ENDPOINTS.list}${queryParams}`
+    );
+  },
+
+  /**
+   * Get ticket by ID (admin)
+   */
+  async getById(id: string): Promise<SupportTicketUI> {
+    return apiService.get<SupportTicketUI>(ADMIN_SUPPORT_ENDPOINTS.byId(id));
+  },
+
+  /**
+   * Assign ticket
+   */
+  async assign(id: string, assignedTo: string): Promise<SupportTicketUI> {
+    return apiService.post<SupportTicketUI>(
+      ADMIN_SUPPORT_ENDPOINTS.assign(id),
+      { assignedTo }
+    );
+  },
+
+  /**
+   * Unassign ticket
+   */
+  async unassign(id: string): Promise<SupportTicketUI> {
+    return apiService.post<SupportTicketUI>(
+      ADMIN_SUPPORT_ENDPOINTS.unassign(id),
+      {}
+    );
+  },
+
+  /**
+   * Resolve ticket
+   */
+  async resolve(id: string, resolution: string): Promise<SupportTicketUI> {
+    return apiService.post<SupportTicketUI>(
+      ADMIN_SUPPORT_ENDPOINTS.resolve(id),
+      { resolution }
+    );
+  },
+
+  /**
+   * Reopen ticket
+   */
+  async reopen(id: string, reason: string): Promise<SupportTicketUI> {
+    return apiService.post<SupportTicketUI>(
+      ADMIN_SUPPORT_ENDPOINTS.reopen(id),
+      { reason }
+    );
+  },
+
+  /**
+   * Update priority
+   */
+  async updatePriority(id: string, priority: string): Promise<SupportTicketUI> {
+    return apiService.patch<SupportTicketUI>(
+      ADMIN_SUPPORT_ENDPOINTS.updatePriority(id),
+      { priority }
+    );
+  },
+
+  /**
+   * Bulk assign tickets
+   */
+  async bulkAssign(ticketIds: string[], assignedTo: string): Promise<void> {
+    return apiService.post(ADMIN_SUPPORT_ENDPOINTS.bulkAssign, {
+      ticketIds,
+      assignedTo,
     });
+  },
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to upload attachment");
-    }
+  /**
+   * Bulk close tickets
+   */
+  async bulkClose(ticketIds: string[]): Promise<void> {
+    return apiService.post(ADMIN_SUPPORT_ENDPOINTS.bulkClose, { ticketIds });
+  },
 
-    return response.json();
-  }
+  /**
+   * Bulk delete tickets
+   */
+  async bulkDelete(ticketIds: string[]): Promise<void> {
+    return apiService.post(ADMIN_SUPPORT_ENDPOINTS.bulkDelete, { ticketIds });
+  },
 
-  // Get ticket statistics (admin only)
-  async getStats(filters?: {
-    shopId?: string;
+  /**
+   * Get statistics
+   */
+  async stats(filters?: {
     startDate?: string;
     endDate?: string;
-  }): Promise<{
-    totalTickets: number;
-    openTickets: number;
-    resolvedTickets: number;
-    averageResponseTime: number;
-    averageResolutionTime: number;
-    ticketsByCategory: Record<SupportTicketCategory, number>;
-    ticketsByPriority: Record<SupportTicketPriority, number>;
-  }> {
-    const params = new URLSearchParams();
+  }): Promise<any> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get(`${ADMIN_SUPPORT_ENDPOINTS.stats}${queryParams}`);
+  },
 
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
-    }
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/support/stats?${queryString}`
-      : "/support/stats";
-
-    return apiService.get<any>(endpoint);
-  }
-
-  // Get my tickets
-  async getMyTickets(
-    filters?: Omit<TicketFilters, "assignedTo">,
-  ): Promise<PaginatedResponse<SupportTicket>> {
-    const params = new URLSearchParams();
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
-    }
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/support/my-tickets?${queryString}`
-      : "/support/my-tickets";
-
-    return apiService.get<PaginatedResponse<SupportTicket>>(endpoint);
-  }
-
-  // Get ticket count
-  async getTicketCount(
-    filters?: Pick<TicketFilters, "status" | "category">,
-  ): Promise<{ count: number }> {
-    const params = new URLSearchParams();
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
-    }
-
-    const queryString = params.toString();
-    const endpoint = queryString
-      ? `/support/count?${queryString}`
-      : "/support/count";
-
-    return apiService.get<{ count: number }>(endpoint);
-  }
-}
-
-export const supportService = new SupportService();
-export type {
-  TicketFilters,
-  CreateTicketData,
-  UpdateTicketData,
-  ReplyToTicketData,
-  AssignTicketData,
-  EscalateTicketData,
+  /**
+   * Export tickets
+   */
+  async export(filters?: TicketFilters): Promise<any> {
+    const queryParams = filters
+      ? `?${new URLSearchParams(filters as any).toString()}`
+      : "";
+    return apiService.get(`${ADMIN_SUPPORT_ENDPOINTS.export}${queryParams}`);
+  },
 };

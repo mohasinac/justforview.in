@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "@/app/api/lib/session";
 import { userOwnsShop } from "@/app/api/lib/firebase/queries";
+import { mapOrderToUI } from "@/schemas/mappers/order.mapper";
+import type { Order } from "@/schemas/resources/order.schema";
 
 // GET /api/orders - role-filtered list
 // POST /api/orders - create order (user)
@@ -32,7 +34,10 @@ export async function GET(request: NextRequest) {
     }
 
     const snap = await query.orderBy("created_at", "desc").limit(limit).get();
-    const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const data = snap.docs.map((d) => {
+      const orderData = d.data() as Order;
+      return mapOrderToUI({ ...orderData, id: d.id });
+    });
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Orders list error:", error);
@@ -70,8 +75,9 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     });
     const created = await docRef.get();
+    const createdData = { ...created.data(), id: created.id } as Order & { id: string };
     return NextResponse.json(
-      { success: true, data: { id: created.id, ...created.data() } },
+      { success: true, data: mapOrderToUI(createdData) },
       { status: 201 },
     );
   } catch (error) {

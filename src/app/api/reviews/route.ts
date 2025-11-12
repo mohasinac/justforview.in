@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirestoreAdmin } from "@/app/api/lib/firebase/admin";
 import { COLLECTIONS } from "@/constants/database";
+import { mapReviewToUI } from "@/schemas/mappers/review.mapper";
+import type { Review } from "@/schemas/resources/review.schema";
 
 // GET /api/reviews - List reviews (filtered by product/shop/user)
 export async function GET(req: NextRequest) {
@@ -33,10 +35,10 @@ export async function GET(req: NextRequest) {
     query = query.limit(limit).offset(offset);
 
     const snapshot = await query.get();
-    const reviews = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const reviews = snapshot.docs.map((doc) => {
+      const data = doc.data() as Review;
+      return mapReviewToUI({ ...data, id: doc.id });
+    });
 
     // Calculate stats if filtering by product
     let stats = null;
@@ -164,12 +166,11 @@ export async function POST(req: NextRequest) {
     };
 
     const docRef = await db.collection(COLLECTIONS.REVIEWS).add(reviewData);
+    const createdDoc = await docRef.get();
+    const createdReview = { ...createdDoc.data(), id: docRef.id } as Review & { id: string };
 
     return NextResponse.json(
-      {
-        id: docRef.id,
-        ...reviewData,
-      },
+      mapReviewToUI(createdReview),
       { status: 201 },
     );
   } catch (error) {

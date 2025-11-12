@@ -6,6 +6,8 @@ import {
   userOwnsShop,
   UserRole,
 } from "@/app/api/lib/firebase/queries";
+import { mapProductToUI } from "@/schemas/mappers/product.mapper";
+import type { Product } from "@/schemas/resources/product.schema";
 
 // GET /api/products - List all products (role-based)
 export async function GET(request: NextRequest) {
@@ -57,19 +59,8 @@ export async function GET(request: NextRequest) {
 
     const snapshot = await query.limit(limit).get();
     let products = snapshot.docs.map((doc) => {
-      const data: any = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        // Add camelCase aliases for snake_case fields
-        shopId: data.shop_id,
-        categoryId: data.category_id,
-        stockCount: data.stock_count,
-        isFeatured: data.is_featured,
-        isDeleted: data.is_deleted,
-        originalPrice: data.original_price,
-        reviewCount: data.review_count,
-      };
+      const data = doc.data() as Product;
+      return mapProductToUI({ ...data, id: doc.id });
     });
 
     if (minPrice) {
@@ -167,9 +158,11 @@ export async function POST(request: NextRequest) {
     };
 
     const docRef = await Collections.products().add(productData);
+    const createdDoc = await docRef.get();
+    const createdProduct = { ...createdDoc.data(), id: docRef.id } as Product & { id: string };
 
     return NextResponse.json(
-      { success: true, data: { id: docRef.id, ...productData } },
+      { success: true, data: mapProductToUI(createdProduct) },
       { status: 201 }
     );
   } catch (error) {

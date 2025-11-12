@@ -7,6 +7,8 @@ import {
   UserRole,
   buildQuery,
 } from "@/app/api/lib/firebase/queries";
+import { mapShopToUI } from "@/schemas/mappers/shop.mapper";
+import type { Shop } from "@/schemas/resources/shop.schema";
 
 /**
  * Unified Shops API with Firebase Integration
@@ -93,10 +95,10 @@ export async function GET(request: NextRequest) {
       console.log("[Shops API] No shops found for the given filters");
     }
 
-    let shops = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    let shops = snapshot.docs.map((doc) => {
+      const data = doc.data() as Shop;
+      return mapShopToUI({ ...data, id: doc.id });
+    });
 
     // For sellers, also fetch public verified shops if needed
     if (role === UserRole.SELLER && filters.includePublic === "true") {
@@ -106,10 +108,10 @@ export async function GET(request: NextRequest) {
         .limit(20);
 
       const publicSnapshot = await publicQuery.get();
-      const publicShops = publicSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const publicShops = publicSnapshot.docs.map((doc) => {
+        const data = doc.data() as Shop;
+        return mapShopToUI({ ...data, id: doc.id });
+      });
 
       // Merge and deduplicate
       const shopMap = new Map();
@@ -280,15 +282,12 @@ export async function POST(request: NextRequest) {
     // Save to Firestore
     const shopsRef = Collections.shops();
     const docRef = await shopsRef.add(shopData);
-
-    const shop = {
-      id: docRef.id,
-      ...shopData,
-    };
+    const createdDoc = await docRef.get();
+    const createdShop = { ...createdDoc.data(), id: docRef.id } as Shop & { id: string };
 
     return NextResponse.json({
       success: true,
-      shop,
+      shop: mapShopToUI(createdShop),
       message: "Shop created successfully. You can now upload logo and banner.",
     });
   } catch (error) {

@@ -10,122 +10,114 @@
 
 Migration to a comprehensive resource schema system to eliminate data inconsistencies between UI and backend by introducing:
 
-1. **Resource Schemas** - Database entity definitions
+1. **Resource Schemas** - Backend entity definitions
 2. **UI Schemas** - Frontend display models
 3. **Mappers** - Backend-to-UI data transformation
 4. **Constants** - Resource-specific endpoints and fields
 5. **Centralized Types** - All TypeScript types in one location
 6. **Resource Documentation** - AI-agent readable feature guides
 
----
-
-## Directory Structure
-
-```
-src/
-├── schemas/
-│   ├── resources/          # Ba**Total Tasks**: ~200+
-**Completed**: 58 (29%)**Total Tasks**: ~200+
-**Completed**: 103 (52%)
+**Total Tasks**: ~200+
+**Completed**: 117 (59%)
 **In Progress**: 0
-**Remaining**: ~97n Progress**: 0
-**Remaining**: ~142d database schemas
-│   │   ├── product.schema.ts
-│   │   ├── auction.schema.ts
-│   │   ├── category.schema.ts
-│   │   ├── shop.schema.ts
-│   │   ├── order.schema.ts
-│   │   ├── user.schema.ts
-│   │   ├── review.schema.ts
-│   │   ├── coupon.schema.ts
-│   │   ├── support.schema.ts
-│   │   ├── return.schema.ts
-│   │   └── ... (all resources)
-│   │
-│   ├── ui/                 # Frontend UI schemas
-│   │   ├── product.ui.ts
-│   │   ├── auction.ui.ts
-│   │   ├── category.ui.ts
-│   │   ├── shop.ui.ts
-│   │   ├── order.ui.ts
-│   │   ├── user.ui.ts
-│   │   ├── review.ui.ts
-│   │   ├── coupon.ui.ts
-│   │   ├── support.ui.ts
-│   │   ├── return.ui.ts
-│   │   └── ... (all resources)
-│   │
-│   └── mappers/            # Backend to UI transformation
-│       ├── product.mapper.ts
-│       ├── auction.mapper.ts
-│       ├── category.mapper.ts
-│       ├── shop.mapper.ts
-│       ├── order.mapper.ts
-│       ├── user.mapper.ts
-│       ├── review.mapper.ts
-│       ├── coupon.mapper.ts
-│       ├── support.mapper.ts
-│       ├── return.mapper.ts
-│       └── ... (all resources)
+**Remaining**: ~83
+│ │ ├── product.schema.ts
+│ │ ├── auction.schema.ts
+│ │ ├── category.schema.ts
+│ │ ├── shop.schema.ts
+│ │ ├── order.schema.ts
+│ │ ├── user.schema.ts
+│ │ ├── review.schema.ts
+│ │ ├── coupon.schema.ts
+│ │ ├── support.schema.ts
+│ │ ├── return.schema.ts
+│ │ └── ... (all resources)
+│ │
+│ ├── ui/ # Frontend UI schemas
+│ │ ├── product.ui.ts
+│ │ ├── auction.ui.ts
+│ │ ├── category.ui.ts
+│ │ ├── shop.ui.ts
+│ │ ├── order.ui.ts
+│ │ ├── user.ui.ts
+│ │ ├── review.ui.ts
+│ │ ├── coupon.ui.ts
+│ │ ├── support.ui.ts
+│ │ ├── return.ui.ts
+│ │ └── ... (all resources)
+│ │
+│ └── mappers/ # Backend to UI transformation
+│ ├── product.mapper.ts
+│ ├── auction.mapper.ts
+│ ├── category.mapper.ts
+│ ├── shop.mapper.ts
+│ ├── order.mapper.ts
+│ ├── user.mapper.ts
+│ ├── review.mapper.ts
+│ ├── coupon.mapper.ts
+│ ├── support.mapper.ts
+│ ├── return.mapper.ts
+│ └── ... (all resources)
 │
 ├── constants/
-│   ├── endpoints/          # Resource-specific API endpoints
-│   │   ├── product.endpoints.ts
-│   │   ├── auction.endpoints.ts
-│   │   ├── category.endpoints.ts
-│   │   ├── shop.endpoints.ts
-│   │   ├── order.endpoints.ts
-│   │   └── ... (all resources)
-│   │
-│   └── fields/             # Resource-specific field definitions
-│       ├── product.fields.ts
-│       ├── auction.fields.ts
-│       ├── category.fields.ts
-│       ├── shop.fields.ts
-│       ├── order.fields.ts
-│       └── ... (all resources)
+│ ├── endpoints/ # Resource-specific API endpoints
+│ │ ├── product.endpoints.ts
+│ │ ├── auction.endpoints.ts
+│ │ ├── category.endpoints.ts
+│ │ ├── shop.endpoints.ts
+│ │ ├── order.endpoints.ts
+│ │ └── ... (all resources)
+│ │
+│ └── fields/ # Resource-specific field definitions
+│ ├── product.fields.ts
+│ ├── auction.fields.ts
+│ ├── category.fields.ts
+│ ├── shop.fields.ts
+│ ├── order.fields.ts
+│ └── ... (all resources)
 │
-└── types/                  # Centralized TypeScript types
-    ├── entities/           # Database entity types
-    │   ├── product.types.ts
-    │   ├── auction.types.ts
-    │   └── ...
-    │
-    ├── ui/                 # UI component types
-    │   ├── product.ui.types.ts
-    │   ├── auction.ui.types.ts
-    │   └── ...
-    │
-    ├── api/                # API request/response types
-    │   ├── product.api.types.ts
-    │   ├── auction.api.types.ts
-    │   └── ...
-    │
-    ├── components/         # Component prop types
-    │   ├── cards.types.ts
-    │   ├── forms.types.ts
-    │   ├── modals.types.ts
-    │   └── ...
-    │
-    └── shared/             # Shared/common types
-        ├── pagination.types.ts
-        ├── filters.types.ts
-        ├── responses.types.ts
-        └── ...
+└── types/ # Centralized TypeScript types
+├── entities/ # Database entity types
+│ ├── product.types.ts
+│ ├── auction.types.ts
+│ └── ...
+│
+├── ui/ # UI component types
+│ ├── product.ui.types.ts
+│ ├── auction.ui.types.ts
+│ └── ...
+│
+├── api/ # API request/response types
+│ ├── product.api.types.ts
+│ ├── auction.api.types.ts
+│ └── ...
+│
+├── components/ # Component prop types
+│ ├── cards.types.ts
+│ ├── forms.types.ts
+│ ├── modals.types.ts
+│ └── ...
+│
+└── shared/ # Shared/common types
+├── pagination.types.ts
+├── filters.types.ts
+├── responses.types.ts
+└── ...
 
 docs/
-└── resources/              # AI-agent documentation
-    ├── product.md
-    ├── auction.md
-    ├── category.md
-    ├── shop.md
-    ├── order.md
-    ├── user.md
-    ├── review.md
-    ├── coupon.md
-    ├── support.md
-    ├── return.md
-    └── ... (all resources)
+└── resources/ # AI-agent documentation
+├── product.md
+├── auction.md
+├── category.md
+├── shop.md
+├── order.md
+├── user.md
+├── review.md
+├── coupon.md
+├── support.md
+├── return.md
+└── ... (all resources)
+
 ```
 
 ---
@@ -383,7 +375,7 @@ docs/
 **API Integration**:
 
 - [ ] Update `src/app/api/hero-slides/route.ts`
-- [ ] Update `src/services/hero-slides.service.ts`
+- [x] Update `src/services/hero-slide.service.ts`
 
 **Documentation**:
 
@@ -407,7 +399,7 @@ docs/
 **API Integration**:
 
 - [ ] Update `src/app/api/support/route.ts`
-- [ ] Update `src/services/support.service.ts`
+- [x] Update `src/services/support.service.ts`
 
 **Documentation**:
 
@@ -429,7 +421,7 @@ docs/
 **API Integration**:
 
 - [ ] Update `src/app/api/returns/route.ts`
-- [ ] Update `src/services/returns.service.ts`
+- [x] Create `src/services/return.service.ts`
 
 **Documentation**:
 
@@ -453,7 +445,7 @@ docs/
 **API Integration**:
 
 - [ ] Update `src/app/api/payments/route.ts`
-- [ ] Update `src/services/payments.service.ts`
+- [x] Create `src/services/payment.service.ts`
 
 **Documentation**:
 
@@ -475,7 +467,7 @@ docs/
 **API Integration**:
 
 - [ ] Update `src/app/api/seller/payouts/route.ts`
-- [ ] Update `src/services/payouts.service.ts`
+- [x] Create `src/services/payout.service.ts`
 
 **Documentation**:
 
@@ -483,12 +475,27 @@ docs/
 
 ### Content Resources
 
-#### 3.10 Blog Post Resource
+#### 3.10 Blog Post Resource ✅
 
-- [ ] Backend schema, types, constants
-- [ ] Frontend UI schema, types, mapper
-- [ ] API integration
-- [ ] Documentation
+**Backend**:
+
+- [x] `src/schemas/resources/blog-post.schema.ts`
+- [x] `src/constants/endpoints/blog-post.endpoints.ts`
+- [x] `src/constants/fields/blog-post.fields.ts`
+
+**Frontend**:
+
+- [x] `src/schemas/ui/blog-post.ui.ts`
+- [x] `src/schemas/mappers/blog-post.mapper.ts`
+
+**API Integration**:
+
+- [ ] Update `src/app/api/blog/route.ts`
+- [x] Update `src/services/blog.service.ts`
+
+**Documentation**:
+
+- [ ] `docs/resources/blog-post.md`
 
 ---
 
@@ -811,10 +818,10 @@ docs/
 
 ## Progress Tracking
 
-**Total Tasks**: ~200+  
-**Completed**: 103 (52%)  
-**In Progress**: 0  
-**Remaining**: ~97
+**Total Tasks**: ~200+
+**Completed**: 109 (55%)
+**In Progress**: 0
+**Remaining**: ~91
 
 **Estimated Time**: 2-3 weeks (working incrementally)
 
@@ -848,12 +855,14 @@ docs/
 13. ✅ Implement Return resource
 14. ✅ Implement Payment resource
 15. ✅ Implement Payout resource
-16. 🚧 Implement Blog Post resource
-17. 🚧 Create services for new resources (address, support, return, payment, payout)
+16. ✅ Implement Blog Post resource (PHASE 3 COMPLETE!)
+17. 🚧 Create services for new resources (address, support, hero-slide, return, payment, payout, blog-post)
 18. 🚧 Update API routes to use mappers
+19. 🚧 Begin Phase 4: Component migration
 
 ---
 
-**Last Updated**: November 12, 2025  
-**Maintainer**: Development Team  
+**Last Updated**: November 12, 2025
+**Maintainer**: Development Team
 **Status**: Phase 2 Complete ✅ | Phase 3 In Progress 🚧 | 8 Resources Complete
+```

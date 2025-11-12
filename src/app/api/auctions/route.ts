@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Collections } from "@/app/api/lib/firebase/collections";
 import { getCurrentUser } from "../lib/session";
 import { userOwnsShop } from "@/app/api/lib/firebase/queries";
+import { mapAuctionToUI } from "@/schemas/mappers/auction.mapper";
+import type { Auction } from "@/schemas/resources/auction.schema";
 
 // GET /api/auctions - List auctions (role-filtered)
 // POST /api/auctions - Create auction (seller/admin)
@@ -23,7 +25,10 @@ export async function GET(request: NextRequest) {
     }
 
     const snapshot = await query.limit(200).get();
-    const auctions = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const auctions = snapshot.docs.map((d) => {
+      const data = d.data() as Auction;
+      return mapAuctionToUI({ ...data, id: d.id });
+    });
 
     return NextResponse.json({ success: true, data: auctions });
   } catch (error) {
@@ -114,8 +119,9 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     });
     const created = await docRef.get();
+    const createdData = { ...created.data(), id: created.id } as Auction & { id: string };
     return NextResponse.json(
-      { success: true, data: { id: created.id, ...created.data() } },
+      { success: true, data: mapAuctionToUI(createdData) },
       { status: 201 },
     );
   } catch (error) {
