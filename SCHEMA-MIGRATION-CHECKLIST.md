@@ -18,9 +18,9 @@ Migration to a comprehensive resource schema system to eliminate data inconsiste
 6. **Resource Documentation** - AI-agent readable feature guides
 
 **Total Tasks**: 299
-**Completed**: 225 (75%)
+**Completed**: 228 (76%)
 **In Progress**: 2
-**Remaining**: 72
+**Remaining**: 69
 
 **Estimated Time**: 2-3 weeks (working incrementally)
 
@@ -672,9 +672,10 @@ docs/
 
 ### 6.2 Update Services to Return UI Schemas
 
-- [ ] All services should return UI schema types, not raw backend types
-- [ ] Services should handle mapper transformation internally
-- [ ] Update all service method signatures
+- [x] Products service returns PaginatedResponse<ProductUI>
+- [x] Auctions service returns PaginatedResponse<AuctionUI>
+- [x] Services handle mapper transformation internally
+- [ ] Update remaining service method signatures
 
 ---
 
