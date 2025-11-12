@@ -28,6 +28,7 @@ import {
   UnifiedFilterSidebar,
 } from "@/components/common/inline-edit";
 import { blogService, type BlogPost } from "@/services/blog.service";
+import type { BlogPostUI } from "@/schemas/ui/blog-post.ui";
 import { BLOG_FILTERS } from "@/constants/filters";
 import { getBlogBulkActions } from "@/constants/bulk-actions";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -82,21 +83,28 @@ export default function AdminBlogPage() {
         ...filterValues,
       });
 
-      const data = Array.isArray(response) ? response : response.data || [];
+      // Type guard to check if response is paginated
+      const isPaginated = !Array.isArray(response) && "data" in response;
+      const data: BlogPostUI[] = isPaginated
+        ? response.data || []
+        : (response as BlogPostUI[]);
+
       setPosts(data);
-      setTotalPages(
-        Array.isArray(response) ? 1 : response.pagination?.totalPages || 1
-      );
+      setTotalPages(isPaginated ? response.pagination?.totalPages || 1 : 1);
       setTotalPosts(
-        Array.isArray(response) ? data.length : response.pagination?.total || 0
+        isPaginated ? response.pagination?.total || 0 : data.length
       );
 
       // Calculate stats
       setStats({
         total: totalPosts,
-        published: data.filter((p) => p.status === "published").length,
-        draft: data.filter((p) => p.status === "draft").length,
-        archived: data.filter((p) => p.status === "archived").length,
+        published: data.filter(
+          (p: BlogPostUI) => p.status.value === "published"
+        ).length,
+        draft: data.filter((p: BlogPostUI) => p.status.value === "draft")
+          .length,
+        archived: data.filter((p: BlogPostUI) => p.status.value === "archived")
+          .length,
       });
     } catch (error) {
       console.error("Failed to load blog posts:", error);

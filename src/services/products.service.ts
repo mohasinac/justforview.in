@@ -84,7 +84,11 @@ class ProductsService {
 export const productsService = new ProductsService();
 
 // Export types for external use
-export type { ProductFilter, CreateProduct, UpdateProduct } from "@/schemas/resources/product.schema";
+export type {
+  ProductFilter,
+  CreateProduct,
+  UpdateProduct,
+} from "@/schemas/resources/product.schema";
 export type ProductFilters = Partial<ProductFilter>;
 export type CreateProductData = CreateProduct;
 export type UpdateProductData = Partial<UpdateProduct>;

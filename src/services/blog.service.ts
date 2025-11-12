@@ -15,6 +15,18 @@ import type {
   BlogPostFilter,
 } from "@/schemas/resources/blog-post.schema";
 
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
 export type BlogFilters = Partial<BlogPostFilter>;
 export type { BlogPostUI as BlogPost };
 
@@ -128,13 +140,15 @@ export const blogService = {
  */
 export const adminBlogService = {
   /**
-   * Get all posts (admin)
+   * Get all posts (admin) - Returns paginated response
    */
-  async list(filters?: Partial<BlogPostFilter>): Promise<BlogPostUI[]> {
+  async list(
+    filters?: Partial<BlogPostFilter>
+  ): Promise<PaginatedResponse<BlogPostUI> | BlogPostUI[]> {
     const queryParams = filters
       ? `?${new URLSearchParams(filters as any).toString()}`
       : "";
-    return apiService.get<BlogPostUI[]>(
+    return apiService.get<PaginatedResponse<BlogPostUI> | BlogPostUI[]>(
       `${ADMIN_BLOG_POST_ENDPOINTS.list}${queryParams}`
     );
   },

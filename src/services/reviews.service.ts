@@ -66,7 +66,10 @@ class ReviewsService {
     id: string,
     data: { isApproved?: boolean; isFeatured?: boolean }
   ): Promise<ReviewUI> {
-    return apiService.patch<ReviewUI>(`${REVIEW_ENDPOINTS.byId(id)}/moderate`, data);
+    return apiService.patch<ReviewUI>(
+      `${REVIEW_ENDPOINTS.byId(id)}/moderate`,
+      data
+    );
   }
 
   async markHelpful(id: string): Promise<{ success: boolean }> {
@@ -76,12 +79,17 @@ class ReviewsService {
     );
   }
 
-  async getSummary(params: { productId?: string; shopId?: string }): Promise<any> {
+  async getSummary(params: {
+    productId?: string;
+    shopId?: string;
+  }): Promise<any> {
     const qs = new URLSearchParams(params as any).toString();
     return apiService.get<any>(`/api/reviews/summary?${qs}`);
   }
 
-  async canReview(productId: string): Promise<{ canReview: boolean; reason?: string }> {
+  async canReview(
+    productId: string
+  ): Promise<{ canReview: boolean; reason?: string }> {
     return apiService.get<{ canReview: boolean; reason?: string }>(
       `/api/reviews/can-review/${productId}`
     );
@@ -91,7 +99,11 @@ class ReviewsService {
 export const reviewsService = new ReviewsService();
 
 // Export types for external use
-export type { ReviewFilter, CreateReview, UpdateReview } from "@/schemas/resources/review.schema";
+export type {
+  ReviewFilter,
+  CreateReview,
+  UpdateReview,
+} from "@/schemas/resources/review.schema";
 export type ReviewFilters = Partial<ReviewFilter>;
 export type CreateReviewData = CreateReview;
 export type UpdateReviewData = Partial<UpdateReview>;

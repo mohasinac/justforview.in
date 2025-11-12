@@ -93,7 +93,11 @@ class ShopsService {
 export const shopsService = new ShopsService();
 
 // Export types for external use
-export type { ShopFilter, CreateShop, UpdateShop } from "@/schemas/resources/shop.schema";
+export type {
+  ShopFilter,
+  CreateShop,
+  UpdateShop,
+} from "@/schemas/resources/shop.schema";
 export type ShopFilters = Partial<ShopFilter>;
 export type CreateShopData = CreateShop;
 export type UpdateShopData = Partial<UpdateShop>;
